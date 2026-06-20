@@ -15,7 +15,7 @@ export async function signInWithPassword(_prev: ActionState, formData: FormData)
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: error.message };
 
-  const next = (formData.get("next") as string) || "/dashboard/customer";
+  const next = (formData.get("next") as string) || "/";
   revalidatePath("/", "layout");
   redirect(next);
 }

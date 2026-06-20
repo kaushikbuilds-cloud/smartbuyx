@@ -10,6 +10,7 @@ import { AddToCartButton } from "@/components/shop/add-to-cart-button";
 import { WishlistButton } from "@/components/shop/wishlist-button";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ReviewList } from "@/components/shop/review-list";
+import { TrackPricePopover } from "@/components/shop/track-price-popover";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -71,6 +72,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <Button size="lg" disabled className="w-full sm:w-auto">Out of stock</Button>
             )}
             <WishlistButton productId={product.id} initial={wishlisted} variant="full" />
+            {session ? <TrackPricePopover productId={product.id} currentPrice={product.base_price} /> : null}
           </div>
         </div>
       </div>

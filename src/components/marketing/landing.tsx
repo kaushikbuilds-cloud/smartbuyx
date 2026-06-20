@@ -38,32 +38,28 @@ const PILLARS = [
   },
 ];
 
-export default async function HomePage() {
+export async function MarketingLanding() {
   const trending = await getTrending(8);
   return (
     <main>
-      {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-background to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30" />
         <div className="container mx-auto px-4 py-24 text-center">
           <Badge variant="secondary" className="mb-4">India&apos;s AI Commerce + Construction super-app</Badge>
           <h1 className="mx-auto max-w-3xl text-balance text-5xl font-bold tracking-tight md:text-6xl">
             Shop. Build. Create.{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              All in one place.
-            </span>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">All in one place.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
             From black shoes under ₹2000 to estimating materials for a 1500 sq.ft house — SmartBuyX does it with AI.
           </p>
           <div className="mt-8 flex justify-center gap-3">
-            <Button size="lg" variant="gradient" asChild><Link href="/products">Explore marketplace</Link></Button>
-            <Button size="lg" variant="outline" asChild><Link href="/house-builder">AI House Builder</Link></Button>
+            <Button size="lg" variant="gradient" asChild><Link href="/register">Get started</Link></Button>
+            <Button size="lg" variant="outline" asChild><Link href="/products">Explore marketplace</Link></Button>
           </div>
         </div>
       </section>
 
-      {/* Quick categories */}
       <section className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
           {QUICK.map(({ icon: Icon, label, href }) => (
@@ -81,7 +77,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trending */}
       {trending.length > 0 ? (
         <section className="container mx-auto px-4 py-12">
           <h2 className="mb-6 text-2xl font-bold">Trending now</h2>
@@ -89,7 +84,6 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {/* Two pillars */}
       <section className="container mx-auto grid gap-6 px-4 py-12 md:grid-cols-2">
         {PILLARS.map((p) => (
           <Card key={p.title} className="overflow-hidden">

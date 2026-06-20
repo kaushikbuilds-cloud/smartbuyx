@@ -32,10 +32,10 @@ export function UserMenu({ email, name, avatarUrl }: Props) {
         <DropdownMenuLabel className="truncate">{name ?? email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/customer"><LayoutDashboard className="h-4 w-4" /> Dashboard</Link>
+          <Link href="/"><LayoutDashboard className="h-4 w-4" /> Dashboard</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/customer"><UserIcon className="h-4 w-4" /> Profile</Link>
+          <Link href="/"><UserIcon className="h-4 w-4" /> Profile</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

@@ -10,6 +10,7 @@ import { OrderStatusBadge } from "@/components/shop/order-status-badge";
 import { ReviewForm } from "@/components/shop/review-form";
 import { CancelOrderButton } from "@/components/shop/cancel-order-button";
 import { ConfirmDeliveryButton } from "@/components/shop/confirm-delivery-button";
+import { ReturnPopover } from "@/components/shop/return-popover";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck } from "lucide-react";
@@ -119,6 +120,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     </div>
                     <span className="font-semibold">{formatINR(item.total)}</span>
                   </div>
+                  {delivered ? (
+                    <div className="mt-3">
+                      <ReturnPopover orderItemId={item.id} />
+                    </div>
+                  ) : null}
                   {delivered && product ? (
                     <div className="mt-4">
                       <ReviewForm productId={product.id} />

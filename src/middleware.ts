@@ -31,7 +31,7 @@ export async function middleware(req: NextRequest) {
       const role = (user?.app_metadata as { role?: string } | undefined)?.role ?? "customer";
       if (!allowed.includes(role)) {
         const url = req.nextUrl.clone();
-        url.pathname = "/dashboard/customer";
+        url.pathname = "/";
         return NextResponse.redirect(url);
       }
     }

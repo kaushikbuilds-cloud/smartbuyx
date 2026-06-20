@@ -1,0 +1,102 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/guards";
+
+const RETURN_WINDOW_DAYS = 7;
+
+const initiateSchema = z.object({
+  orderItemId: z.string().uuid(),
+  reason: z.enum(["damaged", "wrong_item", "not_as_described", "size_fit", "no_longer_needed", "better_price", "other"]),
+  notes: z.string().max(500).optional().or(z.literal("")),
+});
+
+export type ReturnActionState = { error?: string; success?: string } | null;
+
+export async function initiateReturn(_prev: ReturnActionState, formData: FormData): Promise<ReturnActionState> {
+  const { user } = await requireUser();
+  const parsed = initiateSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+
+  // Validate: this order item belongs to the user, order is delivered, within window.
+  const { data: item } = await supabase
+    .from("order_items")
+    .select("id, order_id, total, orders!inner(buyer_id, status, updated_at)")
+    .eq("id", parsed.data.orderItemId)
+    .single();
+  if (!item) return { error: "Item not found." };
+
+  const order = item.orders as unknown as { buyer_id: string; status: string; updated_at: string };
+  if (order.buyer_id !== user.id) return { error: "Not your order." };
+  if (order.status !== "delivered") return { error: "Only delivered items can be returned." };
+
+  const deliveredAt = new Date(order.updated_at);
+  const days = (Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24);
+  if (days > RETURN_WINDOW_DAYS) return { error: `Return window of ${RETURN_WINDOW_DAYS} days has passed.` };
+
+  const { error } = await supabase.from("return_requests").insert({
+    user_id: user.id,
+    order_id: item.order_id,
+    order_item_id: item.id,
+    reason: parsed.data.reason,
+    notes: parsed.data.notes || null,
+    amount: item.total,
+    status: "requested",
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/customer/returns");
+  revalidatePath(`/orders/${item.order_id}`);
+  return { success: "Return requested. We'll review within 24 hours." };
+}
+
+export async function cancelReturn(id: string): Promise<void> {
+  const { user } = await requireUser();
+  const supabase = await createClient();
+  await supabase
+    .from("return_requests")
+    .update({ status: "cancelled", resolved_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .in("status", ["requested", "approved"]);
+  revalidatePath("/dashboard/customer/returns");
+}
+
+export type ReturnWithItem = {
+  id: string;
+  order_id: string;
+  order_item_id: string;
+  reason: string;
+  status: string;
+  amount: number;
+  created_at: string;
+  resolved_at: string | null;
+  title: string;
+};
+
+export async function listMyReturns(userId: string): Promise<ReturnWithItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("return_requests")
+    .select("id, order_id, order_item_id, reason, status, amount, created_at, resolved_at, order_items(title)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((row) => {
+    const item = row.order_items as unknown as { title: string };
+    return {
+      id: row.id,
+      order_id: row.order_id,
+      order_item_id: row.order_item_id,
+      reason: row.reason,
+      status: row.status,
+      amount: Number(row.amount),
+      created_at: row.created_at,
+      resolved_at: row.resolved_at,
+      title: item?.title ?? "Item",
+    };
+  });
+}

@@ -18,6 +18,6 @@ export async function requireUser() {
 
 export async function requireRole(...allowed: UserRole[]) {
   const session = await requireUser();
-  if (!allowed.includes(session.role)) redirect("/dashboard/customer");
+  if (!allowed.includes(session.role)) redirect("/");
   return session;
 }
