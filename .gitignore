@@ -1,0 +1,19 @@
+node_modules
+.next
+out
+.env
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+supabase/.branches
+supabase/.temp
+
+# Private / confidential — never commit these
+AGREMTS/
+New folder/
+*recovery-codes*
+*credentials*
+*.pem
+*.key
