@@ -69,6 +69,7 @@ export async function getProductVariants(productId: string) {
 }
 
 export async function listCategories(kind: ListingKind) {
+  if (!isSupabaseConfigured()) return [] as { id: string; name: string; slug: string }[];
   const supabase = await createClient();
   const { data } = await supabase
     .from("categories")
@@ -91,6 +92,7 @@ export async function getProductReviews(productId: string, limit = 20) {
 }
 
 export async function getTrending(limit = 8) {
+  if (!isSupabaseConfigured()) return [] as Product[];
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
@@ -103,6 +105,7 @@ export async function getTrending(limit = 8) {
 }
 
 export async function getFeatured(limit = 8) {
+  if (!isSupabaseConfigured()) return [] as Product[];
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
