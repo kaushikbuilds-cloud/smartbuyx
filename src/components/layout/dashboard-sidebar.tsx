@@ -14,7 +14,7 @@ import type { AppMode } from "@/features/preferences/mode";
 type NavItem = { href: string; label: string; icon: typeof Home; badge?: number };
 
 const COMMERCE_NAV: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: Home },
+  { href: "/", label: "Home", icon: Home },
   { href: "/orders", label: "My Orders", icon: Package },
   { href: "/wishlist", label: "Wishlist", icon: Heart },
   { href: "/cart", label: "Cart", icon: ShoppingCart },
@@ -31,7 +31,7 @@ const COMMERCE_NAV: NavItem[] = [
 ];
 
 const BUILD_NAV: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: Home },
+  { href: "/", label: "Home", icon: Home },
   { href: "/projects", label: "My Projects", icon: FolderKanban },
   { href: "/house-builder", label: "AI House Builder", icon: Sparkles },
   { href: "/estimator", label: "Material Estimator", icon: Boxes },

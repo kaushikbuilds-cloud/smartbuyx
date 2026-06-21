@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { BrandLogo } from "./brand-logo";
 
-const BRANDS = [
-  { name: "Apple", short: "" },
-  { name: "Samsung", short: "S" },
-  { name: "boAt", short: "b" },
-  { name: "Realme", short: "R" },
-  { name: "Xiaomi", short: "Mi" },
-  { name: "ASUS", short: "A" },
+// slug = Simple Icons slug (https://simpleicons.org). Omit if no official icon.
+const BRANDS: { name: string; slug?: string }[] = [
+  { name: "Apple", slug: "apple" },
+  { name: "Samsung", slug: "samsung" },
+  { name: "boAt" },
+  { name: "Realme", slug: "realme" },
+  { name: "Xiaomi", slug: "xiaomi" },
+  { name: "ASUS", slug: "asus" },
 ];
 
 export function TopBrandsRow() {
@@ -22,9 +24,7 @@ export function TopBrandsRow() {
               href={`/products?q=${encodeURIComponent(b.name)}`}
               className="group flex flex-col items-center gap-2 text-center"
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-full border bg-card text-xl font-bold text-foreground/80 transition-shadow group-hover:shadow-md">
-                {b.short || b.name[0]}
-              </span>
+              <BrandLogo name={b.name} slug={b.slug} />
               <span className="text-xs font-medium">{b.name}</span>
             </Link>
           ))}

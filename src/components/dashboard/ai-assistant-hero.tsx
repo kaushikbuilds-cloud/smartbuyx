@@ -5,7 +5,7 @@ import { ShoppingBag, Sparkles, Send, PartyPopper } from "lucide-react";
 
 const CHIPS = ["Best deals today", "Compare prices", "Price drops", "Trending now"];
 
-export function AIAssistantHero({ firstName }: { firstName: string }) {
+export function AIAssistantHero({ firstName }: { firstName?: string }) {
   const router = useRouter();
 
   function ask(q: string) {
@@ -20,7 +20,7 @@ export function AIAssistantHero({ firstName }: { firstName: string }) {
       <div className="relative grid items-center gap-6 md:grid-cols-[1fr,auto]">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-sm font-medium text-white/80">
-            Welcome back, {firstName}! <PartyPopper className="h-4 w-4 text-amber-300" />
+            {firstName ? `Welcome back, ${firstName}!` : "Welcome to SmartBuyX!"} <PartyPopper className="h-4 w-4 text-amber-300" />
           </p>
           <h1 className="mt-2 text-3xl font-bold leading-tight md:text-4xl">
             Smart shopping<br />starts here
