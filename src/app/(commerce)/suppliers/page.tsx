@@ -2,8 +2,10 @@ import Link from "next/link";
 import { Store } from "lucide-react";
 import { listSuppliers } from "@/features/suppliers/queries";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/shop/star-rating";
 import { TrustScoreBadge } from "@/components/shop/trust-score-badge";
+import { CatalogBreadcrumb } from "@/components/shop/catalog-breadcrumb";
 
 export const metadata = { title: "Verified Suppliers" };
 
@@ -11,12 +13,18 @@ export default async function SuppliersPage() {
   const suppliers = await listSuppliers();
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Verified Suppliers</h1>
-        <p className="text-muted-foreground">
-          Ranked by SmartBuyX Trust Score — GST verification, business age, orders, reviews & response time.
-        </p>
+    <main className="container mx-auto space-y-4 px-4 py-4">
+      <CatalogBreadcrumb trail={[{ label: "Suppliers" }]} />
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-bold">Verified Suppliers</h1>
+          <p className="text-xs text-muted-foreground">
+            Ranked by SmartBuyX Trust Score — {suppliers.length} verified businesses
+          </p>
+        </div>
+        <Button variant="gradient" size="sm" asChild>
+          <Link href="/rfq/new">Get quotes</Link>
+        </Button>
       </div>
 
       {suppliers.length === 0 ? (
@@ -25,7 +33,7 @@ export default async function SuppliersPage() {
           No suppliers listed yet.
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {suppliers.map((s) => (
             <Link key={s.user_id} href={`/suppliers/${s.user_id}`}>
               <Card className="transition-shadow hover:shadow-md">

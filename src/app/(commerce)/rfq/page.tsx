@@ -5,6 +5,7 @@ import { listMyRfqs } from "@/features/rfq/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CatalogBreadcrumb } from "@/components/shop/catalog-breadcrumb";
 
 export const metadata = { title: "My RFQs" };
 
@@ -13,15 +14,14 @@ export default async function RfqListPage() {
   const rfqs = await listMyRfqs(user.id);
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="container mx-auto space-y-4 px-4 py-4">
+      <CatalogBreadcrumb trail={[{ label: "Get Quotes" }]} />
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Requests for Quotation</h1>
-          <p className="text-sm text-muted-foreground">
-            Post once — we reach hundreds of verified suppliers automatically.
-          </p>
+          <h1 className="text-xl font-bold">Requests for Quotation</h1>
+          <p className="text-xs text-muted-foreground">Post once — reach 100+ verified suppliers automatically.</p>
         </div>
-        <Button variant="gradient" asChild>
+        <Button variant="gradient" size="sm" asChild>
           <Link href="/rfq/new"><FilePlus className="h-4 w-4" /> New RFQ</Link>
         </Button>
       </div>

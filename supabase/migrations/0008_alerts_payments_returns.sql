@@ -13,6 +13,7 @@ create table if not exists price_alerts (
   unique(user_id, product_id)
 );
 alter table price_alerts enable row level security;
+drop policy if exists "alerts owner" on price_alerts;
 create policy "alerts owner" on price_alerts for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 create index if not exists price_alerts_active_idx on price_alerts (product_id) where active and triggered_at is null;
 
@@ -51,7 +52,9 @@ execute function public.evaluate_price_alerts_for_product();
 
 -- ============== SAVED PAYMENT METHODS (UPI) ==============
 -- We don't store cards (PCI). UPI IDs are safe to save by user choice.
-create type payment_method_kind as enum ('upi', 'cod', 'card_token');
+do $$ begin
+  create type payment_method_kind as enum ('upi', 'cod', 'card_token');
+exception when duplicate_object then null; end $$;
 
 create table if not exists payment_methods (
   id uuid primary key default gen_random_uuid(),
@@ -64,12 +67,17 @@ create table if not exists payment_methods (
   created_at timestamptz not null default now()
 );
 alter table payment_methods enable row level security;
+drop policy if exists "payment_methods owner" on payment_methods;
 create policy "payment_methods owner" on payment_methods for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 create index if not exists payment_methods_user_idx on payment_methods (user_id);
 
 -- ============== RETURNS & REFUNDS ==============
-create type return_status as enum ('requested','approved','rejected','pickup_scheduled','picked_up','refunded','cancelled');
-create type return_reason as enum ('damaged','wrong_item','not_as_described','size_fit','no_longer_needed','better_price','other');
+do $$ begin
+  create type return_status as enum ('requested','approved','rejected','pickup_scheduled','picked_up','refunded','cancelled');
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create type return_reason as enum ('damaged','wrong_item','not_as_described','size_fit','no_longer_needed','better_price','other');
+exception when duplicate_object then null; end $$;
 
 create table if not exists return_requests (
   id uuid primary key default gen_random_uuid(),
@@ -84,6 +92,7 @@ create table if not exists return_requests (
   created_at timestamptz not null default now()
 );
 alter table return_requests enable row level security;
+drop policy if exists "returns owner" on return_requests;
 create policy "returns owner" on return_requests for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 create index if not exists returns_user_idx on return_requests (user_id, created_at desc);
 

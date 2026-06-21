@@ -64,7 +64,8 @@ export async function updateAccount(_prev: PrefsActionState, formData: FormData)
     .eq("id", user.id);
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/customer/settings", "layout");
+  // Revalidate the whole app so the header greeting + avatar update everywhere.
+  revalidatePath("/", "layout");
   return { success: "Saved." };
 }
 
@@ -92,9 +93,10 @@ export async function updateNotifications(_prev: PrefsActionState, formData: For
 }
 
 export async function updateUiPrefs(_prev: PrefsActionState, formData: FormData): Promise<PrefsActionState> {
-  const ui: Preferences["ui"] = {
-    language: (formData.get("language") as Preferences["ui"]["language"]) ?? "en",
-    currency: (formData.get("currency") as Preferences["ui"]["currency"]) ?? "INR",
+  type Ui = NonNullable<Preferences["ui"]>;
+  const ui: Ui = {
+    language: (formData.get("language") as Ui["language"]) ?? "en",
+    currency: (formData.get("currency") as Ui["currency"]) ?? "INR",
     region: (formData.get("region") as string) || "IN",
   };
   return patchPreferences({ ui });
@@ -112,8 +114,9 @@ export async function updateAiPrefs(_prev: PrefsActionState, formData: FormData)
 }
 
 export async function updateOrderPrefs(_prev: PrefsActionState, formData: FormData): Promise<PrefsActionState> {
-  const orders: Preferences["orders"] = {
-    delivery_window: (formData.get("delivery_window") as Preferences["orders"]["delivery_window"]) ?? "anytime",
+  type Orders = NonNullable<Preferences["orders"]>;
+  const orders: Orders = {
+    delivery_window: (formData.get("delivery_window") as Orders["delivery_window"]) ?? "anytime",
     default_address_id: (formData.get("default_address_id") as string) || null,
   };
   return patchPreferences({ orders });

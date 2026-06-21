@@ -5,14 +5,19 @@ import { listProducts, getTrending } from "@/features/catalog/queries";
 import { getWishlistedIds } from "@/features/catalog/wishlist-queries";
 
 import { AIAssistantHero } from "@/components/dashboard/ai-assistant-hero";
+import { QuickActionsRow } from "@/components/dashboard/quick-actions-row";
 import { MyOrdersRow } from "@/components/dashboard/my-orders-row";
-import { ExclusiveDealsRow } from "@/components/dashboard/exclusive-deals-row";
+import { PromoBannersRow } from "@/components/dashboard/promo-banners-row";
 import { RecommendedRow } from "@/components/dashboard/recommended-row";
+import { PopularCategoriesRow } from "@/components/dashboard/popular-categories-row";
+import { TopBrandsRow } from "@/components/dashboard/top-brands-row";
+import { HelpBar } from "@/components/dashboard/help-bar";
+
 import { AccountOverviewCard } from "@/components/dashboard/account-overview-card";
 import { GoldBenefitsCard } from "@/components/dashboard/gold-benefits-card";
 import { PriceAlertsCard } from "@/components/dashboard/price-alerts-card";
 import { RecentlyViewedCard } from "@/components/dashboard/recently-viewed-card";
-import { NeedHelpCard } from "@/components/dashboard/need-help-card";
+import { MoreWithSmartBuyxCard } from "@/components/dashboard/more-with-smartbuyx-card";
 
 export async function CustomerDashboardHome({ userId, firstName }: { userId: string; firstName: string }) {
   const supabase = await createClient();
@@ -42,17 +47,23 @@ export async function CustomerDashboardHome({ userId, firstName }: { userId: str
 
   return (
     <main className="grid gap-6 p-6 xl:grid-cols-[1fr,360px]">
+      {/* Main column */}
       <div className="min-w-0 space-y-6">
         <AIAssistantHero firstName={firstName} />
+        <QuickActionsRow />
         <MyOrdersRow orders={orders} />
-        <ExclusiveDealsRow smartCoins={Math.round(wallet)} />
+        <PromoBannersRow />
         <RecommendedRow
           products={trending}
           defaultVariantByProduct={defaultVariantByProduct}
           wishlisted={wishlistedIds}
         />
+        <PopularCategoriesRow />
+        <TopBrandsRow />
+        <HelpBar />
       </div>
 
+      {/* Right rail */}
       <aside className="space-y-4">
         <AccountOverviewCard
           totalSpent={totalSpent}
@@ -63,7 +74,7 @@ export async function CustomerDashboardHome({ userId, firstName }: { userId: str
         <GoldBenefitsCard saved={moneySaved} />
         <PriceAlertsCard products={deals.products} />
         <RecentlyViewedCard products={trending} />
-        <NeedHelpCard />
+        <MoreWithSmartBuyxCard />
       </aside>
     </main>
   );

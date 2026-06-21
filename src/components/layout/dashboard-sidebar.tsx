@@ -27,7 +27,7 @@ const COMMERCE_NAV: NavItem[] = [
   { href: "/wallet", label: "Smart Coins", icon: Coins },
   { href: "/dashboard/customer/notifications", label: "Notifications", icon: BellRing },
   { href: "/dashboard/customer/support", label: "Help & Support", icon: LifeBuoy },
-  { href: "/dashboard/customer/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/customer/settings/account", label: "Settings", icon: Settings },
 ];
 
 const BUILD_NAV: NavItem[] = [
@@ -45,7 +45,7 @@ const BUILD_NAV: NavItem[] = [
   { href: "/wallet", label: "Smart Coins", icon: Coins },
   { href: "/dashboard/customer/notifications", label: "Notifications", icon: BellRing },
   { href: "/dashboard/customer/support", label: "Help & Support", icon: LifeBuoy },
-  { href: "/dashboard/customer/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/customer/settings/account", label: "Settings", icon: Settings },
 ];
 
 export function DashboardSidebar({ mode = "commerce", badges }: { mode?: AppMode; badges?: Record<string, number> }) {
