@@ -56,7 +56,7 @@ export async function CustomerDashboardHome({ userId, firstName }: { userId: str
         <RecommendedRow
           products={trending}
           defaultVariantByProduct={defaultVariantByProduct}
-          wishlisted={wishlistedIds}
+          wishlistedIds={Array.from(wishlistedIds)}
         />
         <PopularCategoriesRow />
         <TopBrandsRow />

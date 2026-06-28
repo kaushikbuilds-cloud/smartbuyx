@@ -18,14 +18,17 @@ type VariantMap = Record<string, string>;
 export function RecommendedRow({
   products,
   defaultVariantByProduct,
-  wishlisted,
+  wishlistedIds,
   title = "Recommended For You",
 }: {
   products: Product[];
   defaultVariantByProduct?: VariantMap;
-  wishlisted?: Set<string>;
+  wishlistedIds?: string[];
   title?: string;
 }) {
+  // Build the Set on the client — a Set can't be serialized across the
+  // server→client boundary, so callers pass a plain string[].
+  const wishlisted = new Set(wishlistedIds ?? []);
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
@@ -44,7 +47,7 @@ export function RecommendedRow({
               key={p.id}
               product={p}
               variantId={defaultVariantByProduct?.[p.id]}
-              initiallyWishlisted={wishlisted?.has(p.id) ?? false}
+              initiallyWishlisted={wishlisted.has(p.id)}
             />
           ))}
         </div>
