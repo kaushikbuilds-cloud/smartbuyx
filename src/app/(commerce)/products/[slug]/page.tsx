@@ -11,6 +11,8 @@ import { WishlistButton } from "@/components/shop/wishlist-button";
 import { ProductGallery } from "@/components/shop/product-gallery";
 import { ReviewList } from "@/components/shop/review-list";
 import { TrackPricePopover } from "@/components/shop/track-price-popover";
+import { getReviewSummary } from "@/features/ai/review-summary";
+import { ReviewSummaryCard } from "@/components/shop/review-summary-card";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -23,10 +25,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [variants, reviews, session] = await Promise.all([
+  const [variants, reviews, session, reviewSummary] = await Promise.all([
     getProductVariants(product.id),
     getProductReviews(product.id),
     getSession(),
+    getReviewSummary(product.id, product.rating_count),
   ]);
   const wishlisted = session ? (await getWishlistedIds(session.user.id)).has(product.id) : false;
   const defaultVariant = variants[0];
@@ -80,6 +83,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       {/* Reviews */}
       <section className="mt-12">
         <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+        {reviewSummary ? (
+          <div className="mt-4">
+            <ReviewSummaryCard summary={reviewSummary} />
+          </div>
+        ) : null}
         <div className="mt-4">
           <ReviewList reviews={reviews} avg={product.rating_avg} count={product.rating_count} />
         </div>
