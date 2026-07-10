@@ -1,6 +1,18 @@
 import { requireUser } from "@/lib/auth/guards";
+import { AssistantChat } from "@/components/ai/assistant-chat";
 
-export default async function AssistantPage() {
+export const metadata = { title: "AI Assistant" };
+
+export default async function AssistantPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await requireUser();
-  return <main className="container mx-auto p-8"><h1 className="text-2xl font-bold">AI Shopping Assistant</h1></main>;
+  const { q } = await searchParams;
+  return (
+    <main className="container mx-auto px-4">
+      <AssistantChat initialQuery={q} />
+    </main>
+  );
 }
