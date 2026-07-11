@@ -12,11 +12,14 @@ export type ListParams = {
   sort?: "newest" | "price_asc" | "price_desc" | "rating";
   limit?: number;
   offset?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
 };
 
 export async function listProducts(params: ListParams = {}) {
   if (!isSupabaseConfigured()) return { products: [] as Product[], total: 0 };
-  const { kind = "product", q, categoryId, sort = "newest", limit = 24, offset = 0 } = params;
+  const { kind = "product", q, categoryId, sort = "newest", limit = 24, offset = 0, minPrice, maxPrice, minRating } = params;
   const supabase = await createClient();
   let query = supabase
     .from("products")
@@ -26,6 +29,9 @@ export async function listProducts(params: ListParams = {}) {
 
   if (categoryId) query = query.eq("category_id", categoryId);
   if (q) query = query.textSearch("search_tsv", q, { type: "websearch", config: "simple" });
+  if (minPrice && minPrice > 0) query = query.gte("base_price", minPrice);
+  if (maxPrice && maxPrice > 0) query = query.lte("base_price", maxPrice);
+  if (minRating && minRating > 0) query = query.gte("rating_avg", minRating);
 
   switch (sort) {
     case "price_asc": query = query.order("base_price", { ascending: true }); break;
