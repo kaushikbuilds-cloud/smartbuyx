@@ -2,6 +2,7 @@ import { Mail, Phone, MessageCircle } from "lucide-react";
 import { requireUser } from "@/lib/auth/guards";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageShell } from "@/components/dashboard/page-shell";
+import { SupportChat } from "@/components/ai/support-chat";
 
 export const metadata = { title: "Help & Support" };
 
@@ -16,6 +17,8 @@ export default async function SupportPage() {
   await requireUser();
   return (
     <PageShell title="Help & Support" description="We're here 24×7.">
+      <SupportChat />
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="space-y-2 p-5">
