@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 export type SellerOrderLine = {
   shipmentId: string | null;
   orderId: string;
+  buyerId: string;
   status: string;
   placedAt: string;
   items: { title: string; quantity: number; total: number }[];
@@ -13,19 +14,20 @@ export async function getSellerOrders(sellerId: string): Promise<SellerOrderLine
   const supabase = await createClient();
   const { data } = await supabase
     .from("order_items")
-    .select("order_id, shipment_id, title, quantity, total, orders!inner(created_at), shipments(status)")
+    .select("order_id, shipment_id, title, quantity, total, orders!inner(created_at, buyer_id), shipments(status)")
     .eq("supplier_id", sellerId)
     .order("order_id", { ascending: false });
 
   const byShipment = new Map<string, SellerOrderLine>();
   for (const row of data ?? []) {
     const key = row.shipment_id ?? row.order_id;
-    const order = row.orders as unknown as { created_at: string };
+    const order = row.orders as unknown as { created_at: string; buyer_id: string };
     const shipment = row.shipments as unknown as { status: string } | null;
     if (!byShipment.has(key)) {
       byShipment.set(key, {
         shipmentId: row.shipment_id,
         orderId: row.order_id,
+        buyerId: order.buyer_id,
         status: shipment?.status ?? "pending",
         placedAt: order.created_at,
         items: [],
