@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/dashboard/page-shell";
 import { CancelReturnButton } from "@/components/shop/cancel-return-button";
+import { ReturnTimeline } from "@/components/shop/return-timeline";
 import { formatINR } from "@/lib/utils/format";
 
 export const metadata = { title: "Returns & Refunds" };
@@ -57,23 +58,28 @@ export default async function ReturnsPage() {
             const cancellable = ["requested", "approved"].includes(r.status);
             return (
               <Card key={r.id}>
-                <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                  <div className="min-w-0">
-                    <p className="font-medium">{r.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {REASON_LABELS[r.reason] ?? r.reason} ·{" "}
-                      {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                    </p>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium">{r.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {REASON_LABELS[r.reason] ?? r.reason} ·{" "}
+                        {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold">{formatINR(r.amount)}</span>
+                      <Badge variant={STATUS_VARIANT[r.status] ?? "secondary"} className="capitalize">
+                        {r.status.replace(/_/g, " ")}
+                      </Badge>
+                      {cancellable ? <CancelReturnButton id={r.id} /> : null}
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/orders/${r.order_id}`}>View order</Link>
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold">{formatINR(r.amount)}</span>
-                    <Badge variant={STATUS_VARIANT[r.status] ?? "secondary"} className="capitalize">
-                      {r.status.replace(/_/g, " ")}
-                    </Badge>
-                    {cancellable ? <CancelReturnButton id={r.id} /> : null}
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/orders/${r.order_id}`}>View order</Link>
-                    </Button>
+                  <div className="border-t pt-3">
+                    <ReturnTimeline status={r.status} />
                   </div>
                 </CardContent>
               </Card>

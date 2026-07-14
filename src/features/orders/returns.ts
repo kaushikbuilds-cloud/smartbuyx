@@ -3,9 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth/guards";
+import { computeBuyerRisk } from "@/features/ai/fraud";
 
 const RETURN_WINDOW_DAYS = 7;
+
+// Returnless refund: low-value items from trusted buyers get an instant wallet
+// refund with no pickup (cheaper than reverse logistics). Abusers are excluded.
+const RETURNLESS_MAX_VALUE = 300; // ₹
+const RETURNLESS_MAX_RISK = 30;   // buyer risk score must be below this
 
 const initiateSchema = z.object({
   orderItemId: z.string().uuid(),
@@ -38,16 +45,40 @@ export async function initiateReturn(_prev: ReturnActionState, formData: FormDat
   const days = (Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24);
   if (days > RETURN_WINDOW_DAYS) return { error: `Return window of ${RETURN_WINDOW_DAYS} days has passed.` };
 
-  const { error } = await supabase.from("return_requests").insert({
-    user_id: user.id,
-    order_id: item.order_id,
-    order_item_id: item.id,
-    reason: parsed.data.reason,
-    notes: parsed.data.notes || null,
-    amount: item.total,
-    status: "requested",
-  });
+  // Decide returnless-refund eligibility: low value + trusted buyer + not the
+  // reasons where we'd want the item back to inspect (damaged/wrong item can be
+  // returnless too since they're low value, but keep quality issues reviewable).
+  const amount = Number(item.total);
+  const risk = await computeBuyerRisk(user.id);
+  const returnless =
+    amount <= RETURNLESS_MAX_VALUE &&
+    risk.score < RETURNLESS_MAX_RISK &&
+    parsed.data.reason !== "better_price";
+
+  const { data: created, error } = await supabase
+    .from("return_requests")
+    .insert({
+      user_id: user.id,
+      order_id: item.order_id,
+      order_item_id: item.id,
+      reason: parsed.data.reason,
+      notes: parsed.data.notes || null,
+      amount,
+      status: returnless ? "approved" : "requested",
+    })
+    .select("id")
+    .single();
   if (error) return { error: error.message };
+
+  if (returnless && created) {
+    // Instant refund to wallet, no pickup. The status trigger credits the wallet.
+    const admin = createAdminClient();
+    await admin.from("return_requests").update({ status: "refunded" }).eq("id", created.id);
+    revalidatePath("/dashboard/customer/returns");
+    revalidatePath("/wallet");
+    revalidatePath(`/orders/${item.order_id}`);
+    return { success: `Returnless refund approved! ₹${amount} credited to your wallet — keep the item.` };
+  }
 
   revalidatePath("/dashboard/customer/returns");
   revalidatePath(`/orders/${item.order_id}`);
