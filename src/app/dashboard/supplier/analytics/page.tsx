@@ -1,26 +1,33 @@
-import { IndianRupee, Package, ShoppingBag, TrendingUp } from "lucide-react";
+import { IndianRupee, Package, ShoppingBag, TrendingUp, RotateCcw } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { getSellerStats } from "@/features/orders/seller-analytics";
+import { getSellerReturnStats } from "@/features/orders/return-analytics";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata = { title: "Revenue Analytics" };
 
 export default async function SellerAnalyticsPage() {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  const stats = await getSellerStats(user.id);
+  const [stats, returnStats] = await Promise.all([
+    getSellerStats(user.id),
+    getSellerReturnStats(user.id),
+  ]);
+  const returnRate = stats.orderCount > 0 ? returnStats.totalReturns / stats.orderCount : 0;
 
   const cards = [
     { icon: IndianRupee, label: "Revenue", value: formatINR(stats.revenue) },
     { icon: ShoppingBag, label: "Orders", value: stats.orderCount },
     { icon: Package, label: "Units sold", value: stats.unitsSold },
+    { icon: RotateCcw, label: "Return rate", value: `${(returnRate * 100).toFixed(1)}%` },
   ];
 
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold">Revenue Analytics</h1>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <Card key={c.label}>
             <CardContent className="flex items-center gap-4 p-6">
@@ -60,6 +67,37 @@ export default async function SellerAnalyticsPage() {
               </tbody>
             </table>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <RotateCcw className="h-5 w-5 text-rose-500" />
+            <h2 className="font-semibold">Most-returned products</h2>
+            {returnRate > 0.15 ? <Badge variant="destructive">High return rate</Badge> : null}
+          </div>
+          {returnStats.topReturned.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No returns yet — great job!</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-muted-foreground">
+                <tr><th className="pb-2">Product</th><th className="pb-2 text-right">Returns</th><th className="pb-2 text-right">Refunded</th></tr>
+              </thead>
+              <tbody>
+                {returnStats.topReturned.map((p) => (
+                  <tr key={p.title} className="border-t">
+                    <td className="py-2">{p.title}</td>
+                    <td className="py-2 text-right">{p.returns}</td>
+                    <td className="py-2 text-right">{formatINR(p.refundedAmount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="mt-3 text-xs text-muted-foreground">
+            High returns often signal a listing/quality gap — check descriptions, sizing and images.
+          </p>
         </CardContent>
       </Card>
     </main>
