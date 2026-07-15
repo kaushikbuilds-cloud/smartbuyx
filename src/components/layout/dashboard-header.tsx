@@ -3,18 +3,22 @@ import { Heart, ShoppingCart, Coins, ChevronDown, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth/guards";
 import { getCartCount, getWalletBalance } from "@/features/account/wallet-queries";
+import { getUnreadCount, getRecentNotifications } from "@/features/notifications/queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationBell } from "./notification-bell";
 
 export async function DashboardHeader() {
   const session = await getSession();
   if (!session) return null;
 
   const supabase = await createClient();
-  const [profileRes, cartCount, wallet, wishlistRes] = await Promise.all([
+  const [profileRes, cartCount, wallet, wishlistRes, unreadCount, recentNotifications] = await Promise.all([
     supabase.from("profiles").select("full_name, avatar_url").eq("id", session.user.id).single(),
     getCartCount(session.user.id),
     getWalletBalance(session.user.id),
     supabase.from("wishlist_items").select("id", { count: "exact", head: true }).eq("user_id", session.user.id),
+    getUnreadCount(session.user.id),
+    getRecentNotifications(session.user.id),
   ]);
   const fullName = profileRes.data?.full_name ?? session.user.email ?? "there";
   const firstName = fullName.split(" ")[0];
@@ -50,6 +54,8 @@ export async function DashboardHeader() {
         </div>
         <ChevronDown className="h-3 w-3 text-muted-foreground" />
       </Link>
+
+      <NotificationBell unreadCount={unreadCount} recent={recentNotifications} />
 
       <Link href="/wishlist" aria-label="Wishlist" className="relative flex h-10 w-10 items-center justify-center rounded-xl border bg-card hover:bg-muted">
         <Heart className="h-5 w-5" />
