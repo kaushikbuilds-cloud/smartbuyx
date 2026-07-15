@@ -18,7 +18,7 @@ export default async function EngineersPage() {
         </div>
         <Button variant="gradient" size="sm" asChild><Link href="/rfq/new">Post a brief</Link></Button>
       </div>
-      <ProGrid pros={pros} rfqCta="Find engineers for me" />
+      <ProGrid pros={pros} rfqCta="Find engineers for me" role="engineer" />
     </main>
   );
 }

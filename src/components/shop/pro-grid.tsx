@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Briefcase, MessageSquare } from "lucide-react";
+import { Briefcase, MessageSquare, CalendarClock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "./star-rating";
 import type { ProListing } from "@/features/pros/queries";
 
-export function ProGrid({ pros, rfqCta }: { pros: ProListing[]; rfqCta: string }) {
+export function ProGrid({ pros, rfqCta, role }: { pros: ProListing[]; rfqCta: string; role?: string }) {
   if (pros.length === 0) {
     return (
       <Card>
@@ -55,9 +55,18 @@ export function ProGrid({ pros, rfqCta }: { pros: ProListing[]; rfqCta: string }
               ) : (
                 <span className="text-xs text-muted-foreground">No reviews yet</span>
               )}
-              <Button size="sm" variant="outline" asChild>
-                <Link href="/rfq/new"><MessageSquare className="h-3.5 w-3.5" /> Get Quote</Link>
-              </Button>
+              <div className="flex gap-2">
+                {role ? (
+                  <Button size="sm" variant="gradient" asChild>
+                    <Link href={`/consult/${p.user_id}?role=${role}&name=${encodeURIComponent(p.display_name)}`}>
+                      <CalendarClock className="h-3.5 w-3.5" /> Book
+                    </Link>
+                  </Button>
+                ) : null}
+                <Button size="sm" variant="outline" asChild>
+                  <Link href="/rfq/new"><MessageSquare className="h-3.5 w-3.5" /> Get Quote</Link>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

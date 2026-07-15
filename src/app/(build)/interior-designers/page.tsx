@@ -18,7 +18,7 @@ export default async function InteriorDesignersPage() {
         </div>
         <Button variant="gradient" size="sm" asChild><Link href="/rfq/new">Post a brief</Link></Button>
       </div>
-      <ProGrid pros={pros} rfqCta="Find interior designers for me" />
+      <ProGrid pros={pros} rfqCta="Find interior designers for me" role="interior_designer" />
     </main>
   );
 }
