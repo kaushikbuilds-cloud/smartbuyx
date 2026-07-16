@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText } from "lucide-react";
+import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
@@ -24,6 +24,7 @@ const BUILD_NAV: NavItem[] = [
   { href: "/", label: "Home", icon: Home }, { href: "/projects", label: "My Projects", icon: FolderKanban },
   { href: "/house-builder", label: "AI House Builder", icon: Sparkles }, { href: "/estimator", label: "Material Estimator", icon: Boxes },
   { href: "/cost-calculator", label: "Cost Calculator", icon: Ruler }, { href: "/rfq", label: "RFQs", icon: FileText },
+  { href: "/dashboard/customer/procurement", label: "Procurement AI", icon: ClipboardList },
   { href: "/materials", label: "Materials", icon: HardHat }, { href: "/suppliers", label: "Suppliers", icon: ShoppingBag },
   { href: "/architects", label: "Architects", icon: Building2 }, { href: "/contractors", label: "Contractors", icon: Wrench },
   { href: "/interior-designers", label: "Interior Designers", icon: ScrollText }, { href: "/wallet", label: "Smart Coins", icon: Coins },

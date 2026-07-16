@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard,
   RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, Gift, ShoppingBag,
-  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText,
+  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ModeSwitcher } from "./mode-switcher";
@@ -37,6 +37,7 @@ const BUILD_NAV: NavItem[] = [
   { href: "/estimator", label: "Material Estimator", icon: Boxes },
   { href: "/cost-calculator", label: "Cost Calculator", icon: Ruler },
   { href: "/rfq", label: "RFQs", icon: FileText },
+  { href: "/dashboard/customer/procurement", label: "Procurement AI", icon: ClipboardList },
   { href: "/materials", label: "Materials", icon: HardHat },
   { href: "/suppliers", label: "Suppliers", icon: ShoppingBag },
   { href: "/architects", label: "Architects", icon: Building2 },
