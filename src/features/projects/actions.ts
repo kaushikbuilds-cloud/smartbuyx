@@ -106,11 +106,19 @@ const expenseSchema = z.object({
 });
 
 export async function addExpense(_prev: ProjectActionState, formData: FormData): Promise<ProjectActionState> {
-  await requireUser();
+  const { user } = await requireUser();
   const parsed = expenseSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const supabase = await createClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("customer_id, architect_id, engineer_id, contractor_id")
+    .eq("id", parsed.data.projectId)
+    .single();
+  if (!project || ![project.customer_id, project.architect_id, project.engineer_id, project.contractor_id].includes(user.id)) {
+    return { error: "Project not found." };
+  }
   const { error } = await supabase.from("project_expenses").insert({
     project_id: parsed.data.projectId,
     category: parsed.data.category,
@@ -135,6 +143,14 @@ export async function addSiteReport(_prev: ProjectActionState, formData: FormDat
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const supabase = await createClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("customer_id, architect_id, engineer_id, contractor_id, interior_designer_id")
+    .eq("id", parsed.data.projectId)
+    .single();
+  if (!project || ![project.customer_id, project.architect_id, project.engineer_id, project.contractor_id, project.interior_designer_id].includes(user.id)) {
+    return { error: "Project not found." };
+  }
   const { error } = await supabase.from("site_reports").insert({
     project_id: parsed.data.projectId,
     author_id: user.id,
@@ -156,11 +172,19 @@ const materialSchema = z.object({
 });
 
 export async function addProjectMaterial(_prev: ProjectActionState, formData: FormData): Promise<ProjectActionState> {
-  await requireUser();
+  const { user } = await requireUser();
   const parsed = materialSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const supabase = await createClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select("customer_id, architect_id, engineer_id, contractor_id")
+    .eq("id", parsed.data.projectId)
+    .single();
+  if (!project || ![project.customer_id, project.architect_id, project.engineer_id, project.contractor_id].includes(user.id)) {
+    return { error: "Project not found." };
+  }
   const { error } = await supabase.from("project_materials").insert({
     project_id: parsed.data.projectId,
     name: parsed.data.name,
