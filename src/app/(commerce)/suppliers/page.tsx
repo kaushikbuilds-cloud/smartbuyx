@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/shop/star-rating";
 import { TrustScoreBadge } from "@/components/shop/trust-score-badge";
 import { CatalogBreadcrumb } from "@/components/shop/catalog-breadcrumb";
+import { SupplierMatchmaker } from "@/components/shop/supplier-matchmaker";
 
 export const metadata = { title: "Verified Suppliers" };
 
@@ -45,6 +46,8 @@ export default async function SuppliersPage({
           </Button>
         </div>
       </div>
+
+      <SupplierMatchmaker defaultPincode={pincode} />
 
       {suppliers.length === 0 ? (
         <Card className="flex flex-col items-center gap-2 p-12 text-center text-muted-foreground">
