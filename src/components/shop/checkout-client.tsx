@@ -66,6 +66,10 @@ export function CheckoutClient({
       toast.error("Please add a delivery address.");
       return;
     }
+    if (typeof window === "undefined" || !window.Razorpay) {
+      toast.error("Payment is still loading — please try again in a moment.");
+      return;
+    }
     setLoading(true);
     const res = await createCheckoutOrder(addressId, appliedCode ?? undefined);
     if (!res.ok) {
