@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { markAllNotificationsRead, markNotificationRead } from "@/features/notifications/actions";
-import { describeNotification, type NotificationRow } from "@/features/notifications/queries";
+import { describeNotification, type NotificationRow } from "@/features/notifications/utils";
 
 export function NotificationBell({
   unreadCount,

@@ -1,13 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type { NotificationRow } from "./utils";
 
-export type NotificationRow = {
-  id: string;
-  kind: string;
-  payload: Record<string, unknown>;
-  read_at: string | null;
-  created_at: string;
-};
+export type { NotificationRow } from "./utils";
 
 export async function getUnreadCount(userId: string): Promise<number> {
   if (!isSupabaseConfigured()) return 0;
@@ -32,17 +27,5 @@ export async function getRecentNotifications(userId: string, limit = 8): Promise
   return (data ?? []) as NotificationRow[];
 }
 
-// Human-friendly line for a notification, derived from its kind + payload.
-export function describeNotification(n: NotificationRow): string {
-  const p = n.payload ?? {};
-  switch (n.kind) {
-    case "price.drop":
-      return `Price drop: ${p.title ?? "an item"} is now ₹${p.price ?? "?"}`;
-    case "rfq.new":
-      return `New RFQ: ${p.title ?? "a buyer request"}`;
-    case "consultation.requested":
-      return "New consultation requested";
-    default:
-      return n.kind.replace(/[._]/g, " ");
-  }
-}
+// describeNotification lives in ./utils (client-safe, no server imports).
+export { describeNotification } from "./utils";

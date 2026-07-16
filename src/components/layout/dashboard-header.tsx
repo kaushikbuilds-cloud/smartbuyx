@@ -6,8 +6,10 @@ import { getCartCount, getWalletBalance } from "@/features/account/wallet-querie
 import { getUnreadCount, getRecentNotifications } from "@/features/notifications/queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
+import { DashboardMobileNav } from "./dashboard-mobile-nav";
+import type { AppMode } from "@/features/preferences/mode";
 
-export async function DashboardHeader() {
+export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode }) {
   const session = await getSession();
   if (!session) return null;
 
@@ -26,7 +28,8 @@ export async function DashboardHeader() {
   const wishlistCount = wishlistRes.count ?? 0;
 
   return (
-    <header className="flex items-center gap-4 border-b bg-background px-6 py-3">
+    <header className="flex items-center gap-2 border-b bg-background px-3 py-3 sm:gap-4 sm:px-6">
+      <DashboardMobileNav mode={mode} />
       {/* Search with categories */}
       <form action="/products" className="flex flex-1 items-stretch overflow-hidden rounded-xl border bg-muted/30 focus-within:ring-2 focus-within:ring-purple-500/30">
         <div className="flex items-center pl-4 text-muted-foreground"><Search className="h-4 w-4" /></div>
@@ -57,7 +60,7 @@ export async function DashboardHeader() {
 
       <NotificationBell unreadCount={unreadCount} recent={recentNotifications} />
 
-      <Link href="/wishlist" aria-label="Wishlist" className="relative flex h-10 w-10 items-center justify-center rounded-xl border bg-card hover:bg-muted">
+      <Link href="/wishlist" aria-label="Wishlist" className="relative hidden h-10 w-10 items-center justify-center rounded-xl border bg-card hover:bg-muted sm:flex">
         <Heart className="h-5 w-5" />
         {wishlistCount > 0 ? (
           <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">{wishlistCount}</span>

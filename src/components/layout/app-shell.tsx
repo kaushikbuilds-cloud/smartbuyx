@@ -25,7 +25,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-muted/30">
       <DashboardSidebar mode={mode} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardHeader />
+        <DashboardHeader mode={mode} />
         <div className="flex-1">{children}</div>
       </div>
     </div>
