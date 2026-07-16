@@ -9,11 +9,18 @@ export type CreatorActionState = { error?: string; success?: string } | null;
 
 const CREATOR_ROLES = ["creator", "admin", "superadmin"] as const;
 
+// z.string().url() alone accepts javascript:/data: URIs — videoUrl renders as
+// a clickable <a href> in reel-card.tsx, so an unrestricted scheme is stored XSS.
+const httpUrl = z
+  .string()
+  .url()
+  .refine((v) => /^https?:\/\//i.test(v), { message: "Enter a valid video URL" });
+
 const reelSchema = z.object({
   title: z.string().max(120).optional().or(z.literal("")),
   caption: z.string().max(500).optional().or(z.literal("")),
-  videoUrl: z.string().url("Enter a valid video URL"),
-  thumbnailUrl: z.string().url().optional().or(z.literal("")),
+  videoUrl: httpUrl,
+  thumbnailUrl: httpUrl.optional().or(z.literal("")),
   productSlug: z.string().optional().or(z.literal("")),
 });
 

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { PlayCircle, ShoppingBag, ImageOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatINR } from "@/lib/utils/format";
+import { isSafeHttpUrl } from "@/lib/utils/safe-url";
 import type { ReelFeedItem } from "@/features/creator/queries";
 
 export function ReelCard({ reel }: { reel: ReelFeedItem }) {
@@ -16,14 +17,16 @@ export function ReelCard({ reel }: { reel: ReelFeedItem }) {
             <PlayCircle className="h-12 w-12" />
           </div>
         )}
-        <a
-          href={reel.videoUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100"
-        >
-          <PlayCircle className="h-14 w-14 text-white" />
-        </a>
+        {isSafeHttpUrl(reel.videoUrl) ? (
+          <a
+            href={reel.videoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100"
+          >
+            <PlayCircle className="h-14 w-14 text-white" />
+          </a>
+        ) : null}
       </div>
       <CardContent className="space-y-2 p-4">
         <div>

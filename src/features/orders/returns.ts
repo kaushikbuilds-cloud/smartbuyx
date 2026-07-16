@@ -14,11 +14,21 @@ const RETURN_WINDOW_DAYS = 7;
 const RETURNLESS_MAX_VALUE = 300; // ₹
 const RETURNLESS_MAX_RISK = 30;   // buyer risk score must be below this
 
+// z.string().url() alone accepts javascript:/data: URIs (they're parseable
+// URLs by the WHATWG spec) — this value later renders as a clickable <a href>
+// on the seller's dashboard, so an unrestricted scheme here is stored XSS.
+// Only allow http/https, matching how the value is actually produced (a
+// Supabase Storage public URL from ReturnProofUploader).
+const httpUrl = z
+  .string()
+  .url()
+  .refine((v) => /^https?:\/\//i.test(v), { message: "Invalid proof URL." });
+
 const initiateSchema = z.object({
   orderItemId: z.string().uuid(),
   reason: z.enum(["damaged", "wrong_item", "not_as_described", "size_fit", "no_longer_needed", "better_price", "other"]),
   notes: z.string().max(500).optional().or(z.literal("")),
-  videoUrl: z.string().url().optional().or(z.literal("")),
+  videoUrl: httpUrl.optional().or(z.literal("")),
   wantsExchange: z.string().optional(), // checkbox: "on" when checked
 });
 

@@ -2,6 +2,7 @@ import { PlayCircle, RotateCcw, Repeat } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { listSellerReturns } from "@/features/orders/returns";
 import { formatINR } from "@/lib/utils/format";
+import { isSafeHttpUrl } from "@/lib/utils/safe-url";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DisputeReturnForm } from "@/components/dashboard/seller/dispute-return-form";
@@ -49,7 +50,7 @@ export default async function SellerReturnsPage() {
                   {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                 </p>
                 {r.notes ? <p className="text-xs text-muted-foreground">Buyer notes: {r.notes}</p> : null}
-                {r.video_url ? (
+                {isSafeHttpUrl(r.video_url) ? (
                   <a
                     href={r.video_url}
                     target="_blank"
