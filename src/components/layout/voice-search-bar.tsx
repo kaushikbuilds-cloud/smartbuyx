@@ -14,8 +14,20 @@ type SpeechRecognitionLike = {
   onend: (() => void) | null;
 };
 
+// Indian languages the browser speech engine commonly supports.
+const VOICE_LANGS = [
+  { code: "en-IN", label: "EN" },
+  { code: "hi-IN", label: "हिं" },
+  { code: "ta-IN", label: "தமி" },
+  { code: "te-IN", label: "తెలు" },
+  { code: "bn-IN", label: "বাং" },
+  { code: "mr-IN", label: "मरा" },
+  { code: "kn-IN", label: "ಕನ್" },
+] as const;
+
 export function VoiceSearchBar() {
   const [listening, setListening] = useState(false);
+  const [lang, setLang] = useState<string>("en-IN");
   const [supported] = useState(
     () => typeof window !== "undefined" && Boolean((window as unknown as Record<string, unknown>).webkitSpeechRecognition || (window as unknown as Record<string, unknown>).SpeechRecognition)
   );
@@ -28,7 +40,7 @@ export function VoiceSearchBar() {
       (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
     if (!Ctor) return;
     const recognition = new (Ctor as new () => SpeechRecognitionLike)();
-    recognition.lang = "en-IN";
+    recognition.lang = lang;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = (e) => {
@@ -58,15 +70,29 @@ export function VoiceSearchBar() {
         className="flex-1 bg-transparent px-3 py-2.5 text-sm focus:outline-none"
       />
       {supported ? (
-        <button
-          type="button"
-          onClick={startListening}
-          aria-label="Search by voice"
-          title="Search by voice"
-          className={`flex items-center px-2 text-muted-foreground hover:text-foreground ${listening ? "animate-pulse text-rose-500" : ""}`}
-        >
-          <Mic className="h-4 w-4" />
-        </button>
+        <>
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            aria-label="Voice language"
+            title="Voice search language"
+            className="hidden bg-transparent px-1 text-xs text-muted-foreground focus:outline-none sm:block"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {VOICE_LANGS.map((l) => (
+              <option key={l.code} value={l.code}>{l.label}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={startListening}
+            aria-label="Search by voice"
+            title="Search by voice"
+            className={`flex items-center px-2 text-muted-foreground hover:text-foreground ${listening ? "animate-pulse text-rose-500" : ""}`}
+          >
+            <Mic className="h-4 w-4" />
+          </button>
+        </>
       ) : null}
       <div className="hidden items-center gap-1 border-l border-border/60 px-3 text-xs text-muted-foreground sm:flex">
         All Categories <ChevronDown className="h-3 w-3" />
