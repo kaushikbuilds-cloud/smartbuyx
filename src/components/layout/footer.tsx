@@ -4,6 +4,7 @@ const COLUMNS = [
   { title: "Commerce", links: [["Shop", "/products"], ["Materials", "/materials"], ["Suppliers", "/suppliers"], ["Reels", "/reels"]] },
   { title: "Build", links: [["Architects", "/architects"], ["Contractors", "/contractors"], ["AI House Builder", "/house-builder"], ["Estimator", "/estimator"]] },
   { title: "Company", links: [["Pricing", "/plans"], ["About", "/about"], ["Careers", "/careers"], ["Contact", "/contact"]] },
+  { title: "Legal", links: [["Privacy Policy", "/legal/privacy"], ["Terms of Service", "/legal/terms"], ["Refund Policy", "/legal/refund-policy"], ["Shipping Policy", "/legal/shipping-policy"]] },
 ];
 
 export function Footer() {
