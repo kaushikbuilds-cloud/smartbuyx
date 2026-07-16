@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/guards";
+import { isWhatsAppConfigured, sendWhatsAppTemplate } from "@/lib/whatsapp/client";
 
 const SELLER_ROLES = ["supplier", "d2c_brand", "admin", "superadmin"] as const;
 
@@ -64,5 +65,26 @@ async function syncOrderStatus(orderId: string) {
   if (current?.status !== orderStatus) {
     await admin.from("orders").update({ status: orderStatus }).eq("id", orderId);
     await admin.from("order_status_history").insert({ order_id: orderId, status: orderStatus });
+    if (orderStatus === "shipped" || orderStatus === "delivered") {
+      await notifyBuyerWhatsApp(orderId, orderStatus);
+    }
   }
+}
+
+// Best-effort WhatsApp ping for opted-in buyers — never blocks the status update.
+async function notifyBuyerWhatsApp(orderId: string, status: "shipped" | "delivered") {
+  if (!isWhatsAppConfigured()) return;
+  const admin = createAdminClient();
+  const { data: order } = await admin.from("orders").select("buyer_id").eq("id", orderId).single();
+  if (!order) return;
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("phone, preferences")
+    .eq("id", order.buyer_id)
+    .single();
+  const prefs = profile?.preferences as { notifications?: { whatsapp?: boolean } } | null;
+  if (!prefs?.notifications?.whatsapp || !profile?.phone) return;
+
+  const template = status === "shipped" ? "order_shipped" : "order_delivered";
+  await sendWhatsAppTemplate(profile.phone, template, [orderId.slice(0, 8).toUpperCase()]);
 }

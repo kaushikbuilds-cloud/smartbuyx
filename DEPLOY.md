@@ -27,6 +27,7 @@ Copy `.env.example` locally, then set these in Vercel or your hosting provider:
 | `RAZORPAY_WEBHOOK_SECRET` | Razorpay webhook verification |
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Browser checkout |
 | `OPENAI_API_KEY` or `GEMINI_API_KEY` | AI features |
+| `MSG91_AUTH_KEY`, `MSG91_WHATSAPP_INTEGRATED_NUMBER` | WhatsApp order notifications (optional; buyers opt in) |
 
 Never use `NEXT_PUBLIC_` for a secret. Rotate any key that has been shared in chat, screenshots, or source control.
 

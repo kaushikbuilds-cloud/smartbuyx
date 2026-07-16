@@ -16,6 +16,7 @@ const CHANNEL_TOGGLES = [
   { name: "email", label: "Email notifications" },
   { name: "sms", label: "SMS notifications" },
   { name: "push", label: "Push notifications" },
+  { name: "whatsapp", label: "WhatsApp notifications" },
 ] as const;
 
 export function NotificationsForm({ initial }: { initial: Preferences["notifications"] }) {

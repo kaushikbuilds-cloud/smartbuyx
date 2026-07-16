@@ -14,6 +14,7 @@ export type Preferences = {
     email?: boolean;
     sms?: boolean;
     push?: boolean;
+    whatsapp?: boolean;
   };
   ui?: {
     language?: "en" | "hi" | "ta" | "te" | "kn" | "ml" | "bn" | "mr";
@@ -84,7 +85,7 @@ async function patchPreferences(patch: Preferences): Promise<PrefsActionState> {
   return { success: "Saved." };
 }
 
-const NOTIF_KEYS = ["order_updates", "price_drops", "wishlist_alerts", "promos", "email", "sms", "push"] as const;
+const NOTIF_KEYS = ["order_updates", "price_drops", "wishlist_alerts", "promos", "email", "sms", "push", "whatsapp"] as const;
 
 export async function updateNotifications(_prev: PrefsActionState, formData: FormData): Promise<PrefsActionState> {
   const notifications: Preferences["notifications"] = {};
