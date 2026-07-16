@@ -1,16 +1,26 @@
 import Link from "next/link";
-import { Store } from "lucide-react";
-import { listSuppliers } from "@/features/suppliers/queries";
+import { MapPin, Store } from "lucide-react";
+import { listSuppliers, getBuyerPincode } from "@/features/suppliers/queries";
+import { getSession } from "@/lib/auth/guards";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/shop/star-rating";
 import { TrustScoreBadge } from "@/components/shop/trust-score-badge";
 import { CatalogBreadcrumb } from "@/components/shop/catalog-breadcrumb";
 
 export const metadata = { title: "Verified Suppliers" };
 
-export default async function SuppliersPage() {
-  const suppliers = await listSuppliers();
+export default async function SuppliersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ near?: string }>;
+}) {
+  const { near } = await searchParams;
+  const session = await getSession();
+  const pincode = session?.user ? await getBuyerPincode(session.user.id) : null;
+  const localOnly = near === "1" && Boolean(pincode);
+  const suppliers = await listSuppliers(pincode, localOnly);
 
   return (
     <main className="container mx-auto space-y-4 px-4 py-4">
@@ -22,9 +32,18 @@ export default async function SuppliersPage() {
             Ranked by SmartBuyX Trust Score — {suppliers.length} verified businesses
           </p>
         </div>
-        <Button variant="gradient" size="sm" asChild>
-          <Link href="/rfq/new">Get quotes</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {pincode ? (
+            <Button variant={localOnly ? "gradient" : "outline"} size="sm" asChild>
+              <Link href={localOnly ? "/suppliers" : "/suppliers?near=1"}>
+                <MapPin className="mr-1 h-3.5 w-3.5" /> {localOnly ? `Near ${pincode}` : "Near me"}
+              </Link>
+            </Button>
+          ) : null}
+          <Button variant="gradient" size="sm" asChild>
+            <Link href="/rfq/new">Get quotes</Link>
+          </Button>
+        </div>
       </div>
 
       {suppliers.length === 0 ? (
@@ -42,6 +61,11 @@ export default async function SuppliersPage() {
                     <h3 className="font-semibold">{s.business_name}</h3>
                     <TrustScoreBadge score={s.trust_score} verified={s.gstin_verified} size="sm" />
                   </div>
+                  {s.isLocal ? (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      <MapPin className="h-3 w-3" /> Delivers to your area
+                    </Badge>
+                  ) : null}
                   {s.bio ? <p className="line-clamp-2 text-sm text-muted-foreground">{s.bio}</p> : null}
                   {s.rating_count > 0 ? <StarRating value={s.rating_avg} count={s.rating_count} /> : null}
                 </CardContent>
