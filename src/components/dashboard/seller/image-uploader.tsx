@@ -1,16 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { enhanceProductImage } from "@/features/ai/image-enhancement";
 
 export function ImageUploader({ initial = [] }: { initial?: string[] }) {
   const [urls, setUrls] = useState<string[]>(initial);
   const [uploading, setUploading] = useState(false);
+  const [enhancing, setEnhancing] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const supabase = createClient();
+
+  function enhance(url: string) {
+    setEnhancing(url);
+    startTransition(async () => {
+      const result = await enhanceProductImage(url);
+      setEnhancing(null);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.url) {
+        setUrls((prev) => prev.map((u) => (u === url ? result.url! : u)));
+        toast.success("Image enhanced");
+      }
+    });
+  }
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -53,6 +72,15 @@ export function ImageUploader({ initial = [] }: { initial?: string[] }) {
                 className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/90"
               >
                 <X className="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                title="Enhance with AI"
+                disabled={isPending}
+                onClick={() => enhance(url)}
+                className="absolute bottom-0.5 left-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/90"
+              >
+                {enhancing === url ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
               </button>
             </div>
           ))}
