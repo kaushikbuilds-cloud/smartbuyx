@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, ShoppingCart, Coins, ChevronDown, Search } from "lucide-react";
+import { Heart, ShoppingCart, Coins, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth/guards";
 import { getCartCount, getWalletBalance } from "@/features/account/wallet-queries";
@@ -7,6 +7,7 @@ import { getUnreadCount, getRecentNotifications } from "@/features/notifications
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
 import { DashboardMobileNav } from "./dashboard-mobile-nav";
+import { VoiceSearchBar } from "./voice-search-bar";
 import type { AppMode } from "@/features/preferences/mode";
 
 export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode }) {
@@ -30,21 +31,7 @@ export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode })
   return (
     <header className="flex items-center gap-2 border-b bg-background px-3 py-3 sm:gap-4 sm:px-6">
       <DashboardMobileNav mode={mode} />
-      {/* Search with categories */}
-      <form action="/products" className="flex flex-1 items-stretch overflow-hidden rounded-xl border bg-muted/30 focus-within:ring-2 focus-within:ring-purple-500/30">
-        <div className="flex items-center pl-4 text-muted-foreground"><Search className="h-4 w-4" /></div>
-        <input
-          name="q"
-          placeholder="Search for products, brands and more..."
-          className="flex-1 bg-transparent px-3 py-2.5 text-sm focus:outline-none"
-        />
-        <div className="hidden items-center gap-1 border-l border-border/60 px-3 text-xs text-muted-foreground sm:flex">
-          All Categories <ChevronDown className="h-3 w-3" />
-        </div>
-        <button type="submit" className="flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 px-5 text-white hover:opacity-90">
-          <Search className="h-4 w-4" />
-        </button>
-      </form>
+      <VoiceSearchBar />
 
       {/* Smart Coins pill */}
       <Link href="/wallet" className="hidden items-center gap-2 rounded-xl border bg-card px-3 py-2 hover:shadow-sm md:flex">

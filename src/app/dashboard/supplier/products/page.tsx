@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { getSellerProducts } from "@/features/catalog/queries";
 import { formatINR } from "@/lib/utils/format";
@@ -19,10 +19,18 @@ export default async function SellerProductsPage() {
           <h1 className="text-2xl font-bold">My Products</h1>
           <p className="text-muted-foreground">{products.length} listings</p>
         </div>
-        <Button variant="gradient" asChild>
-          <Link href="/dashboard/supplier/products/new"><Plus className="h-4 w-4" /> Add product</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <a href="/api/seller/feed" download><Download className="h-4 w-4" /> Export feed</a>
+          </Button>
+          <Button variant="gradient" asChild>
+            <Link href="/dashboard/supplier/products/new"><Plus className="h-4 w-4" /> Add product</Link>
+          </Button>
+        </div>
       </div>
+      <p className="mb-4 -mt-4 text-xs text-muted-foreground">
+        Export feed downloads a Google Merchant / Meta Shops-compatible CSV — import it into other marketplaces to sell everywhere from one catalog.
+      </p>
 
       {products.length === 0 ? (
         <Card className="p-12 text-center text-muted-foreground">
