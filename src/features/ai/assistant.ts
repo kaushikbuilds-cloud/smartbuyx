@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { requireUser } from "@/lib/auth/guards";
 import type OpenAI from "openai";
 
 export type AssistantProduct = {
@@ -95,6 +96,7 @@ export async function askAssistant(
   history: ChatTurn[],
   message: string
 ): Promise<AssistantReply> {
+  await requireUser(); // the page that renders this chat is gated, but Server Actions are independently callable
   if (!message.trim()) return { ok: false, error: "Type a question first." };
   if (!isOpenAIConfigured()) return { ok: false, error: "AI is not configured yet." };
 

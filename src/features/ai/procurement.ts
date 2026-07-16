@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { requireUser } from "@/lib/auth/guards";
 import type OpenAI from "openai";
 
 export type DraftPoItem = { title: string; quantity: number; unit: string | null; unitPrice: number };
@@ -116,6 +117,7 @@ const SYSTEM = `You are SmartBuyX Procurement AI, a B2B buying assistant for an 
 - Keep replies under 130 words, India-context, plain sentences. Mention prices in ₹.`;
 
 export async function askProcurement(history: ChatTurn[], message: string): Promise<ProcurementReply> {
+  await requireUser(); // the page that renders this chat is gated, but Server Actions are independently callable
   if (!message.trim()) return { ok: false, error: "Type a request first." };
   if (!isOpenAIConfigured()) return { ok: false, error: "AI is not configured yet." };
 

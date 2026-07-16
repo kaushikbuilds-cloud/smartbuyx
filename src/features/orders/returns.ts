@@ -122,6 +122,8 @@ export type ReturnWithItem = {
 };
 
 export async function listMyReturns(userId: string): Promise<ReturnWithItem[]> {
+  const { user } = await requireUser();
+  if (user.id !== userId) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("return_requests")
@@ -153,7 +155,11 @@ export type SellerReturnRow = ReturnWithItem & {
 };
 
 // Returns against this seller's products, newest first — feeds the seller dispute dashboard.
+// Uses the admin client (RLS can't join order_items -> supplier_id cheaply here), so this
+// function must enforce the ownership check itself: only the seller's own data, ever.
 export async function listSellerReturns(sellerId: string): Promise<SellerReturnRow[]> {
+  const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
+  if (user.id !== sellerId) return [];
   const admin = createAdminClient();
   const { data } = await admin
     .from("return_requests")

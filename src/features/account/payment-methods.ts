@@ -64,6 +64,8 @@ export type SavedPaymentMethod = {
 };
 
 export async function listPaymentMethods(userId: string): Promise<SavedPaymentMethod[]> {
+  const { user } = await requireUser();
+  if (user.id !== userId) return [];
   const supabase = await createClient();
   const { data } = await supabase
     .from("payment_methods")

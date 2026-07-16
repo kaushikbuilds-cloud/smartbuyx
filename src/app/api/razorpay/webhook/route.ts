@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay/verify";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fulfilPaidOrder } from "@/features/orders/checkout-actions";
+import { fulfilPaidOrder } from "@/features/orders/fulfil-paid-order";
 
 // Server-to-server confirmation. Idempotent: safe if the client callback already finalized.
 export async function POST(req: NextRequest) {

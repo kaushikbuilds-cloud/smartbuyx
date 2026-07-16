@@ -46,6 +46,8 @@ export async function submitProApplication(_prev: ProApplicationState, formData:
 }
 
 export async function getMyProApplication(userId: string) {
+  const { user } = await requireUser();
+  if (user.id !== userId) return null;
   const supabase = await createClient();
   const { data } = await supabase
     .from("pro_applications")
