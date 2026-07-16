@@ -5,6 +5,7 @@ import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { requireUser } from "@/lib/auth/guards";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { safeErrorMessage } from "@/lib/utils/safe-error";
 import type OpenAI from "openai";
 
 export type AssistantProduct = {
@@ -156,6 +157,6 @@ export async function askAssistant(
 
     return { ok: true, answer: "I found these options:", products: collected.slice(0, 6) };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "AI request failed." };
+    return { ok: false, error: safeErrorMessage(e, "AI request failed.", "askAssistant") };
   }
 }

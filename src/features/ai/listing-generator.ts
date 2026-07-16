@@ -4,6 +4,7 @@ import { z } from "zod";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { requireRole } from "@/lib/auth/guards";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 const SELLER_ROLES = ["supplier", "d2c_brand", "admin", "superadmin"] as const;
 
@@ -68,6 +69,6 @@ Return ONLY valid JSON with keys: title, description, brand, unit, keywords, sug
 
     return { ok: true, listing: parsed.data as GeneratedListing };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "AI request failed." };
+    return { ok: false, error: safeErrorMessage(e, "AI request failed.", "generateListing") };
   }
 }

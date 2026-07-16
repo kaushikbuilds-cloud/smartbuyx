@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth/guards";
 import { razorpay, toPaise } from "@/lib/razorpay/client";
 import { verifyPaymentSignature } from "@/lib/razorpay/verify";
+import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type PlanOrderResult =
   | { ok: true; razorpayOrderId: string; amount: number; keyId: string; planId: string }
@@ -44,7 +45,7 @@ export async function startPlanCheckout(planId: string): Promise<PlanOrderResult
       planId,
     };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Could not start payment." };
+    return { ok: false, error: safeErrorMessage(e, "Could not start payment.", "startPlanCheckout") };
   }
 }
 

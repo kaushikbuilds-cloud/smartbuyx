@@ -8,6 +8,7 @@ import { getCart } from "./cart-queries";
 import { razorpay, toPaise } from "@/lib/razorpay/client";
 import { verifyPaymentSignature } from "@/lib/razorpay/verify";
 import { fulfilPaidOrder } from "./fulfil-paid-order";
+import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type CreateOrderResult =
   | { ok: true; orderId: string; razorpayOrderId: string; amount: number; keyId: string }
@@ -108,7 +109,7 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
       keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
     };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Could not start payment." };
+    return { ok: false, error: safeErrorMessage(e, "Could not start payment.", "createCheckoutOrder") };
   }
 }
 

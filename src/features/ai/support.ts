@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/guards";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { safeErrorMessage } from "@/lib/utils/safe-error";
 import type OpenAI from "openai";
 
 export type SupportReply =
@@ -127,6 +128,6 @@ export async function askSupport(history: ChatTurn[], message: string): Promise<
     }
     return { ok: false, error: "Couldn't resolve that — email hello@smartbuyx.in." };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Support request failed." };
+    return { ok: false, error: safeErrorMessage(e, "Support request failed.", "askSupport") };
   }
 }
