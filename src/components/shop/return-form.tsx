@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { initiateReturn, type ReturnActionState } from "@/features/orders/returns";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { ReturnProofUploader } from "@/components/shop/return-proof-uploader";
 
 const REASONS = [
   { value: "damaged", label: "Damaged in delivery" },
@@ -43,6 +44,11 @@ export function ReturnForm({ orderItemId }: { orderItemId: string }) {
           placeholder="Share photos to support@smartbuyx.in for faster approval."
         />
       </div>
+      <ReturnProofUploader />
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="wantsExchange" className="h-4 w-4 rounded border-input" />
+        Exchange for a new one instead of a refund
+      </label>
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       {state?.success ? <p className="text-sm text-emerald-600">{state.success}</p> : null}
       <SubmitButton variant="gradient">Submit return request</SubmitButton>

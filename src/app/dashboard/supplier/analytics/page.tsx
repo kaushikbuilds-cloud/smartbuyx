@@ -10,17 +10,15 @@ export const metadata = { title: "Revenue Analytics" };
 
 export default async function SellerAnalyticsPage() {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  const [stats, returnStats] = await Promise.all([
-    getSellerStats(user.id),
-    getSellerReturnStats(user.id),
-  ]);
+  const stats = await getSellerStats(user.id);
+  const returnStats = await getSellerReturnStats(user.id, stats.orderCount);
   const returnRate = stats.orderCount > 0 ? returnStats.totalReturns / stats.orderCount : 0;
 
   const cards = [
     { icon: IndianRupee, label: "Revenue", value: formatINR(stats.revenue) },
     { icon: ShoppingBag, label: "Orders", value: stats.orderCount },
     { icon: Package, label: "Units sold", value: stats.unitsSold },
-    { icon: RotateCcw, label: "Return rate", value: `${(returnRate * 100).toFixed(1)}%` },
+    { icon: RotateCcw, label: "Return score", value: `${returnStats.returnScore}/100` },
   ];
 
   return (

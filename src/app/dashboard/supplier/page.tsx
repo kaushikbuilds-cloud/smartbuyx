@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Package, PlusCircle, TrendingUp, Boxes, Scale, FileText, IndianRupee,
+  Package, PlusCircle, TrendingUp, Boxes, Scale, FileText, IndianRupee, RotateCcw,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { getSellerStats } from "@/features/orders/seller-analytics";
@@ -16,6 +16,7 @@ const TOOLS = [
   { href: "/dashboard/supplier/products", label: "My Products", desc: "Manage listings", icon: Package, color: "from-blue-600 to-cyan-600" },
   { href: "/dashboard/supplier/orders", label: "Orders", desc: "Fulfil & track", icon: FileText, color: "from-emerald-600 to-teal-600" },
   { href: "/dashboard/supplier/analytics", label: "Analytics", desc: "Revenue & returns", icon: TrendingUp, color: "from-amber-500 to-orange-600" },
+  { href: "/dashboard/supplier/returns", label: "Returns & Disputes", desc: "Review & flag returns", icon: RotateCcw, color: "from-red-500 to-rose-600" },
   { href: "/dashboard/supplier/inventory", label: "Inventory Intelligence", desc: "Stockout alerts & forecast", icon: Boxes, color: "from-rose-600 to-pink-600" },
   { href: "/dashboard/supplier/competitors", label: "Competitor Analysis", desc: "Pricing guidance", icon: Scale, color: "from-fuchsia-600 to-purple-600" },
   { href: "/dashboard/supplier/rfqs", label: "Incoming RFQs", desc: "Quote requests", icon: FileText, color: "from-cyan-600 to-blue-600" },
