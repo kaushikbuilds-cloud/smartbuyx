@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay/verify";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fulfilPaidOrder } from "@/features/orders/checkout-actions";
 
 // Server-to-server confirmation. Idempotent: safe if the client callback already finalized.
 export async function POST(req: NextRequest) {
@@ -31,8 +32,10 @@ export async function POST(req: NextRequest) {
         .eq("razorpay_order_id", rzpOrderId)
         .single();
 
+      // Full fulfilment (inventory, shipments, escrow) — idempotent, so this is
+      // a no-op if the client callback already finalized the order.
       if (payment?.order_id) {
-        await admin.from("orders").update({ status: "paid" }).eq("id", payment.order_id).eq("status", "pending");
+        await fulfilPaidOrder(payment.order_id);
       }
     }
   }
