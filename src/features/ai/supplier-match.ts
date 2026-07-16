@@ -1,9 +1,11 @@
 "use server";
 
 import { z } from "zod";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type SupplierMatch = {
   userId: string;
@@ -45,6 +47,13 @@ export async function matchSuppliers(input: {
 }): Promise<MatchResult> {
   if (!input.need.trim()) return { ok: false, error: "Describe what you need first." };
   if (!isSupabaseConfigured()) return { ok: false, error: "Supplier directory isn't available yet." };
+
+  // Public page, no login required — rate limit by IP instead of user id.
+  // Vercel's edge sets/overwrites x-forwarded-for with the real client IP, so
+  // this isn't client-spoofable there; on other hosts, confirm the same holds.
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = checkRateLimit(`match-suppliers:${ip}`, 15, 60_000);
+  if (!rl.ok) return { ok: false, error: `Too many requests — try again in ${rl.retryAfterSeconds}s.` };
 
   const supabase = await createClient();
   const { data } = await supabase

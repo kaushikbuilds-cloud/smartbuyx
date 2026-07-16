@@ -4,6 +4,7 @@ import OpenAI, { toFile } from "openai";
 import { openai, isOpenAIConfigured } from "@/lib/ai/openai";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/guards";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const ENHANCE_PROMPT =
   "Enhance this product photo for an e-commerce listing: even, bright studio lighting, " +
@@ -31,9 +32,12 @@ function isAllowedImageHost(url: string): boolean {
 // Cleans up a seller-uploaded product photo (better lighting/background) via
 // OpenAI image edits, then re-uploads the result next to the original.
 export async function enhanceProductImage(imageUrl: string): Promise<EnhanceResult> {
-  await requireRole("supplier", "d2c_brand", "admin", "superadmin");
+  const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
   if (!isOpenAIConfigured()) return { error: "AI image enhancement isn't configured yet." };
   if (!isAllowedImageHost(imageUrl)) return { error: "Invalid image source." };
+  // Tighter limit than text AI calls — image generation costs meaningfully more per call.
+  const rl = checkRateLimit(`enhance:${user.id}`, 8, 60_000);
+  if (!rl.ok) return { error: `Too many requests — try again in ${rl.retryAfterSeconds}s.` };
 
   try {
     const res = await fetch(imageUrl);

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/guards";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type OpenAI from "openai";
 
 export type SupportReply =
@@ -85,6 +86,8 @@ export async function askSupport(history: ChatTurn[], message: string): Promise<
   const { user } = await requireUser();
   if (!message.trim()) return { ok: false, error: "Type a question first." };
   if (!isOpenAIConfigured()) return { ok: false, error: "AI support is not configured yet." };
+  const rl = checkRateLimit(`support:${user.id}`, 20, 60_000);
+  if (!rl.ok) return { ok: false, error: `Too many questions — try again in ${rl.retryAfterSeconds}s.` };
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM },

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { requireRole } from "@/lib/auth/guards";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const SELLER_ROLES = ["supplier", "d2c_brand", "admin", "superadmin"] as const;
 
@@ -31,10 +32,12 @@ const listingSchema = z.object({
 });
 
 export async function generateListing(prompt: string): Promise<GenerateResult> {
-  await requireRole(...SELLER_ROLES);
+  const { user } = await requireRole(...SELLER_ROLES);
 
   if (!prompt.trim()) return { ok: false, error: "Describe the product first." };
   if (!isOpenAIConfigured()) return { ok: false, error: "AI is not configured (missing OpenAI key)." };
+  const rl = checkRateLimit(`listing:${user.id}`, 20, 60_000);
+  if (!rl.ok) return { ok: false, error: `Too many requests — try again in ${rl.retryAfterSeconds}s.` };
 
   const system = `You are a product-listing assistant for SmartBuyX, an Indian marketplace selling both consumer products and construction materials.
 Given a short product description, produce a compelling, SEO-friendly listing.
