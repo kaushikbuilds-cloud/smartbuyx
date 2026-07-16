@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard,
   RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, Gift, ShoppingBag,
-  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList,
+  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ModeSwitcher } from "./mode-switcher";
@@ -24,6 +24,7 @@ const COMMERCE_NAV: NavItem[] = [
   { href: "/dashboard/customer/payments", label: "Payments", icon: CreditCard },
   { href: "/dashboard/customer/returns", label: "Returns & Refunds", icon: RotateCcw },
   { href: "/dashboard/customer/reviews", label: "Reviews", icon: Star },
+  { href: "/dashboard/customer/become-seller", label: "Become a Seller", icon: Store },
   { href: "/wallet", label: "Smart Coins", icon: Coins },
   { href: "/dashboard/customer/notifications", label: "Notifications", icon: BellRing },
   { href: "/dashboard/customer/support", label: "Help & Support", icon: LifeBuoy },
