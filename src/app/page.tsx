@@ -6,11 +6,44 @@ import { CustomerDashboardHome } from "@/components/dashboard/customer-dashboard
 import { BuildDashboardHome } from "@/components/dashboard/build-dashboard-home";
 import { MarketingLanding } from "@/components/marketing/landing";
 
+// Organization + WebSite JSON-LD: what search engines actually crawl here is
+// the logged-out marketing view, so this is what feeds Google's knowledge
+// panel / sitelinks search box eligibility for the brand.
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://smartbuyx.in/#organization",
+      name: "SmartBuyX",
+      url: "https://smartbuyx.in",
+      logo: "https://smartbuyx.in/icon",
+      description: "India's AI-powered commerce and construction super-app.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://smartbuyx.in/#website",
+      url: "https://smartbuyx.in",
+      name: "SmartBuyX",
+      publisher: { "@id": "https://smartbuyx.in/#organization" },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: "https://smartbuyx.in/products?q={search_term_string}" },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 export default async function HomePage() {
   const session = await getSession();
   if (!session) {
     return (
       <AppShell>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
         <MarketingLanding />
       </AppShell>
     );

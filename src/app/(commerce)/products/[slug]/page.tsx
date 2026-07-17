@@ -17,7 +17,31 @@ import { ReviewSummaryCard } from "@/components/shop/review-summary-card";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  return { title: product?.title ?? "Product" };
+  if (!product) return { title: "Product" };
+
+  const description =
+    product.description?.slice(0, 160) ??
+    `${product.title}${product.brand ? ` by ${product.brand}` : ""} — buy online on SmartBuyX.`;
+  const image = (product.images as unknown as { url: string }[] | null)?.[0]?.url;
+
+  return {
+    title: product.title,
+    description,
+    alternates: { canonical: `/products/${slug}` },
+    openGraph: {
+      title: product.title,
+      description,
+      url: `/products/${slug}`,
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,8 +59,30 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const defaultVariant = variants[0];
   const inStock = (defaultVariant?.stock ?? 0) > 0;
 
+  const productImages = (product.images as unknown as { url: string }[] | null) ?? [];
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.description ?? undefined,
+    image: productImages.map((i) => i.url),
+    brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
+    offers: {
+      "@type": "Offer",
+      url: `https://smartbuyx.in/products/${slug}`,
+      priceCurrency: "INR",
+      price: product.base_price,
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+    aggregateRating:
+      product.rating_count > 0
+        ? { "@type": "AggregateRating", ratingValue: product.rating_avg, reviewCount: product.rating_count }
+        : undefined,
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="grid gap-8 lg:grid-cols-2">
         <ProductGallery images={product.images ?? []} title={product.title} />
 
