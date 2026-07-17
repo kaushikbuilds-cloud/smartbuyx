@@ -17,7 +17,3 @@ New folder/
 *credentials*
 *.pem
 *.key
-
-# Security audit reports/plans — contain exploit-level detail; keep local until
-# every finding's fix is confirmed applied in production, then share deliberately.
-security/
