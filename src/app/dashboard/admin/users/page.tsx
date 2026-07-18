@@ -1,3 +1,4 @@
+import { requireRole } from "@/lib/auth/guards";
 import { listUsers } from "@/features/admin/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const { role: viewerRole } = await requireRole("admin", "superadmin");
   const { q } = await searchParams;
   const users = await listUsers(q);
 
@@ -46,7 +48,7 @@ export default async function AdminUsersPage({
                     <Badge variant={u.kyc_status === "approved" ? "success" : "secondary"}>{u.kyc_status}</Badge>
                   </td>
                   <td className="p-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString("en-IN")}</td>
-                  <td className="p-3"><RoleSelect userId={u.id} role={u.role} /></td>
+                  <td className="p-3"><RoleSelect userId={u.id} role={u.role} viewerRole={viewerRole} /></td>
                 </tr>
               ))}
               {users.length === 0 ? (

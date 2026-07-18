@@ -6,12 +6,29 @@ import { requireRole } from "@/lib/auth/guards";
 import type { UserRole } from "@/types/auth";
 
 const ADMIN = ["admin", "superadmin"] as const;
+const ADMIN_TIER = ["admin", "superadmin"] as const;
 
-export async function setUserRole(userId: string, role: UserRole): Promise<void> {
-  await requireRole(...ADMIN);
+export async function setUserRole(userId: string, role: UserRole): Promise<{ error?: string }> {
+  const { user, role: callerRole } = await requireRole(...ADMIN);
+
   const db = createAdminClient();
+  const { data: target } = await db.from("profiles").select("role").eq("id", userId).single();
+
+  // Only superadmin can grant or revoke admin-tier access. A regular admin can
+  // manage every other role, but can't create a peer admin, promote themselves
+  // to superadmin, or demote another admin/superadmin out of the tier.
+  const grantingAdminTier = (ADMIN_TIER as readonly string[]).includes(role);
+  const targetIsAdminTier = Boolean(target && (ADMIN_TIER as readonly string[]).includes(target.role));
+  if ((grantingAdminTier || targetIsAdminTier) && callerRole !== "superadmin") {
+    return { error: "Only a superadmin can grant or revoke admin access." };
+  }
+  if (userId === user.id && role !== callerRole) {
+    return { error: "You can't change your own role." };
+  }
+
   await db.from("profiles").update({ role }).eq("id", userId);
   revalidatePath("/dashboard/admin/users");
+  return {};
 }
 
 export async function setProductStatus(productId: string, status: "active" | "archived"): Promise<void> {
