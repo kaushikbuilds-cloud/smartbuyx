@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/shop/order-status-badge";
 
 export const metadata = { title: "Orders · Admin" };
+export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
   const orders = await listAllOrders();

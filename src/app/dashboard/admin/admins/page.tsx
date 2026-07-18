@@ -7,6 +7,7 @@ import { RoleSelect } from "@/components/admin/role-select";
 import { SuspendUserButton } from "@/components/admin/suspend-user-button";
 
 export const metadata = { title: "Admins · Admin" };
+export const dynamic = "force-dynamic";
 
 export default async function AdminsPage() {
   const { role: viewerRole } = await requireRole("superadmin");

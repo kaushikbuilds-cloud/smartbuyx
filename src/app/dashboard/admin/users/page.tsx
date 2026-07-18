@@ -6,6 +6,7 @@ import { RoleSelect } from "@/components/admin/role-select";
 import { SuspendUserButton } from "@/components/admin/suspend-user-button";
 
 export const metadata = { title: "Users · Admin" };
+export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage({
   searchParams,

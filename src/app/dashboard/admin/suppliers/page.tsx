@@ -6,6 +6,10 @@ import { TrustScoreBadge } from "@/components/shop/trust-score-badge";
 import { ApplicationActions, GstVerifyButton } from "@/components/admin/application-actions";
 
 export const metadata = { title: "Suppliers · Admin" };
+// Admin moderation queue — always read fresh from the DB, never serve a
+// cached snapshot. A missing revalidatePath() call elsewhere shouldn't be
+// able to hide a real pending application from admins.
+export const dynamic = "force-dynamic";
 
 export default async function AdminSuppliersPage() {
   const applications = await listProApplications();

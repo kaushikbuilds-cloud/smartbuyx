@@ -7,6 +7,7 @@ import { ProductStatusToggle } from "@/components/admin/product-status-toggle";
 import { ProductFeaturedToggle } from "@/components/admin/product-featured-toggle";
 
 export const metadata = { title: "Products · Admin" };
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage({
   searchParams,

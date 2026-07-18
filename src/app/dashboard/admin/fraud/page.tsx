@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RiskBadge } from "@/components/dashboard/seller/risk-badge";
 
 export const metadata = { title: "Fraud Monitoring · Admin" };
+export const dynamic = "force-dynamic";
 
 const REASON_LABELS: Record<string, string> = {
   better_price: "Found better price",

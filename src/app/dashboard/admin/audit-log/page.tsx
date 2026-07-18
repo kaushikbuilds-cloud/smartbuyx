@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = { title: "Audit Log · Admin" };
+export const dynamic = "force-dynamic";
 
 const ACTION_LABELS: Record<string, string> = {
   set_user_role: "Changed role",
