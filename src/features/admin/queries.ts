@@ -137,6 +137,51 @@ export async function listAuditLog(limit = 100): Promise<AuditLogEntry[]> {
   });
 }
 
+export type AdminKycDocument = {
+  id: string;
+  user_id: string;
+  owner_name: string | null;
+  doc_type: string;
+  status: string;
+  created_at: string;
+  signed_url: string | null;
+};
+
+// KYC documents for admin review, newest first. Generates a short-lived signed
+// URL for each private file so a reviewer can view it without the bucket ever
+// being public.
+export async function listKycDocuments(pendingOnly = false): Promise<AdminKycDocument[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  let query = db
+    .from("seller_kyc_documents")
+    .select("id, user_id, doc_type, status, created_at, storage_path, profiles!seller_kyc_documents_user_id_fkey(full_name)")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (pendingOnly) query = query.eq("status", "pending");
+  const { data, error } = await query;
+  logIfError("listKycDocuments", error);
+
+  const rows = data ?? [];
+  return Promise.all(
+    rows.map(async (row) => {
+      const { data: signed } = await db.storage
+        .from("kyc-docs")
+        .createSignedUrl(row.storage_path as string, 300);
+      const owner = row.profiles as unknown as { full_name: string | null } | null;
+      return {
+        id: row.id as string,
+        user_id: row.user_id as string,
+        owner_name: owner?.full_name ?? null,
+        doc_type: row.doc_type as string,
+        status: row.status as string,
+        created_at: row.created_at as string,
+        signed_url: signed?.signedUrl ?? null,
+      };
+    })
+  );
+}
+
 export type AdminProduct = {
   id: string;
   title: string;

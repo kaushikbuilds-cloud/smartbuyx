@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Package, Store, ShoppingBag, ShieldAlert, ShieldCheck, ScrollText } from "lucide-react";
+import { LayoutDashboard, Users, Package, Store, ShoppingBag, ShieldAlert, ShieldCheck, ScrollText, FileCheck2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const NAV = [
@@ -10,6 +10,7 @@ const NAV = [
   { href: "/dashboard/admin/users", label: "Users", icon: Users },
   { href: "/dashboard/admin/products", label: "Products", icon: Package },
   { href: "/dashboard/admin/suppliers", label: "Suppliers & Applications", icon: Store },
+  { href: "/dashboard/admin/kyc", label: "KYC Review", icon: FileCheck2 },
   { href: "/dashboard/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/dashboard/admin/fraud", label: "Fraud Monitoring", icon: ShieldAlert },
 ];

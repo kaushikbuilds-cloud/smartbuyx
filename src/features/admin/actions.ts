@@ -151,6 +151,27 @@ export async function verifySupplierGst(userId: string, verified: boolean): Prom
   revalidatePath("/dashboard/admin/suppliers");
 }
 
+export async function setKycStatus(
+  documentId: string,
+  status: "approved" | "rejected"
+): Promise<void> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const { data: doc } = await db
+    .from("seller_kyc_documents")
+    .select("user_id, doc_type")
+    .eq("id", documentId)
+    .single();
+  const { error } = await db.from("seller_kyc_documents").update({ status }).eq("id", documentId);
+  logIfError("setKycStatus", error);
+  await logAdminAction(user.id, "set_kyc_status", "kyc_document", documentId, {
+    status,
+    doc_type: doc?.doc_type,
+    subject: doc?.user_id,
+  });
+  revalidatePath("/dashboard/admin/kyc");
+}
+
 export async function setUserSuspended(
   userId: string,
   suspended: boolean,
