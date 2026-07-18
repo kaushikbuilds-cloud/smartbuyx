@@ -9,14 +9,20 @@ const config: CapacitorConfig = {
   appName: "SmartBuyX",
   webDir: "capacitor-www",
   server: {
-    url: "https://smartbuyx.in",
+    // smartbuyx.in (apex) issues an HTTP 308 redirect to www.smartbuyx.in at
+    // the Vercel domain level. Capacitor compares the request host against
+    // this url's host BEFORE following any redirect, so pointing at the apex
+    // domain meant the very first page load ever attempted -- host mismatch
+    // -> immediately kicked out to the system browser on every launch.
+    url: "https://www.smartbuyx.in",
     androidScheme: "https",
     cleartext: false,
-    // Without this, any navigation to a domain other than smartbuyx.in gets
-    // kicked out to the system browser instead of staying in the app's
+    // Without this, any navigation to a domain other than www.smartbuyx.in
+    // gets kicked out to the system browser instead of staying in the app's
     // WebView -- this is what broke login (redirects through Supabase Auth's
     // own domain) and would have broken checkout (Razorpay) the same way.
     allowNavigation: [
+      "smartbuyx.in",
       "*.supabase.co",
       "checkout.razorpay.com",
       "api.razorpay.com",
