@@ -48,6 +48,7 @@ export async function submitProApplication(_prev: ProApplicationState, formData:
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard/customer/become-seller");
+  revalidatePath("/dashboard/admin/suppliers");
   return { success: "Application submitted! We'll review it within 24-48 hours." };
 }
 
