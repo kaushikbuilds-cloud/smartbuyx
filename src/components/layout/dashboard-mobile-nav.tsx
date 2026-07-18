@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck } from "lucide-react";
+import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { ModeSwitcher } from "./mode-switcher";
+import { signOut } from "@/features/auth/actions";
 import type { AppMode } from "@/features/preferences/mode";
 
 type NavItem = { href: string; label: string; icon: typeof Home };
@@ -63,9 +64,14 @@ export function DashboardMobileNav({ mode, isAdminTier }: { mode: AppMode; isAdm
             </Link>
           </div>
         ) : null}
-        <nav className="mt-3 flex-1 overflow-y-auto px-3 pb-6">
+        <nav className="mt-3 flex-1 overflow-y-auto px-3 pb-2">
           {items.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href); return <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={cn("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium", active ? mode === "build" ? "bg-amber-50 text-amber-700" : "bg-purple-50 text-purple-700" : "text-muted-foreground hover:bg-muted hover:text-foreground")}><item.icon className="h-4 w-4" />{item.label}</Link>; })}
         </nav>
+        <form action={signOut} className="border-t px-3 py-3">
+          <button type="submit" className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-muted">
+            <LogOut className="h-4 w-4" /> Log out
+          </button>
+        </form>
       </aside>
     </>
   );

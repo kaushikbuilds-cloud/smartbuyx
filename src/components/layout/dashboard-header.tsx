@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Heart, ShoppingCart, Coins, ChevronDown } from "lucide-react";
+import { Heart, ShoppingCart, Coins, ChevronDown, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth/guards";
+import { signOut } from "@/features/auth/actions";
 import { getCartCount, getWalletBalance } from "@/features/account/wallet-queries";
 import { getUnreadCount, getRecentNotifications } from "@/features/notifications/queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -71,6 +72,17 @@ export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode })
           <p className="text-xs text-muted-foreground">View Profile</p>
         </div>
       </Link>
+
+      <form action={signOut}>
+        <button
+          type="submit"
+          aria-label="Log out"
+          title="Log out"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground hover:bg-muted hover:text-destructive"
+        >
+          <LogOut className="h-5 w-5" />
+        </button>
+      </form>
     </header>
   );
 }
