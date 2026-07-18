@@ -5,9 +5,11 @@ import {
 import { requireRole } from "@/lib/auth/guards";
 import { getSellerStats } from "@/features/orders/seller-analytics";
 import { getInventoryIntelligence } from "@/features/seller/inventory-intelligence";
+import { getSellerOnboardingStatus } from "@/features/seller/verification";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { OnboardingChecklist } from "@/components/dashboard/seller/onboarding-checklist";
 
 export const metadata = { title: "Seller Hub" };
 
@@ -25,9 +27,10 @@ const TOOLS = [
 
 export default async function SupplierDashboard() {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  const [stats, inventory] = await Promise.all([
+  const [stats, inventory, onboarding] = await Promise.all([
     getSellerStats(user.id),
     getInventoryIntelligence(user.id),
+    getSellerOnboardingStatus(user.id),
   ]);
   const criticalStock = inventory.filter((i) => i.status === "critical").length;
 
@@ -37,6 +40,8 @@ export default async function SupplierDashboard() {
         <h1 className="text-2xl font-bold">Seller Hub</h1>
         <p className="text-sm text-muted-foreground">Everything you need to run your store.</p>
       </div>
+
+      <OnboardingChecklist status={onboarding} />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <Card>

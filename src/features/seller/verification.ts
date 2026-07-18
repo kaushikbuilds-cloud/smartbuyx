@@ -124,3 +124,40 @@ export async function getMyKycDocuments(userId: string): Promise<KycDocument[]> 
     .order("created_at", { ascending: false });
   return (data ?? []) as KycDocument[];
 }
+
+export type OnboardingStatus = {
+  hasProduct: boolean;
+  hasPayout: boolean;
+  kycSubmitted: boolean;
+  kycApproved: boolean;
+  gstVerified: boolean;
+  hasLogo: boolean;
+};
+
+// Drives the seller onboarding checklist. Reads only the caller's own rows.
+export async function getSellerOnboardingStatus(userId: string): Promise<OnboardingStatus> {
+  const { user } = await requireUser();
+  const empty: OnboardingStatus = {
+    hasProduct: false, hasPayout: false, kycSubmitted: false,
+    kycApproved: false, gstVerified: false, hasLogo: false,
+  };
+  if (user.id !== userId) return empty;
+  const supabase = await createClient();
+
+  const [productRes, payoutRes, kycRes, profileRes] = await Promise.all([
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("supplier_id", userId),
+    supabase.from("seller_payout_details").select("user_id").eq("user_id", userId).maybeSingle(),
+    supabase.from("seller_kyc_documents").select("status").eq("user_id", userId),
+    supabase.from("supplier_profiles").select("gstin_verified, store_logo_url").eq("user_id", userId).maybeSingle(),
+  ]);
+
+  const kyc = kycRes.data ?? [];
+  return {
+    hasProduct: (productRes.count ?? 0) > 0,
+    hasPayout: Boolean(payoutRes.data),
+    kycSubmitted: kyc.length > 0,
+    kycApproved: kyc.some((d) => d.status === "approved"),
+    gstVerified: Boolean(profileRes.data?.gstin_verified),
+    hasLogo: Boolean(profileRes.data?.store_logo_url),
+  };
+}
