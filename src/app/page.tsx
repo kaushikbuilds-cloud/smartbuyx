@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth/guards";
 import { getMode } from "@/features/preferences/mode";
@@ -35,7 +36,21 @@ const JSON_LD = {
   ],
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; next?: string }>;
+}) {
+  // Defensive fallback: if Supabase's Redirect URLs allowlist doesn't include
+  // our real callback path, it silently falls back to the bare Site URL,
+  // landing an unconsumed OAuth/magic-link ?code= here instead of /callback.
+  // Finish the exchange here rather than leaving the user stuck "signed in"
+  // but still logged out.
+  const { code, next } = await searchParams;
+  if (code) {
+    redirect(`/callback?code=${encodeURIComponent(code)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
+  }
+
   const session = await getSession();
   if (!session) {
     return (

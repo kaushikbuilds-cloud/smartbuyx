@@ -7,7 +7,14 @@ Create a separate **production** Supabase project. In its SQL Editor, apply ever
 Configure Supabase Auth:
 
 - Set the Site URL to the production application URL.
-- Add `https://your-domain.com/auth/callback` to Redirect URLs.
+- Add `https://your-domain.com/callback` to Redirect URLs (not `/auth/callback` —
+  `(auth)` is a Next.js route group, invisible in the actual URL; the real route
+  is `src/app/(auth)/callback/route.ts`, served at `/callback`). If you're on an
+  apex + www setup, add both `https://your-domain.com/callback` and
+  `https://www.your-domain.com/callback`. A mismatch here makes Supabase silently
+  fall back to the bare Site URL, leaving an unconsumed `?code=` on the homepage
+  instead of completing sign-in — that's the symptom to look for if login/OAuth
+  redirects seem to silently do nothing.
 - Enable Google only after adding the Google OAuth client ID and secret in Supabase.
 - Keep Row Level Security enabled; SmartBuyX relies on it.
 
