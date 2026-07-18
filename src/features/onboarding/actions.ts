@@ -18,7 +18,13 @@ const applySchema = z.object({
 // reviewProApplication, which promotes profiles.role on approval.
 export async function submitProApplication(_prev: ProApplicationState, formData: FormData): Promise<ProApplicationState> {
   const { user, role } = await requireUser();
-  if (role !== "customer") return { error: "Only customer accounts can apply for a pro role." };
+  // 'buyer' is a legacy DB value not in the UserRole type (the default wasn't
+  // corrected until migration 0016) — some sessions may still carry it in
+  // their JWT until they next log in. Cast to compare against it so legacy
+  // accounts aren't blocked from applying.
+  if (role !== "customer" && (role as string) !== "buyer") {
+    return { error: "Only customer accounts can apply for a pro role." };
+  }
 
   const parsed = applySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };

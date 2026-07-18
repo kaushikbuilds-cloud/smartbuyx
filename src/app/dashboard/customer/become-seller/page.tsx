@@ -29,7 +29,8 @@ export default async function BecomeSellerPage() {
         </div>
       </div>
 
-      {role !== "customer" ? (
+      {/* 'buyer' is a legacy DB value for the base role, not a pro role — see migration 0016. */}
+      {role !== "customer" && (role as string) !== "buyer" ? (
         <Card><CardContent className="p-6 text-sm text-muted-foreground">
           Your account is already a {role} — no application needed.
         </CardContent></Card>
