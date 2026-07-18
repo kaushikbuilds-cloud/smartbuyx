@@ -70,16 +70,16 @@ export async function MarketingLanding() {
           <Badge variant="secondary" className="mb-4 gap-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
             <Sparkles className="h-3 w-3" /> India&apos;s AI Commerce + Construction super-app
           </Badge>
-          <h1 className="mx-auto max-w-3xl text-balance text-5xl font-bold tracking-tight md:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             Shop. Build. Create.{" "}
             <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
               All in one place.
             </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
             From black shoes under ₹2000 to estimating materials for a 1500 sq.ft house — SmartBuyX does it with AI.
           </p>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button size="lg" variant="gradient" className="bg-gradient-to-r from-purple-600 to-indigo-600" asChild>
               <Link href="/register">Get started <ArrowRight className="h-4 w-4" /></Link>
             </Button>
