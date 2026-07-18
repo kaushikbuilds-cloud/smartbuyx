@@ -11,14 +11,16 @@ export async function logAdminAction(
 ): Promise<void> {
   try {
     const db = createAdminClient();
-    await db.from("audit_logs").insert({
+    const { error } = await db.from("audit_logs").insert({
       actor_id: actorId,
       action,
       target_type: targetType,
       target_id: targetId,
       metadata,
     });
-  } catch {
+    if (error) console.error("[admin/audit:logAdminAction]", error);
+  } catch (err) {
     // Swallow — logging is best-effort, never the reason an admin action fails.
+    console.error("[admin/audit:logAdminAction]", err);
   }
 }

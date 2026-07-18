@@ -9,6 +9,10 @@ import type { UserRole } from "@/types/auth";
 const ADMIN = ["admin", "superadmin"] as const;
 const ADMIN_TIER = ["admin", "superadmin"] as const;
 
+function logIfError(label: string, error: unknown) {
+  if (error) console.error(`[admin/actions:${label}]`, error);
+}
+
 export async function setUserRole(userId: string, role: UserRole): Promise<{ error?: string }> {
   const { user, role: callerRole } = await requireRole(...ADMIN);
 
@@ -27,7 +31,9 @@ export async function setUserRole(userId: string, role: UserRole): Promise<{ err
     return { error: "You can't change your own role." };
   }
 
-  await db.from("profiles").update({ role }).eq("id", userId);
+  const { error } = await db.from("profiles").update({ role }).eq("id", userId);
+  logIfError("setUserRole", error);
+  if (error) return { error: "Failed to update role. Check server logs." };
   await logAdminAction(user.id, "set_user_role", "profile", userId, { from: target?.role, to: role });
   revalidatePath("/dashboard/admin/users");
   return {};
@@ -36,7 +42,8 @@ export async function setUserRole(userId: string, role: UserRole): Promise<{ err
 export async function setProductStatus(productId: string, status: "active" | "archived"): Promise<void> {
   const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
-  await db.from("products").update({ status }).eq("id", productId);
+  const { error } = await db.from("products").update({ status }).eq("id", productId);
+  logIfError("setProductStatus", error);
   await logAdminAction(user.id, "set_product_status", "product", productId, { status });
   revalidatePath("/dashboard/admin/products");
 }
@@ -44,7 +51,8 @@ export async function setProductStatus(productId: string, status: "active" | "ar
 export async function setProductFeatured(productId: string, featured: boolean): Promise<void> {
   const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
-  await db.from("products").update({ is_featured: featured }).eq("id", productId);
+  const { error } = await db.from("products").update({ is_featured: featured }).eq("id", productId);
+  logIfError("setProductFeatured", error);
   await logAdminAction(user.id, "set_product_featured", "product", productId, { featured });
   revalidatePath("/dashboard/admin/products");
 }
@@ -63,14 +71,16 @@ export async function reviewProApplication(
     .single();
   if (!app) return;
 
-  await db
+  const { error: appError } = await db
     .from("pro_applications")
     .update({ status: approve ? "approved" : "rejected", reviewed_at: new Date().toISOString() })
     .eq("id", applicationId);
+  logIfError("reviewProApplication.application", appError);
 
   if (approve) {
     // Promote the user to their requested pro role.
-    await db.from("profiles").update({ role: app.requested_role }).eq("id", app.user_id);
+    const { error: roleError } = await db.from("profiles").update({ role: app.requested_role }).eq("id", app.user_id);
+    logIfError("reviewProApplication.role", roleError);
   }
   await logAdminAction(user.id, approve ? "approve_pro_application" : "reject_pro_application", "pro_application", applicationId, {
     requested_role: app.requested_role,
@@ -81,7 +91,7 @@ export async function reviewProApplication(
 export async function verifySupplierGst(userId: string, verified: boolean): Promise<void> {
   const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
-  await db
+  const { error } = await db
     .from("supplier_profiles")
     .update({
       gstin_verified: verified,
@@ -89,6 +99,7 @@ export async function verifySupplierGst(userId: string, verified: boolean): Prom
       verified_business: verified,
     })
     .eq("user_id", userId);
+  logIfError("verifySupplierGst", error);
   // Recompute trust score after verification.
   await db.rpc("recompute_trust_score", { p_supplier: userId }).then(() => {}, () => {});
   await logAdminAction(user.id, "verify_supplier_gst", "supplier_profile", userId, { verified });
@@ -112,7 +123,7 @@ export async function setUserSuspended(
     return { error: "Only a superadmin can suspend an admin account." };
   }
 
-  await db
+  const { error } = await db
     .from("profiles")
     .update({
       is_suspended: suspended,
@@ -120,6 +131,8 @@ export async function setUserSuspended(
       suspended_reason: suspended ? reason || null : null,
     })
     .eq("id", userId);
+  logIfError("setUserSuspended", error);
+  if (error) return { error: "Failed to update suspension. Check server logs." };
   await logAdminAction(user.id, suspended ? "suspend_user" : "unsuspend_user", "profile", userId, { reason });
   revalidatePath("/dashboard/admin/users");
   return {};
