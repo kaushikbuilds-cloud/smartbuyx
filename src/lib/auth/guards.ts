@@ -1,9 +1,15 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { UserRole } from "@/types/auth";
 
-export async function getSession() {
+// Every page render goes through AppShell (which calls this to pick dashboard
+// vs. marketing chrome) and then usually again via requireUser/requireRole in
+// the page itself, plus DashboardHeader. Without per-request memoization that
+// was N redundant Supabase Auth round-trips on every single navigation.
+// React's cache() dedupes calls within one request (server components only).
+export const getSession = cache(async function getSession() {
   // Don't crash the page if Supabase env is missing (e.g. unset on host).
   if (!isSupabaseConfigured()) return null;
   try {
@@ -15,7 +21,7 @@ export async function getSession() {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireUser() {
   const session = await getSession();
