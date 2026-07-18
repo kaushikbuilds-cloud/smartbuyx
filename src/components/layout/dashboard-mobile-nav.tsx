@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store } from "lucide-react";
+import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
@@ -33,7 +33,7 @@ const BUILD_NAV: NavItem[] = [
   { href: "/dashboard/customer/settings/account", label: "Settings", icon: Settings },
 ];
 
-export function DashboardMobileNav({ mode }: { mode: AppMode }) {
+export function DashboardMobileNav({ mode, isAdminTier }: { mode: AppMode; isAdminTier?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const items = mode === "build" ? BUILD_NAV : COMMERCE_NAV;
@@ -51,6 +51,18 @@ export function DashboardMobileNav({ mode }: { mode: AppMode }) {
           <button aria-label="Close navigation" onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted"><X className="h-5 w-5" /></button>
         </div>
         <ModeSwitcher mode={mode} />
+        {isAdminTier ? (
+          <div className="px-3 pt-3">
+            <Link
+              href="/dashboard/admin"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300"
+            >
+              <ShieldCheck className="h-4 w-4 shrink-0" />
+              Admin Panel
+            </Link>
+          </div>
+        ) : null}
         <nav className="mt-3 flex-1 overflow-y-auto px-3 pb-6">
           {items.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href); return <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={cn("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium", active ? mode === "build" ? "bg-amber-50 text-amber-700" : "bg-purple-50 text-purple-700" : "text-muted-foreground hover:bg-muted hover:text-foreground")}><item.icon className="h-4 w-4" />{item.label}</Link>; })}
         </nav>

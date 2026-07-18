@@ -30,7 +30,7 @@ export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode })
 
   return (
     <header className="flex items-center gap-2 border-b bg-background px-3 py-3 sm:gap-4 sm:px-6">
-      <DashboardMobileNav mode={mode} />
+      <DashboardMobileNav mode={mode} isAdminTier={session.role === "admin" || session.role === "superadmin"} />
       <VoiceSearchBar />
 
       {/* Smart Coins pill */}

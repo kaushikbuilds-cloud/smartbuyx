@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard,
   RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, Gift, ShoppingBag,
-  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store,
+  HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ModeSwitcher } from "./mode-switcher";
@@ -50,7 +50,15 @@ const BUILD_NAV: NavItem[] = [
   { href: "/dashboard/customer/settings/account", label: "Settings", icon: Settings },
 ];
 
-export function DashboardSidebar({ mode = "commerce", badges }: { mode?: AppMode; badges?: Record<string, number> }) {
+export function DashboardSidebar({
+  mode = "commerce",
+  badges,
+  isAdminTier,
+}: {
+  mode?: AppMode;
+  badges?: Record<string, number>;
+  isAdminTier?: boolean;
+}) {
   const pathname = usePathname();
   const items = mode === "build" ? BUILD_NAV : COMMERCE_NAV;
   const accent = mode === "build" ? "from-amber-500 to-orange-600" : "from-purple-500 to-indigo-600";
@@ -66,6 +74,21 @@ export function DashboardSidebar({ mode = "commerce", badges }: { mode?: AppMode
       </Link>
 
       <ModeSwitcher mode={mode} />
+
+      {isAdminTier ? (
+        <div className="px-3 pt-3">
+          <Link
+            href="/dashboard/admin"
+            className={cn(
+              "flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/50",
+              pathname.startsWith("/dashboard/admin") && "ring-1 ring-rose-400"
+            )}
+          >
+            <ShieldCheck className="h-4 w-4 shrink-0" />
+            Admin Panel
+          </Link>
+        </div>
+      ) : null}
 
       {/* Nav */}
       <nav className="mt-4 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">

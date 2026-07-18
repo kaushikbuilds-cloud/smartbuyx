@@ -21,9 +21,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const mode = await getMode();
+  const isAdminTier = session.role === "admin" || session.role === "superadmin";
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar mode={mode} />
+      <DashboardSidebar mode={mode} isAdminTier={isAdminTier} />
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardHeader mode={mode} />
         <div className="flex-1">{children}</div>
