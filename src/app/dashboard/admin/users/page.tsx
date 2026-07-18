@@ -3,6 +3,7 @@ import { listUsers } from "@/features/admin/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RoleSelect } from "@/components/admin/role-select";
+import { SuspendUserButton } from "@/components/admin/suspend-user-button";
 
 export const metadata = { title: "Users · Admin" };
 
@@ -38,6 +39,8 @@ export default async function AdminUsersPage({
                 <th className="p-3">KYC</th>
                 <th className="p-3">Joined</th>
                 <th className="p-3">Role</th>
+                <th className="p-3">Status</th>
+                <th className="p-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -49,10 +52,14 @@ export default async function AdminUsersPage({
                   </td>
                   <td className="p-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString("en-IN")}</td>
                   <td className="p-3"><RoleSelect userId={u.id} role={u.role} viewerRole={viewerRole} /></td>
+                  <td className="p-3">
+                    {u.is_suspended ? <Badge variant="destructive">Suspended</Badge> : <Badge variant="success">Active</Badge>}
+                  </td>
+                  <td className="p-3"><SuspendUserButton userId={u.id} isSuspended={u.is_suspended} /></td>
                 </tr>
               ))}
               {users.length === 0 ? (
-                <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No users found.</td></tr>
+                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No users found.</td></tr>
               ) : null}
             </tbody>
           </table>

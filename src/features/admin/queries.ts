@@ -57,6 +57,7 @@ export type AdminUser = {
   role: string;
   kyc_status: string;
   created_at: string;
+  is_suspended: boolean;
 };
 
 export async function listUsers(q?: string): Promise<AdminUser[]> {
@@ -64,12 +65,58 @@ export async function listUsers(q?: string): Promise<AdminUser[]> {
   const db = createAdminClient();
   let query = db
     .from("profiles")
-    .select("id, full_name, role, kyc_status, created_at")
+    .select("id, full_name, role, kyc_status, created_at, is_suspended")
     .order("created_at", { ascending: false })
     .limit(100);
   if (q) query = query.ilike("full_name", `%${q}%`);
   const { data } = await query;
   return (data ?? []) as AdminUser[];
+}
+
+// Admin-tier accounts only, for the superadmin-exclusive Admins page.
+export async function listAdmins(): Promise<AdminUser[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  const { data } = await db
+    .from("profiles")
+    .select("id, full_name, role, kyc_status, created_at, is_suspended")
+    .in("role", ["admin", "superadmin"])
+    .order("created_at", { ascending: false });
+  return (data ?? []) as AdminUser[];
+}
+
+export type AuditLogEntry = {
+  id: string;
+  actor_id: string;
+  actor_name: string | null;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export async function listAuditLog(limit = 100): Promise<AuditLogEntry[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  const { data } = await db
+    .from("audit_logs")
+    .select("id, actor_id, action, target_type, target_id, metadata, created_at, profiles!audit_logs_actor_id_fkey(full_name)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((row) => {
+    const actor = row.profiles as unknown as { full_name: string | null } | null;
+    return {
+      id: row.id,
+      actor_id: row.actor_id,
+      actor_name: actor?.full_name ?? null,
+      action: row.action,
+      target_type: row.target_type,
+      target_id: row.target_id,
+      metadata: (row.metadata ?? {}) as Record<string, unknown>,
+      created_at: row.created_at,
+    };
+  });
 }
 
 export type AdminProduct = {
@@ -81,6 +128,7 @@ export type AdminProduct = {
   rating_avg: number;
   sales_count: number;
   supplier_id: string;
+  is_featured: boolean;
 };
 
 export async function listAllProducts(q?: string): Promise<AdminProduct[]> {
@@ -88,7 +136,7 @@ export async function listAllProducts(q?: string): Promise<AdminProduct[]> {
   const db = createAdminClient();
   let query = db
     .from("products")
-    .select("id, title, slug, status, base_price, rating_avg, sales_count, supplier_id")
+    .select("id, title, slug, status, base_price, rating_avg, sales_count, supplier_id, is_featured")
     .order("created_at", { ascending: false })
     .limit(100);
   if (q) query = query.ilike("title", `%${q}%`);

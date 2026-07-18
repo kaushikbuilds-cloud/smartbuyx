@@ -4,6 +4,7 @@ import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProductStatusToggle } from "@/components/admin/product-status-toggle";
+import { ProductFeaturedToggle } from "@/components/admin/product-featured-toggle";
 
 export const metadata = { title: "Products · Admin" };
 
@@ -38,6 +39,7 @@ export default async function AdminProductsPage({
                 <th className="p-3 text-right">Price</th>
                 <th className="p-3 text-right">Sold</th>
                 <th className="p-3">Status</th>
+                <th className="p-3">Featured</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
@@ -52,11 +54,12 @@ export default async function AdminProductsPage({
                   <td className="p-3">
                     <Badge variant={p.status === "active" ? "success" : "secondary"}>{p.status}</Badge>
                   </td>
+                  <td className="p-3"><ProductFeaturedToggle id={p.id} featured={p.is_featured} /></td>
                   <td className="p-3 text-right"><ProductStatusToggle id={p.id} status={p.status} /></td>
                 </tr>
               ))}
               {products.length === 0 ? (
-                <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No products found.</td></tr>
+                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No products found.</td></tr>
               ) : null}
             </tbody>
           </table>

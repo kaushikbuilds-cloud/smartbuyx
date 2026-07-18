@@ -18,6 +18,13 @@ export async function middleware(req: NextRequest) {
   const { response, user } = await updateSession(req);
   const { pathname } = req.nextUrl;
 
+  const isSuspended = Boolean((user?.app_metadata as { suspended?: boolean } | undefined)?.suspended);
+  if (isSuspended && pathname !== "/suspended" && !pathname.startsWith("/api/")) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/suspended";
+    return NextResponse.redirect(url);
+  }
+
   const needsAuth = PROTECTED.some((p) => pathname.startsWith(p));
   if (needsAuth && !user) {
     const url = req.nextUrl.clone();

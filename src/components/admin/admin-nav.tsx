@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Package, Store, ShoppingBag, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Users, Package, Store, ShoppingBag, ShieldAlert, ShieldCheck, ScrollText } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const NAV = [
@@ -14,13 +14,19 @@ const NAV = [
   { href: "/dashboard/admin/fraud", label: "Fraud Monitoring", icon: ShieldAlert },
 ];
 
-export function AdminNav() {
+const SUPERADMIN_NAV = [
+  { href: "/dashboard/admin/admins", label: "Admins", icon: ShieldCheck },
+  { href: "/dashboard/admin/audit-log", label: "Audit Log", icon: ScrollText },
+];
+
+export function AdminNav({ isSuperadmin }: { isSuperadmin: boolean }) {
   const pathname = usePathname();
+  const items = isSuperadmin ? [...NAV, ...SUPERADMIN_NAV] : NAV;
   return (
     <nav className="sticky top-4 w-full shrink-0 lg:w-56">
       <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
       <ul className="space-y-0.5">
-        {NAV.map((item) => {
+        {items.map((item) => {
           const active = pathname === item.href;
           return (
             <li key={item.href}>

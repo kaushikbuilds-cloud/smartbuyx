@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/guards";
+import { logAdminAction } from "./audit";
 import type { UserRole } from "@/types/auth";
 
 const ADMIN = ["admin", "superadmin"] as const;
@@ -27,14 +28,24 @@ export async function setUserRole(userId: string, role: UserRole): Promise<{ err
   }
 
   await db.from("profiles").update({ role }).eq("id", userId);
+  await logAdminAction(user.id, "set_user_role", "profile", userId, { from: target?.role, to: role });
   revalidatePath("/dashboard/admin/users");
   return {};
 }
 
 export async function setProductStatus(productId: string, status: "active" | "archived"): Promise<void> {
-  await requireRole(...ADMIN);
+  const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
   await db.from("products").update({ status }).eq("id", productId);
+  await logAdminAction(user.id, "set_product_status", "product", productId, { status });
+  revalidatePath("/dashboard/admin/products");
+}
+
+export async function setProductFeatured(productId: string, featured: boolean): Promise<void> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  await db.from("products").update({ is_featured: featured }).eq("id", productId);
+  await logAdminAction(user.id, "set_product_featured", "product", productId, { featured });
   revalidatePath("/dashboard/admin/products");
 }
 
@@ -42,7 +53,7 @@ export async function reviewProApplication(
   applicationId: string,
   approve: boolean
 ): Promise<void> {
-  await requireRole(...ADMIN);
+  const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
 
   const { data: app } = await db
@@ -61,11 +72,14 @@ export async function reviewProApplication(
     // Promote the user to their requested pro role.
     await db.from("profiles").update({ role: app.requested_role }).eq("id", app.user_id);
   }
+  await logAdminAction(user.id, approve ? "approve_pro_application" : "reject_pro_application", "pro_application", applicationId, {
+    requested_role: app.requested_role,
+  });
   revalidatePath("/dashboard/admin/suppliers");
 }
 
 export async function verifySupplierGst(userId: string, verified: boolean): Promise<void> {
-  await requireRole(...ADMIN);
+  const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();
   await db
     .from("supplier_profiles")
@@ -77,5 +91,36 @@ export async function verifySupplierGst(userId: string, verified: boolean): Prom
     .eq("user_id", userId);
   // Recompute trust score after verification.
   await db.rpc("recompute_trust_score", { p_supplier: userId }).then(() => {}, () => {});
+  await logAdminAction(user.id, "verify_supplier_gst", "supplier_profile", userId, { verified });
   revalidatePath("/dashboard/admin/suppliers");
+}
+
+export async function setUserSuspended(
+  userId: string,
+  suspended: boolean,
+  reason?: string
+): Promise<{ error?: string }> {
+  const { user, role: callerRole } = await requireRole(...ADMIN);
+  if (userId === user.id) return { error: "You can't suspend your own account." };
+
+  const db = createAdminClient();
+  const { data: target } = await db.from("profiles").select("role").eq("id", userId).single();
+  // A regular admin can suspend ordinary users, but not another admin/superadmin
+  // — that would let one admin silently lock out another. Only superadmin can.
+  const targetIsAdminTier = Boolean(target && (ADMIN_TIER as readonly string[]).includes(target.role));
+  if (targetIsAdminTier && callerRole !== "superadmin") {
+    return { error: "Only a superadmin can suspend an admin account." };
+  }
+
+  await db
+    .from("profiles")
+    .update({
+      is_suspended: suspended,
+      suspended_at: suspended ? new Date().toISOString() : null,
+      suspended_reason: suspended ? reason || null : null,
+    })
+    .eq("id", userId);
+  await logAdminAction(user.id, suspended ? "suspend_user" : "unsuspend_user", "profile", userId, { reason });
+  revalidatePath("/dashboard/admin/users");
+  return {};
 }
