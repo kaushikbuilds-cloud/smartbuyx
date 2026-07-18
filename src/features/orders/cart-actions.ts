@@ -6,20 +6,23 @@ import { getSession } from "@/lib/auth/guards";
 
 export type CartActionResult = { error?: string } | void;
 
-async function getOrCreateCartId(userId: string): Promise<string> {
+async function getOrCreateCartId(userId: string): Promise<{ cartId?: string; error?: string }> {
   const supabase = await createClient();
   const { data: existing } = await supabase.from("carts").select("id").eq("user_id", userId).single();
-  if (existing) return existing.id;
-  const { data: created } = await supabase.from("carts").insert({ user_id: userId }).select("id").single();
-  return created!.id;
+  if (existing) return { cartId: existing.id };
+  const { data: created, error } = await supabase.from("carts").insert({ user_id: userId }).select("id").single();
+  if (error) return { error: error.message };
+  return { cartId: created.id };
 }
 
 export async function addToCart(variantId: string, quantity = 1): Promise<CartActionResult> {
   const session = await getSession();
   if (!session) return { error: "Please log in to add items to your cart." };
 
+  const { cartId, error: cartError } = await getOrCreateCartId(session.user.id);
+  if (!cartId) return { error: cartError ?? "Couldn't create your cart." };
+
   const supabase = await createClient();
-  const cartId = await getOrCreateCartId(session.user.id);
 
   const { data: existing } = await supabase
     .from("cart_items")
