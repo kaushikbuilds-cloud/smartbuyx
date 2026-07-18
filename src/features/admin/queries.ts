@@ -177,6 +177,7 @@ export type ProApplication = {
   city: string | null;
   state: string | null;
   description: string | null;
+  review_note: string | null;
 };
 
 export async function listProApplications(): Promise<ProApplication[]> {
@@ -184,7 +185,7 @@ export async function listProApplications(): Promise<ProApplication[]> {
   const db = createAdminClient();
   const { data, error } = await db
     .from("pro_applications")
-    .select("id, user_id, requested_role, business_name, status, created_at, business_type, category, gstin, phone, city, state, description")
+    .select("id, user_id, requested_role, business_name, status, created_at, business_type, category, gstin, phone, city, state, description, review_note")
     .order("created_at", { ascending: false })
     .limit(100);
   logIfError("listProApplications", error);

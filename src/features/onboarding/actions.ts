@@ -57,9 +57,9 @@ export async function submitProApplication(_prev: ProApplicationState, formData:
     .from("pro_applications")
     .select("id, status")
     .eq("user_id", user.id)
-    .eq("status", "pending")
+    .in("status", ["pending", "under_review"])
     .maybeSingle();
-  if (existing) return { error: "You already have a pending application." };
+  if (existing) return { error: "You already have an application in progress." };
 
   const d = parsed.data;
   const { error } = await supabase.from("pro_applications").insert({
@@ -95,7 +95,7 @@ export async function getMyProApplication(userId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("pro_applications")
-    .select("id, requested_role, business_name, status, created_at, reviewed_at, category, city, state")
+    .select("id, requested_role, business_name, status, created_at, reviewed_at, category, city, state, review_note")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(1)

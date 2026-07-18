@@ -111,6 +111,28 @@ export async function reviewProApplication(
   revalidatePath("/dashboard/admin/suppliers");
 }
 
+export async function setApplicationStatus(
+  applicationId: string,
+  status: "under_review" | "info_requested",
+  note?: string
+): Promise<void> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const { error } = await db
+    .from("pro_applications")
+    .update({ status, review_note: note?.trim() || null })
+    .eq("id", applicationId);
+  logIfError("setApplicationStatus", error);
+  await logAdminAction(
+    user.id,
+    status === "under_review" ? "application_under_review" : "application_info_requested",
+    "pro_application",
+    applicationId,
+    { note: note?.trim() || undefined }
+  );
+  revalidatePath("/dashboard/admin/suppliers");
+}
+
 export async function verifySupplierGst(userId: string, verified: boolean): Promise<void> {
   const { user } = await requireRole(...ADMIN);
   const db = createAdminClient();

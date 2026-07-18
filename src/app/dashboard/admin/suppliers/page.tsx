@@ -21,7 +21,22 @@ export default async function AdminSuppliersPage() {
     .order("trust_score", { ascending: false })
     .limit(100);
 
-  const pending = applications.filter((a) => a.status === "pending");
+  // applications arrive newest-first; keep only the latest row per applicant so
+  // a resubmission (new row) doesn't show alongside its stale predecessor.
+  const seenUsers = new Set<string>();
+  const latestPerUser = applications.filter((a) => {
+    if (seenUsers.has(a.user_id)) return false;
+    seenUsers.add(a.user_id);
+    return true;
+  });
+  const OPEN_STATUSES = ["pending", "under_review", "info_requested"];
+  const pending = latestPerUser.filter((a) => OPEN_STATUSES.includes(a.status));
+
+  const STATUS_BADGE: Record<string, { label: string; variant: "secondary" | "default" | "outline" }> = {
+    pending: { label: "Pending", variant: "secondary" },
+    under_review: { label: "Under review", variant: "default" },
+    info_requested: { label: "Info requested", variant: "outline" },
+  };
 
   return (
     <main className="space-y-6">
@@ -33,9 +48,9 @@ export default async function AdminSuppliersPage() {
       {/* Pending applications */}
       <Card>
         <CardContent className="p-5">
-          <h2 className="mb-3 font-semibold">Pending applications ({pending.length})</h2>
+          <h2 className="mb-3 font-semibold">Open applications ({pending.length})</h2>
           {pending.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No pending applications.</p>
+            <p className="text-sm text-muted-foreground">No open applications.</p>
           ) : (
             <ul className="space-y-2">
               {pending.map((a) => (
@@ -43,6 +58,7 @@ export default async function AdminSuppliersPage() {
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium">{a.business_name}</p>
+                      <Badge variant={STATUS_BADGE[a.status]?.variant ?? "secondary"}>{STATUS_BADGE[a.status]?.label ?? a.status}</Badge>
                       <Badge variant="secondary" className="capitalize">{a.requested_role}</Badge>
                       {a.business_type ? (
                         <Badge variant="outline" className="capitalize">{a.business_type.replace(/_/g, " ")}</Badge>
@@ -59,6 +75,11 @@ export default async function AdminSuppliersPage() {
                       <p className="max-w-prose text-xs text-muted-foreground">{a.description}</p>
                     ) : null}
                     {a.phone ? <p className="text-xs text-muted-foreground">☎ {a.phone}</p> : null}
+                    {a.review_note ? (
+                      <p className="rounded bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+                        Info requested: {a.review_note}
+                      </p>
+                    ) : null}
                   </div>
                   <ApplicationActions id={a.id} />
                 </li>
