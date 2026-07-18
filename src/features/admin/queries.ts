@@ -4,6 +4,15 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 // All admin queries use the service-role client. Pages that call these MUST be
 // guarded with requireRole("admin","superadmin").
 
+// Every query below discarded `error` silently (`const { data } = await query`),
+// so a bad SUPABASE_SERVICE_ROLE_KEY or any other query failure looked
+// identical to "genuinely no rows" — the admin panel would just show empty
+// everywhere with zero trace of why. This logs any error so it's visible in
+// Vercel runtime logs instead of vanishing.
+function logIfError(label: string, error: unknown) {
+  if (error) console.error(`[admin/queries:${label}]`, error);
+}
+
 export type PlatformStats = {
   gmv: number;
   orders: number;
@@ -33,6 +42,12 @@ export async function getPlatformStats(): Promise<PlatformStats> {
     db.from("pro_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
     db.from("return_requests").select("id", { count: "exact", head: true }).in("status", ["requested", "approved"]),
   ]);
+  logIfError("getPlatformStats.orders", ordersRes.error);
+  logIfError("getPlatformStats.users", usersRes.error);
+  logIfError("getPlatformStats.sellers", sellersRes.error);
+  logIfError("getPlatformStats.products", productsRes.error);
+  logIfError("getPlatformStats.apps", appsRes.error);
+  logIfError("getPlatformStats.returns", returnsRes.error);
 
   const orders = ordersRes.data ?? [];
   const gmv = orders
@@ -69,7 +84,8 @@ export async function listUsers(q?: string): Promise<AdminUser[]> {
     .order("created_at", { ascending: false })
     .limit(100);
   if (q) query = query.ilike("full_name", `%${q}%`);
-  const { data } = await query;
+  const { data, error } = await query;
+  logIfError("listUsers", error);
   return (data ?? []) as AdminUser[];
 }
 
@@ -77,11 +93,12 @@ export async function listUsers(q?: string): Promise<AdminUser[]> {
 export async function listAdmins(): Promise<AdminUser[]> {
   if (!isSupabaseConfigured()) return [];
   const db = createAdminClient();
-  const { data } = await db
+  const { data, error } = await db
     .from("profiles")
     .select("id, full_name, role, kyc_status, created_at, is_suspended")
     .in("role", ["admin", "superadmin"])
     .order("created_at", { ascending: false });
+  logIfError("listAdmins", error);
   return (data ?? []) as AdminUser[];
 }
 
@@ -99,11 +116,12 @@ export type AuditLogEntry = {
 export async function listAuditLog(limit = 100): Promise<AuditLogEntry[]> {
   if (!isSupabaseConfigured()) return [];
   const db = createAdminClient();
-  const { data } = await db
+  const { data, error } = await db
     .from("audit_logs")
     .select("id, actor_id, action, target_type, target_id, metadata, created_at, profiles!audit_logs_actor_id_fkey(full_name)")
     .order("created_at", { ascending: false })
     .limit(limit);
+  logIfError("listAuditLog", error);
   return (data ?? []).map((row) => {
     const actor = row.profiles as unknown as { full_name: string | null } | null;
     return {
@@ -140,7 +158,8 @@ export async function listAllProducts(q?: string): Promise<AdminProduct[]> {
     .order("created_at", { ascending: false })
     .limit(100);
   if (q) query = query.ilike("title", `%${q}%`);
-  const { data } = await query;
+  const { data, error } = await query;
+  logIfError("listAllProducts", error);
   return (data ?? []).map((p) => ({ ...p, base_price: Number(p.base_price), rating_avg: Number(p.rating_avg) })) as AdminProduct[];
 }
 
@@ -156,11 +175,12 @@ export type ProApplication = {
 export async function listProApplications(): Promise<ProApplication[]> {
   if (!isSupabaseConfigured()) return [];
   const db = createAdminClient();
-  const { data } = await db
+  const { data, error } = await db
     .from("pro_applications")
     .select("id, user_id, requested_role, business_name, status, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
+  logIfError("listProApplications", error);
   return (data ?? []) as ProApplication[];
 }
 
@@ -175,11 +195,12 @@ export type AdminOrder = {
 export async function listAllOrders(): Promise<AdminOrder[]> {
   if (!isSupabaseConfigured()) return [];
   const db = createAdminClient();
-  const { data } = await db
+  const { data, error } = await db
     .from("orders")
     .select("id, total, status, created_at, buyer_id")
     .order("created_at", { ascending: false })
     .limit(100);
+  logIfError("listAllOrders", error);
   return (data ?? []).map((o) => ({ ...o, total: Number(o.total) })) as AdminOrder[];
 }
 
@@ -196,12 +217,13 @@ export type FraudFlag = {
 export async function listFraudFlags(): Promise<FraudFlag[]> {
   if (!isSupabaseConfigured()) return [];
   const db = createAdminClient();
-  const { data } = await db
+  const { data, error } = await db
     .from("return_requests")
     .select("id, user_id, reason, amount, status, created_at")
     .in("reason", ["better_price", "no_longer_needed"])
     .order("created_at", { ascending: false })
     .limit(100);
+  logIfError("listFraudFlags", error);
   return (data ?? []).map((r) => ({
     returnId: r.id,
     userId: r.user_id,
