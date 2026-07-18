@@ -67,6 +67,33 @@ export async function recordKycDocument(docType: string, storagePath: string): P
   return {};
 }
 
+// Saves the public store-logo URL (uploaded client-side to the public
+// product-images bucket) onto the seller's supplier_profiles row.
+export async function saveStoreLogo(url: string): Promise<{ error?: string }> {
+  const { user } = await requireUser();
+  if (url && !/^https?:\/\//.test(url)) return { error: "Invalid image URL." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("supplier_profiles")
+    .update({ store_logo_url: url || null })
+    .eq("user_id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard/supplier/verification");
+  return {};
+}
+
+export async function getMyStoreLogo(userId: string): Promise<string | null> {
+  const { user } = await requireUser();
+  if (user.id !== userId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("supplier_profiles")
+    .select("store_logo_url")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data?.store_logo_url ?? null;
+}
+
 export async function getMyPayoutDetails(userId: string) {
   const { user } = await requireUser();
   if (user.id !== userId) return null;

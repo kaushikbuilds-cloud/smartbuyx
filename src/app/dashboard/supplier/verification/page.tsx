@@ -1,18 +1,20 @@
 import { ShieldCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
-import { getMyPayoutDetails, getMyKycDocuments } from "@/features/seller/verification";
+import { getMyPayoutDetails, getMyKycDocuments, getMyStoreLogo } from "@/features/seller/verification";
 import { Card, CardContent } from "@/components/ui/card";
 import { PayoutDetailsForm } from "@/components/dashboard/seller/payout-details-form";
 import { KycUploader } from "@/components/dashboard/seller/kyc-uploader";
+import { StoreLogoUploader } from "@/components/dashboard/seller/store-logo-uploader";
 
 export const metadata = { title: "Verification · Seller" };
 export const dynamic = "force-dynamic";
 
 export default async function SellerVerificationPage() {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  const [payout, documents] = await Promise.all([
+  const [payout, documents, storeLogo] = await Promise.all([
     getMyPayoutDetails(user.id),
     getMyKycDocuments(user.id),
+    getMyStoreLogo(user.id),
   ]);
 
   return (
@@ -26,6 +28,16 @@ export default async function SellerVerificationPage() {
           <p className="text-sm text-muted-foreground">Complete these to receive payouts and earn a Verified badge.</p>
         </div>
       </div>
+
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <div>
+            <h2 className="font-semibold">Store branding</h2>
+            <p className="text-sm text-muted-foreground">Your logo appears on your public storefront and product listings.</p>
+          </div>
+          <StoreLogoUploader userId={user.id} initialUrl={storeLogo} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="space-y-4 p-6">

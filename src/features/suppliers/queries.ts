@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { Product } from "@/features/catalog/types";
 
 export type SupplierListItem = {
   user_id: string;
@@ -50,8 +51,23 @@ export async function getSupplier(userId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("supplier_profiles")
-    .select("user_id, business_name, bio, gstin, service_pincodes, rating_avg, rating_count, trust_score, gstin_verified, verified_business, business_started_on, avg_response_minutes")
+    .select("user_id, business_name, bio, gstin, store_logo_url, service_pincodes, rating_avg, rating_count, trust_score, gstin_verified, verified_business, business_started_on, avg_response_minutes, profiles!supplier_profiles_user_id_fkey(created_at)")
     .eq("user_id", userId)
     .single();
-  return data;
+  if (!data) return null;
+  const profile = data.profiles as unknown as { created_at: string } | null;
+  return { ...data, member_since: profile?.created_at ?? null };
+}
+
+// Active listings for a supplier's public storefront.
+export async function getSupplierProducts(userId: string): Promise<Product[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select("id, supplier_id, category_id, kind, title, slug, description, brand, unit, base_price, compare_at_price, currency, images, attributes, status, rating_avg, rating_count, sales_count, is_featured, created_at")
+    .eq("supplier_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(24);
+  return (data ?? []) as unknown as Product[];
 }
