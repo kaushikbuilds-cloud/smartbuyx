@@ -4,9 +4,15 @@ import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { signInWithGoogle } from "@/features/auth/actions";
 import { Button } from "@/components/ui/button";
+import { useIsNativeApp } from "@/lib/native/use-is-native-app";
 
 export function SocialButtons() {
   const [pending, startTransition] = useTransition();
+  const isNativeApp = useIsNativeApp();
+  // Google/Facebook/Apple OAuth can't complete inside the app's webview
+  // (providers force the flow into the system browser), so hide the whole
+  // block in the native app -- email/password stays in-app and works.
+  if (isNativeApp) return null;
   return (
     <div className="space-y-3">
       <div className="text-center text-sm text-muted-foreground">or continue with</div>

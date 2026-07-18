@@ -4,9 +4,13 @@ import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "@/features/auth/actions";
+import { useIsNativeApp } from "@/lib/native/use-is-native-app";
 
 export function GoogleButton() {
   const [pending, startTransition] = useTransition();
+  const isNativeApp = useIsNativeApp();
+  // Google blocks OAuth inside the app's webview -> hide in the native app.
+  if (isNativeApp) return null;
   return (
     <>
       <div className="relative my-2">
