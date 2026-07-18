@@ -39,12 +39,26 @@ export default async function AdminSuppliersPage() {
           ) : (
             <ul className="space-y-2">
               {pending.map((a) => (
-                <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-                  <div>
-                    <p className="font-medium">{a.business_name}</p>
+                <li key={a.id} className="flex flex-wrap items-start justify-between gap-3 rounded-lg border p-3">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{a.business_name}</p>
+                      <Badge variant="secondary" className="capitalize">{a.requested_role}</Badge>
+                      {a.business_type ? (
+                        <Badge variant="outline" className="capitalize">{a.business_type.replace(/_/g, " ")}</Badge>
+                      ) : null}
+                      {a.gstin ? <Badge variant="outline">GST: {a.gstin}</Badge> : null}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Wants: {a.requested_role} · {new Date(a.created_at).toLocaleDateString("en-IN")}
+                      {a.category ? <span className="capitalize">{a.category.replace(/_/g, " ")} · </span> : null}
+                      {[a.city, a.state].filter(Boolean).join(", ")}
+                      {a.city || a.state ? " · " : ""}
+                      {new Date(a.created_at).toLocaleDateString("en-IN")}
                     </p>
+                    {a.description ? (
+                      <p className="max-w-prose text-xs text-muted-foreground">{a.description}</p>
+                    ) : null}
+                    {a.phone ? <p className="text-xs text-muted-foreground">☎ {a.phone}</p> : null}
                   </div>
                   <ApplicationActions id={a.id} />
                 </li>
