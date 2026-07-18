@@ -66,7 +66,7 @@ export async function reviewProApplication(
 
   const { data: app } = await db
     .from("pro_applications")
-    .select("user_id, requested_role")
+    .select("user_id, requested_role, business_name")
     .eq("id", applicationId)
     .single();
   if (!app) return;
@@ -81,6 +81,26 @@ export async function reviewProApplication(
     // Promote the user to their requested pro role.
     const { error: roleError } = await db.from("profiles").update({ role: app.requested_role }).eq("id", app.user_id);
     logIfError("reviewProApplication.role", roleError);
+
+    // Each pro role reads from its own profile table (supplier_profiles,
+    // architect_profiles, contractor_profiles), each with a differently named
+    // "name" column -- promoting the role alone leaves that row missing, so
+    // the account is a "supplier" that never shows up in the directory/search.
+    let profileError;
+    if (app.requested_role === "supplier") {
+      ({ error: profileError } = await db
+        .from("supplier_profiles")
+        .upsert({ user_id: app.user_id, business_name: app.business_name }, { onConflict: "user_id" }));
+    } else if (app.requested_role === "architect") {
+      ({ error: profileError } = await db
+        .from("architect_profiles")
+        .upsert({ user_id: app.user_id, firm_name: app.business_name }, { onConflict: "user_id" }));
+    } else {
+      ({ error: profileError } = await db
+        .from("contractor_profiles")
+        .upsert({ user_id: app.user_id, company_name: app.business_name }, { onConflict: "user_id" }));
+    }
+    logIfError("reviewProApplication.profileRow", profileError);
   }
   await logAdminAction(user.id, approve ? "approve_pro_application" : "reject_pro_application", "pro_application", applicationId, {
     requested_role: app.requested_role,
