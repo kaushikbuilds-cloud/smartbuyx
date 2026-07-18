@@ -59,6 +59,23 @@ export async function signInWithGoogle() {
   if (data.url) redirect(data.url);
 }
 
+// Native (Capacitor) Google sign-in: returns the provider URL instead of
+// redirecting, so the app can open it in a system browser tab and return via
+// a deep link. redirectTo is the app's custom scheme; the PKCE verifier is
+// stored as a cookie on this same webview, so when the app later loads
+// /callback?code=... the server exchange finds it and sets the session.
+const NATIVE_OAUTH_REDIRECT = "in.smartbuyx.app://callback";
+
+export async function getGoogleOAuthUrl(): Promise<{ url?: string; error?: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: NATIVE_OAUTH_REDIRECT, skipBrowserRedirect: true },
+  });
+  if (error) return { error: error.message };
+  return { url: data.url ?? undefined };
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
