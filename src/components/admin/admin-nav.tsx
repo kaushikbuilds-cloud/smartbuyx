@@ -24,7 +24,7 @@ export function AdminNav({ isSuperadmin }: { isSuperadmin: boolean }) {
   const pathname = usePathname();
   const items = isSuperadmin ? [...NAV, ...SUPERADMIN_NAV] : NAV;
   return (
-    <nav className="sticky top-4 w-full shrink-0 lg:w-56">
+    <nav className="w-full shrink-0 lg:sticky lg:top-4 lg:w-56">
       <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
       <ul className="space-y-0.5">
         {items.map((item) => {

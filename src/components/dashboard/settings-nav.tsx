@@ -24,7 +24,7 @@ const SECTIONS = [
 export function SettingsNav() {
   const pathname = usePathname();
   return (
-    <nav className="sticky top-4 w-full shrink-0 lg:w-60">
+    <nav className="w-full shrink-0 lg:sticky lg:top-4 lg:w-60">
       <div className="mb-3 flex items-center gap-2 px-2">
         <Gear className="h-4 w-4 text-muted-foreground" />
         <p className="text-sm font-semibold text-muted-foreground">Settings</p>
