@@ -1,9 +1,23 @@
-import { Store } from "lucide-react";
+import Link from "next/link";
+import { Store, ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/guards";
 import { getMyProApplication } from "@/features/onboarding/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ProApplicationForm } from "@/components/dashboard/pro-application-form";
+
+// Where each pro role's dashboard lives, so an approved seller/pro has a
+// direct way in instead of a dead-end "already a supplier" message.
+const ROLE_DASHBOARD: Record<string, string> = {
+  supplier: "/dashboard/supplier",
+  d2c_brand: "/dashboard/brand",
+  architect: "/dashboard/architect",
+  contractor: "/dashboard/contractor",
+  interior_designer: "/dashboard/interior-designer",
+  engineer: "/dashboard/engineer",
+  creator: "/dashboard/creator",
+};
 
 export const metadata = { title: "Become a Seller" };
 
@@ -41,8 +55,18 @@ export default async function BecomeSellerPage() {
 
       {/* 'buyer' is a legacy DB value for the base role, not a pro role — see migration 0016. */}
       {role !== "customer" && (role as string) !== "buyer" ? (
-        <Card><CardContent className="p-6 text-sm text-muted-foreground">
-          Your account is already a {role} — no application needed.
+        <Card><CardContent className="space-y-4 p-6">
+          <p className="text-sm text-muted-foreground">
+            Your account is already a {role} — no application needed.
+          </p>
+          {ROLE_DASHBOARD[role] ? (
+            <Button asChild variant="gradient">
+              <Link href={ROLE_DASHBOARD[role]}>
+                Open your {role === "supplier" ? "Seller Hub" : "dashboard"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : null}
         </CardContent></Card>
       ) : application && (application.status === "pending" || application.status === "under_review") ? (
         <Card>
