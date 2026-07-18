@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Brand gradient splash background (purple -> indigo, matching the web
      app's icon/OG image gradient). styles.xml's AppTheme.NoActionBarLaunch
-     references @drawable/splash directly -- Android resolves this whether
+     references @drawable/splash directly; Android resolves this whether
      the file is XML or PNG, so no image-generation tool is needed here. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient

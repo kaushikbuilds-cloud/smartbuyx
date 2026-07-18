@@ -12,6 +12,16 @@ const config: CapacitorConfig = {
     url: "https://smartbuyx.in",
     androidScheme: "https",
     cleartext: false,
+    // Without this, any navigation to a domain other than smartbuyx.in gets
+    // kicked out to the system browser instead of staying in the app's
+    // WebView -- this is what broke login (redirects through Supabase Auth's
+    // own domain) and would have broken checkout (Razorpay) the same way.
+    allowNavigation: [
+      "*.supabase.co",
+      "checkout.razorpay.com",
+      "api.razorpay.com",
+      "*.razorpay.com",
+    ],
   },
   backgroundColor: "#ffffff",
   android: {
