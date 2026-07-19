@@ -28,8 +28,8 @@ export default async function AdminFraudPage() {
       </p>
 
       <Card>
-        <CardContent className="p-0">
-          <table className="w-full text-sm">
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full min-w-[600px] text-sm">
             <thead className="border-b text-left text-muted-foreground">
               <tr>
                 <th className="p-3">Return</th>
