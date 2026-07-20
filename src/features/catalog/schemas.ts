@@ -12,7 +12,22 @@ export const productSchema = z.object({
   categoryId: z.string().uuid().optional().or(z.literal("")),
   images: z.array(z.string().url()).default([]),
   status: z.enum(["active", "draft", "archived"]).default("active"),
+  // Free-form "S:36, M:38, L:40" chest-inches style entry for apparel, parsed
+  // into { size: number } and stored in products.attributes.size_chart for
+  // the AI size-recommendation feature to reason over.
+  sizeChart: z.string().max(500).optional().or(z.literal("")),
 });
+
+export function parseSizeChart(raw: string | undefined): Record<string, number> | null {
+  if (!raw?.trim()) return null;
+  const chart: Record<string, number> = {};
+  for (const pair of raw.split(",")) {
+    const [size, val] = pair.split(":").map((s) => s.trim());
+    const num = Number(val);
+    if (size && Number.isFinite(num) && num > 0) chart[size.toUpperCase()] = num;
+  }
+  return Object.keys(chart).length > 0 ? chart : null;
+}
 
 export type ProductInput = z.infer<typeof productSchema>;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck, LogOut, Gift } from "lucide-react";
+import { Menu, X, Home, Package, Heart, ShoppingCart, Bell, Ticket, MapPin, CreditCard, RotateCcw, Star, Coins, BellRing, LifeBuoy, Settings, ShoppingBag, HardHat, FolderKanban, FileText, Building2, Wrench, Sparkles, Ruler, Boxes, ScrollText, ClipboardList, Store, ShieldCheck, LogOut, Gift, Camera } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
@@ -19,6 +19,7 @@ const COMMERCE_NAV: NavItem[] = [
   { href: "/dashboard/customer/returns", label: "Returns & Refunds", icon: RotateCcw }, { href: "/dashboard/customer/reviews", label: "Reviews", icon: Star },
   { href: "/dashboard/customer/become-seller", label: "Become a Seller", icon: Store },
   { href: "/gift-finder", label: "AI Gift Finder", icon: Gift }, { href: "/shopping-planner", label: "AI Shopping Planner", icon: ClipboardList },
+  { href: "/image-search", label: "Search by Photo", icon: Camera },
   { href: "/wallet", label: "Smart Coins", icon: Coins }, { href: "/dashboard/customer/notifications", label: "Notifications", icon: BellRing },
   { href: "/dashboard/customer/support", label: "Help & Support", icon: LifeBuoy }, { href: "/dashboard/customer/settings/account", label: "Settings", icon: Settings },
 ];

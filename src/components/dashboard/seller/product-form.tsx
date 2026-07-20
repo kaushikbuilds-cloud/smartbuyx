@@ -8,6 +8,12 @@ import { ImageUploader } from "./image-uploader";
 import type { ActionState } from "@/features/catalog/actions";
 import type { Product } from "@/features/catalog/types";
 
+function existingSizeChart(product?: Product): string {
+  const chart = (product?.attributes as Record<string, unknown> | undefined)?.size_chart as Record<string, number> | undefined;
+  if (!chart) return "";
+  return Object.entries(chart).map(([size, val]) => `${size}:${val}`).join(", ");
+}
+
 type Props = {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   product?: Product;
@@ -73,6 +79,19 @@ export function ProductForm({ action, product, submitLabel = "Save product" }: P
       <div className="grid gap-2">
         <Label>Images</Label>
         <ImageUploader initial={(product?.images ?? []).map((i) => i.url)} />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="sizeChart">Size chart (optional, apparel only)</Label>
+        <Input
+          id="sizeChart"
+          name="sizeChart"
+          defaultValue={existingSizeChart(product)}
+          placeholder="e.g. S:36, M:38, L:40, XL:42 (chest, inches)"
+        />
+        <p className="text-xs text-muted-foreground">
+          Powers AI size recommendations for customers. Leave blank if this isn&apos;t apparel.
+        </p>
       </div>
 
       <div className="grid gap-2">

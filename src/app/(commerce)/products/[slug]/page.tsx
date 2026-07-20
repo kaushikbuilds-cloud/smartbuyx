@@ -13,6 +13,9 @@ import { ReviewList } from "@/components/shop/review-list";
 import { TrackPricePopover } from "@/components/shop/track-price-popover";
 import { getReviewSummary } from "@/features/ai/review-summary";
 import { ReviewSummaryCard } from "@/components/shop/review-summary-card";
+import { SizeRecommendationWidget } from "@/components/shop/size-recommendation-widget";
+import { getPriceTrend } from "@/features/catalog/price-trend";
+import { PriceTrendBadge } from "@/components/shop/price-trend-badge";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -49,11 +52,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [variants, reviews, session, reviewSummary] = await Promise.all([
+  const [variants, reviews, session, reviewSummary, priceTrend] = await Promise.all([
     getProductVariants(product.id),
     getProductReviews(product.id),
     getSession(),
     getReviewSummary(product.id, product.rating_count),
+    getPriceTrend(product.id, product.base_price),
   ]);
   const wishlisted = session ? (await getWishlistedIds(session.user.id)).has(product.id) : false;
   const defaultVariant = variants[0];
@@ -101,6 +105,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             ) : null}
             {product.unit ? <span className="text-muted-foreground">/ {product.unit}</span> : null}
           </div>
+          <div className="mt-1.5"><PriceTrendBadge trend={priceTrend} /></div>
 
           {product.description ? (
             <p className="mt-4 whitespace-pre-line text-sm text-muted-foreground">{product.description}</p>
@@ -123,6 +128,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <WishlistButton productId={product.id} initial={wishlisted} variant="full" />
             {session ? <TrackPricePopover productId={product.id} currentPrice={product.base_price} /> : null}
           </div>
+
+          {session && (product.attributes as Record<string, unknown> | null)?.size_chart ? (
+            <div className="mt-4">
+              <SizeRecommendationWidget productId={product.id} />
+            </div>
+          ) : null}
         </div>
       </div>
 

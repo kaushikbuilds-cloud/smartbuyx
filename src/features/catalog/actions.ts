@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole, requireUser } from "@/lib/auth/guards";
 import { uniqueSlug } from "@/lib/utils/format";
-import { productSchema, reviewSchema } from "./schemas";
+import { productSchema, reviewSchema, parseSizeChart } from "./schemas";
 
 export type ActionState = { error?: string; success?: string } | null;
 
@@ -47,6 +47,7 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
       category_id: p.categoryId || null,
       images: p.images.map((url) => ({ url })),
       status: p.status,
+      attributes: parseSizeChart(p.sizeChart) ? { size_chart: parseSizeChart(p.sizeChart) } : {},
     })
     .select("id")
     .single();
@@ -79,6 +80,12 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
   const p = parsed.data;
 
   const supabase = await createClient();
+  const { data: existing } = await supabase.from("products").select("attributes").eq("id", id).single();
+  const sizeChart = parseSizeChart(p.sizeChart);
+  const attributes = { ...(existing?.attributes as Record<string, unknown> ?? {}) };
+  if (sizeChart) attributes.size_chart = sizeChart;
+  else delete attributes.size_chart;
+
   const { error } = await supabase
     .from("products")
     .update({
@@ -91,6 +98,7 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
       category_id: p.categoryId || null,
       images: p.images.map((url) => ({ url })),
       status: p.status,
+      attributes,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
