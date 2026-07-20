@@ -1,13 +1,10 @@
 "use client";
 
 import { useRef, useState, useTransition, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Sparkles, Send, ImageOff, Star, Loader2 } from "lucide-react";
+import { Sparkles, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { formatINR } from "@/lib/utils/format";
-import { Card } from "@/components/ui/card";
 import { askAssistant, type AssistantProduct } from "@/features/ai/assistant";
+import { AssistantProductCard } from "./assistant-product-card";
 
 type Turn = {
   role: "user" | "assistant";
@@ -104,34 +101,7 @@ export function AssistantChat({ initialQuery }: { initialQuery?: string }) {
 
               {t.products && t.products.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {t.products.slice(0, 4).map((p) => (
-                    <Link key={p.id} href={`/products/${p.slug}`}>
-                      <Card className="flex items-center gap-3 p-2.5 transition-shadow hover:shadow-md">
-                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
-                          {p.image ? (
-                            <Image src={p.image} alt={p.title} fill sizes="48px" className="object-cover" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-muted-foreground">
-                              <ImageOff className="h-4 w-4" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium">{p.title}</p>
-                          <p className="text-xs font-bold">
-                            {formatINR(p.price)}
-                            {p.unit ? <span className="font-normal text-muted-foreground"> / {p.unit}</span> : null}
-                          </p>
-                          {p.ratingCount > 0 ? (
-                            <p className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                              <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                              {p.rating.toFixed(1)} ({p.ratingCount})
-                            </p>
-                          ) : null}
-                        </div>
-                      </Card>
-                    </Link>
-                  ))}
+                  {t.products.slice(0, 4).map((p) => <AssistantProductCard key={p.id} product={p} />)}
                 </div>
               ) : null}
             </div>

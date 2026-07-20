@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   ShoppingBag, HardHat, Sparkles, Boxes, Ruler, Video, ScanLine, Building2,
-  Rocket, ShieldCheck, Truck, Headphones, Star, ArrowRight, BadgeCheck, RotateCcw, PartyPopper,
+  Rocket, ShieldCheck, Truck, Headphones, Star, ArrowRight, BadgeCheck, RotateCcw, PartyPopper, Gift,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,7 @@ const QUICK = [
   { icon: ScanLine, label: "AR Try Room", href: "/ar-try", color: "from-fuchsia-500 to-purple-500" },
   { icon: Video, label: "Creator Hub", href: "/reels", color: "from-violet-500 to-purple-500" },
   { icon: Sparkles, label: "AI Assistant", href: "/assistant", color: "from-purple-600 to-indigo-600" },
+  { icon: Gift, label: "Gift Finder", href: "/gift-finder", color: "from-rose-500 to-pink-600" },
 ];
 
 const FEATURES = [
