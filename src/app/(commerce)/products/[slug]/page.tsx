@@ -16,6 +16,7 @@ import { ReviewSummaryCard } from "@/components/shop/review-summary-card";
 import { SizeRecommendationWidget } from "@/components/shop/size-recommendation-widget";
 import { getPriceTrend } from "@/features/catalog/price-trend";
 import { PriceTrendBadge } from "@/components/shop/price-trend-badge";
+import { ArModelViewer } from "@/components/shop/ar-model-viewer";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -88,7 +89,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     <main className="container mx-auto px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={product.images ?? []} title={product.title} />
+        <div className="space-y-3">
+          <ProductGallery images={product.images ?? []} title={product.title} />
+          {product.model_glb_url ? (
+            <ArModelViewer
+              glbUrl={product.model_glb_url}
+              usdzUrl={product.model_usdz_url}
+              title={product.title}
+              posterUrl={product.images?.[0]?.url}
+            />
+          ) : null}
+        </div>
 
         {/* Info */}
         <div>

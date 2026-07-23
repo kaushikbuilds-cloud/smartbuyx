@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { ListingKind, Product, ProductVariant, Review } from "./types";
 
 const PRODUCT_COLS =
-  "id, supplier_id, category_id, kind, title, slug, description, brand, unit, base_price, compare_at_price, currency, images, attributes, status, rating_avg, rating_count, sales_count, is_featured, created_at";
+  "id, supplier_id, category_id, kind, title, slug, description, brand, unit, base_price, compare_at_price, currency, images, attributes, status, rating_avg, rating_count, sales_count, is_featured, created_at, model_glb_url, model_usdz_url";
 
 export type ListParams = {
   kind?: ListingKind;
@@ -118,6 +118,20 @@ export async function getFeatured(limit = 8) {
     .select(PRODUCT_COLS)
     .eq("status", "active")
     .eq("is_featured", true)
+    .limit(limit);
+  return (data ?? []) as unknown as Product[];
+}
+
+// Products with a 3D model uploaded -- powers the "AR Try Room" listing.
+export async function getArEnabledProducts(limit = 24) {
+  if (!isSupabaseConfigured()) return [] as Product[];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("products")
+    .select(PRODUCT_COLS)
+    .eq("status", "active")
+    .not("model_glb_url", "is", null)
+    .order("created_at", { ascending: false })
     .limit(limit);
   return (data ?? []) as unknown as Product[];
 }

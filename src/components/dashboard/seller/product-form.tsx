@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { ImageUploader } from "./image-uploader";
+import { ArModelUploader } from "./ar-model-uploader";
 import type { ActionState } from "@/features/catalog/actions";
 import type { Product } from "@/features/catalog/types";
 
@@ -18,9 +19,10 @@ type Props = {
   action: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   product?: Product;
   submitLabel?: string;
+  userId: string;
 };
 
-export function ProductForm({ action, product, submitLabel = "Save product" }: Props) {
+export function ProductForm({ action, product, submitLabel = "Save product", userId }: Props) {
   const [state, formAction] = useActionState<ActionState, FormData>(action, null);
 
   return (
@@ -93,6 +95,8 @@ export function ProductForm({ action, product, submitLabel = "Save product" }: P
           Powers AI size recommendations for customers. Leave blank if this isn&apos;t apparel.
         </p>
       </div>
+
+      <ArModelUploader userId={userId} initialGlbUrl={product?.model_glb_url} initialUsdzUrl={product?.model_usdz_url} />
 
       <div className="grid gap-2">
         <Label htmlFor="status">Status</Label>

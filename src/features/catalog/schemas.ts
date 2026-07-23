@@ -16,6 +16,8 @@ export const productSchema = z.object({
   // into { size: number } and stored in products.attributes.size_chart for
   // the AI size-recommendation feature to reason over.
   sizeChart: z.string().max(500).optional().or(z.literal("")),
+  modelGlbUrl: z.string().url().optional().or(z.literal("")),
+  modelUsdzUrl: z.string().url().optional().or(z.literal("")),
 });
 
 export function parseSizeChart(raw: string | undefined): Record<string, number> | null {

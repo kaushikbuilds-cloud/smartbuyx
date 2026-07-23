@@ -23,6 +23,8 @@ export type Product = {
   sales_count: number;
   is_featured: boolean;
   created_at: string;
+  model_glb_url?: string | null;
+  model_usdz_url?: string | null;
 };
 
 export type ProductVariant = {

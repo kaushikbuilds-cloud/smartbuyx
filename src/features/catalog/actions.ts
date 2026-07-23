@@ -48,6 +48,8 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
       images: p.images.map((url) => ({ url })),
       status: p.status,
       attributes: parseSizeChart(p.sizeChart) ? { size_chart: parseSizeChart(p.sizeChart) } : {},
+      model_glb_url: p.modelGlbUrl || null,
+      model_usdz_url: p.modelUsdzUrl || null,
     })
     .select("id")
     .single();
@@ -99,6 +101,8 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
       images: p.images.map((url) => ({ url })),
       status: p.status,
       attributes,
+      model_glb_url: p.modelGlbUrl || null,
+      model_usdz_url: p.modelUsdzUrl || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
