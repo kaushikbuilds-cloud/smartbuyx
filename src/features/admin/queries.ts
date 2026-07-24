@@ -182,6 +182,67 @@ export async function listKycDocuments(pendingOnly = false): Promise<AdminKycDoc
   );
 }
 
+export type RefurbishedQcItem = {
+  id: string;
+  title: string;
+  brand: string | null;
+  base_price: number;
+  images: { url: string }[];
+  supplier_id: string;
+  supplier_name: string | null;
+  condition_grade: string;
+  battery_health: number | null;
+  warranty_months: number;
+  accessories_included: string | null;
+  serial_or_imei: string | null;
+  qc_status: string;
+  qc_notes: string | null;
+  created_at: string;
+};
+
+// Refurbished listings awaiting/needing quality inspection review.
+export async function listRefurbishedQcQueue(pendingOnly = true): Promise<RefurbishedQcItem[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  let query = db
+    .from("products")
+    .select(
+      "id, title, brand, base_price, images, supplier_id, created_at, profiles!products_supplier_id_fkey(full_name), refurbished_details!inner(condition_grade, battery_health, warranty_months, accessories_included, qc_status, qc_notes), refurbished_serials(serial_or_imei)"
+    )
+    .eq("is_refurbished", true)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (pendingOnly) query = query.eq("refurbished_details.qc_status", "pending");
+  const { data, error } = await query;
+  logIfError("listRefurbishedQcQueue", error);
+
+  return (data ?? []).map((row) => {
+    const details = row.refurbished_details as unknown as {
+      condition_grade: string; battery_health: number | null; warranty_months: number;
+      accessories_included: string | null; qc_status: string; qc_notes: string | null;
+    };
+    const supplier = row.profiles as unknown as { full_name: string | null } | null;
+    const serial = row.refurbished_serials as unknown as { serial_or_imei: string } | null;
+    return {
+      id: row.id,
+      title: row.title,
+      brand: row.brand,
+      base_price: Number(row.base_price),
+      images: (row.images ?? []) as { url: string }[],
+      supplier_id: row.supplier_id,
+      supplier_name: supplier?.full_name ?? null,
+      condition_grade: details.condition_grade,
+      battery_health: details.battery_health,
+      warranty_months: details.warranty_months,
+      accessories_included: details.accessories_included,
+      serial_or_imei: serial?.serial_or_imei ?? null,
+      qc_status: details.qc_status,
+      qc_notes: details.qc_notes,
+      created_at: row.created_at,
+    };
+  });
+}
+
 export type AdminProduct = {
   id: string;
   title: string;

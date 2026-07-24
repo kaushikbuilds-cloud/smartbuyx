@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  Package, PlusCircle, TrendingUp, Boxes, Scale, FileText, IndianRupee, RotateCcw, ShieldCheck,
+  Package, PlusCircle, TrendingUp, Boxes, Scale, FileText, IndianRupee, RotateCcw, ShieldCheck, RefreshCw,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { getSellerStats } from "@/features/orders/seller-analytics";
@@ -22,6 +22,7 @@ const TOOLS = [
   { href: "/dashboard/supplier/inventory", label: "Inventory Intelligence", desc: "Stockout alerts & forecast", icon: Boxes, color: "from-rose-600 to-pink-600" },
   { href: "/dashboard/supplier/competitors", label: "Competitor Analysis", desc: "Pricing guidance", icon: Scale, color: "from-fuchsia-600 to-purple-600" },
   { href: "/dashboard/supplier/rfqs", label: "Incoming RFQs", desc: "Quote requests", icon: FileText, color: "from-cyan-600 to-blue-600" },
+  { href: "/dashboard/supplier/refurbished", label: "Refurbished Products", desc: "List & track inspections", icon: RefreshCw, color: "from-teal-600 to-emerald-600" },
   { href: "/dashboard/supplier/verification", label: "Verification & Payouts", desc: "Bank details & KYC", icon: ShieldCheck, color: "from-emerald-600 to-teal-600" },
 ];
 

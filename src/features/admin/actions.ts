@@ -151,6 +151,30 @@ export async function verifySupplierGst(userId: string, verified: boolean): Prom
   revalidatePath("/dashboard/admin/suppliers");
 }
 
+export async function reviewRefurbishedQc(
+  productId: string,
+  status: "passed" | "failed",
+  notes?: string
+): Promise<void> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const { error } = await db
+    .from("refurbished_details")
+    .update({
+      qc_status: status,
+      qc_notes: notes?.trim() || null,
+      qc_reviewed_by: user.id,
+      qc_reviewed_at: new Date().toISOString(),
+    })
+    .eq("product_id", productId);
+  logIfError("reviewRefurbishedQc", error);
+  await logAdminAction(user.id, status === "passed" ? "refurbished_qc_passed" : "refurbished_qc_failed", "product", productId, {
+    notes: notes?.trim() || undefined,
+  });
+  revalidatePath("/dashboard/admin/refurbished-qc");
+  revalidatePath("/refurbished");
+}
+
 export async function setKycStatus(
   documentId: string,
   status: "approved" | "rejected"

@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { ListingKind, Product, ProductVariant, Review } from "./types";
 
 const PRODUCT_COLS =
-  "id, supplier_id, category_id, kind, title, slug, description, brand, unit, base_price, compare_at_price, currency, images, attributes, status, rating_avg, rating_count, sales_count, is_featured, created_at, model_glb_url, model_usdz_url";
+  "id, supplier_id, category_id, kind, title, slug, description, brand, unit, base_price, compare_at_price, currency, images, attributes, status, rating_avg, rating_count, sales_count, is_featured, created_at, model_glb_url, model_usdz_url, is_refurbished";
 
 export type ListParams = {
   kind?: ListingKind;

@@ -17,6 +17,8 @@ import { SizeRecommendationWidget } from "@/components/shop/size-recommendation-
 import { getPriceTrend } from "@/features/catalog/price-trend";
 import { PriceTrendBadge } from "@/components/shop/price-trend-badge";
 import { ArModelViewer } from "@/components/shop/ar-model-viewer";
+import { getRefurbishedDetails } from "@/features/refurbished/queries";
+import { RefurbishedConditionCard } from "@/components/shop/refurbished-condition-card";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -53,12 +55,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [variants, reviews, session, reviewSummary, priceTrend] = await Promise.all([
+  const [variants, reviews, session, reviewSummary, priceTrend, refurbishedDetails] = await Promise.all([
     getProductVariants(product.id),
     getProductReviews(product.id),
     getSession(),
     getReviewSummary(product.id, product.rating_count),
     getPriceTrend(product.id, product.base_price),
+    product.is_refurbished ? getRefurbishedDetails(product.id) : Promise.resolve(null),
   ]);
   const wishlisted = session ? (await getWishlistedIds(session.user.id)).has(product.id) : false;
   const defaultVariant = variants[0];
@@ -117,6 +120,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {product.unit ? <span className="text-muted-foreground">/ {product.unit}</span> : null}
           </div>
           <div className="mt-1.5"><PriceTrendBadge trend={priceTrend} /></div>
+
+          {refurbishedDetails ? (
+            <div className="mt-4">
+              <RefurbishedConditionCard details={refurbishedDetails} />
+            </div>
+          ) : null}
 
           {product.description ? (
             <p className="mt-4 whitespace-pre-line text-sm text-muted-foreground">{product.description}</p>

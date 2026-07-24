@@ -25,6 +25,7 @@ export type Product = {
   created_at: string;
   model_glb_url?: string | null;
   model_usdz_url?: string | null;
+  is_refurbished?: boolean;
 };
 
 export type ProductVariant = {
