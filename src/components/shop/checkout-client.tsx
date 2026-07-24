@@ -1,43 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Script from "next/script";
 import { toast } from "sonner";
 import { Loader2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils/format";
-import {
-  createCheckoutOrder,
-  verifyAndFinalizeOrder,
-  validateCoupon,
-} from "@/features/orders/checkout-actions";
+import { createCheckoutOrder, validateCoupon } from "@/features/orders/checkout-actions";
 
-type RazorpayResponse = {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-};
-
-declare global {
-  interface Window {
-    Razorpay: new (options: Record<string, unknown>) => { open: () => void };
+// PayU's hosted checkout is a plain form POST redirect -- there's no
+// client-side SDK/widget (unlike Razorpay's checkout.js modal this replaces).
+// Building and submitting the form via the DOM directly (rather than React
+// state + a ref) sidesteps any render-timing gap between setting field
+// values and calling submit().
+function redirectToPayu(actionUrl: string, fields: Record<string, string>) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = actionUrl;
+  for (const [name, value] of Object.entries(fields)) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
   }
+  document.body.appendChild(form);
+  form.submit();
 }
 
 export function CheckoutClient({
   addressId,
   subtotal,
-  buyerName,
-  buyerEmail,
 }: {
   addressId: string | null;
   subtotal: number;
-  buyerName: string;
-  buyerEmail: string;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -66,10 +63,6 @@ export function CheckoutClient({
       toast.error("Please add a delivery address.");
       return;
     }
-    if (typeof window === "undefined" || !window.Razorpay) {
-      toast.error("Payment is still loading — please try again in a moment.");
-      return;
-    }
     setLoading(true);
     const res = await createCheckoutOrder(addressId, appliedCode ?? undefined);
     if (!res.ok) {
@@ -77,38 +70,12 @@ export function CheckoutClient({
       setLoading(false);
       return;
     }
-
-    const rzp = new window.Razorpay({
-      key: res.keyId,
-      amount: res.amount,
-      currency: "INR",
-      name: "SmartBuyX",
-      description: "Order payment",
-      order_id: res.razorpayOrderId,
-      prefill: { name: buyerName, email: buyerEmail },
-      theme: { color: "#2563eb" },
-      handler: async (response: RazorpayResponse) => {
-        const result = await verifyAndFinalizeOrder({
-          orderId: res.orderId,
-          razorpayOrderId: response.razorpay_order_id,
-          razorpayPaymentId: response.razorpay_payment_id,
-          razorpaySignature: response.razorpay_signature,
-        });
-        if (result.ok) router.push(`/checkout/success?order=${res.orderId}`);
-        else {
-          toast.error(result.error ?? "Payment verification failed.");
-          setLoading(false);
-        }
-      },
-      modal: { ondismiss: () => setLoading(false) },
-    });
-    rzp.open();
+    redirectToPayu(res.payuUrl, res.fields);
+    // No setLoading(false) here -- the browser is navigating away to PayU.
   }
 
   return (
     <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

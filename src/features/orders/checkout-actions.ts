@@ -1,17 +1,20 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth/guards";
 import { getCart } from "./cart-queries";
-import { razorpay, toPaise } from "@/lib/razorpay/client";
-import { verifyPaymentSignature } from "@/lib/razorpay/verify";
-import { fulfilPaidOrder } from "./fulfil-paid-order";
+import { generatePayuRequestHash, payuBaseUrl, txnidForOrder, isPayuConfigured } from "@/lib/payu/client";
 import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type CreateOrderResult =
-  | { ok: true; orderId: string; razorpayOrderId: string; amount: number; keyId: string }
+  | {
+      ok: true;
+      payuUrl: string;
+      fields: {
+        key: string; txnid: string; amount: string; productinfo: string;
+        firstname: string; email: string; phone: string; surl: string; furl: string; hash: string;
+      };
+    }
   | { ok: false; error: string };
 
 // Validate a coupon against the current cart. Used by the checkout UI.
@@ -30,13 +33,20 @@ export async function validateCoupon(code: string): Promise<{ ok: boolean; disco
   return { ok: true, discount: Number(row.discount), reason: "ok" };
 }
 
-// 1) Build a DB order from the cart, then a Razorpay order to collect payment.
+// Build a DB order from the cart, then a PayU hosted-checkout form the
+// client auto-submits (browser navigates to PayU's payment page; there is
+// no client-side widget/SDK for this flow). PayU posts the result back to
+// /api/payu/callback (see that route for hash verification + fulfilment).
 export async function createCheckoutOrder(addressId: string, couponCode?: string): Promise<CreateOrderResult> {
   const { user } = await requireUser();
+  if (!isPayuConfigured()) return { ok: false, error: "Payments are not configured yet." };
   const supabase = await createClient();
   const cart = await getCart(user.id);
 
   if (cart.lines.length === 0) return { ok: false, error: "Your cart is empty." };
+
+  const { data: profile } = await supabase.from("profiles").select("full_name, phone").eq("id", user.id).single();
+  if (!profile?.phone) return { ok: false, error: "Add a phone number to your account before checking out." };
 
   const subtotal = cart.subtotal;
   const tax = 0;
@@ -86,63 +96,34 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
   if (itemsErr) return { ok: false, error: itemsErr.message };
 
   try {
-    const rzpOrder = await razorpay().orders.create({
-      amount: toPaise(total),
-      currency: "INR",
-      receipt: order.id,
-      notes: { order_id: order.id, buyer_id: user.id },
-    });
+    const key = process.env.PAYU_MERCHANT_KEY!;
+    const txnid = txnidForOrder(order.id);
+    const amount = total.toFixed(2); // must be byte-identical everywhere it's used (hash + form + response)
+    const productinfo = "SmartBuyX Order";
+    const firstname = (profile.full_name ?? user.email ?? "Customer").split(" ")[0];
+    const email = user.email ?? "";
+    const phone = profile.phone;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+    const surl = `${appUrl}/api/payu/callback`;
+    const furl = `${appUrl}/api/payu/callback`; // same route -- it reads `status` from the posted body
 
-    await supabase.from("payments").insert({
+    const hash = generatePayuRequestHash({ key, txnid, amount, productinfo, firstname, email });
+
+    const { error: paymentErr } = await supabase.from("payments").insert({
       order_id: order.id,
-      razorpay_order_id: rzpOrder.id,
+      payu_txnid: txnid,
       amount: total,
       currency: "INR",
       status: "created",
     });
+    if (paymentErr) return { ok: false, error: paymentErr.message };
 
     return {
       ok: true,
-      orderId: order.id,
-      razorpayOrderId: rzpOrder.id,
-      amount: toPaise(total),
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      payuUrl: payuBaseUrl(),
+      fields: { key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash },
     };
   } catch (e) {
     return { ok: false, error: safeErrorMessage(e, "Could not start payment.", "createCheckoutOrder") };
   }
 }
-
-// 2) Verify the Razorpay signature on the client success callback, then fulfil.
-export async function verifyAndFinalizeOrder(input: {
-  orderId: string;
-  razorpayOrderId: string;
-  razorpayPaymentId: string;
-  razorpaySignature: string;
-}): Promise<{ ok: boolean; error?: string }> {
-  await requireUser();
-
-  const valid = verifyPaymentSignature({
-    orderId: input.razorpayOrderId,
-    paymentId: input.razorpayPaymentId,
-    signature: input.razorpaySignature,
-  });
-  if (!valid) return { ok: false, error: "Payment verification failed." };
-
-  const admin = createAdminClient();
-  await admin
-    .from("payments")
-    .update({
-      razorpay_payment_id: input.razorpayPaymentId,
-      razorpay_signature: input.razorpaySignature,
-      status: "captured",
-    })
-    .eq("razorpay_order_id", input.razorpayOrderId);
-
-  await fulfilPaidOrder(input.orderId);
-  revalidatePath("/orders");
-  return { ok: true };
-}
-
-// fulfilPaidOrder now lives in ./fulfil-paid-order.ts (deliberately not a
-// "use server" file — see the comment there for why).

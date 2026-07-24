@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/guards";
 import { getCart } from "@/features/orders/cart-queries";
 import { listAddresses } from "@/features/account/address-queries";
-import { createClient } from "@/lib/supabase/server";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,8 +25,6 @@ export default async function CheckoutPage() {
     );
   }
 
-  const supabase = await createClient();
-  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
   const defaultAddress = addresses.find((a) => a.is_default) ?? addresses[0] ?? null;
 
   return (
@@ -79,10 +76,8 @@ export default async function CheckoutPage() {
             <CheckoutClient
               addressId={defaultAddress?.id ?? null}
               subtotal={cart.subtotal}
-              buyerName={profile?.full_name ?? ""}
-              buyerEmail={user.email ?? ""}
             />
-            <p className="text-center text-xs text-muted-foreground">Secured by Razorpay · UPI, cards, net banking</p>
+            <p className="text-center text-xs text-muted-foreground">Secured by PayU · UPI, cards, net banking</p>
           </CardContent>
         </Card>
       </div>

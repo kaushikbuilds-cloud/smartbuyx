@@ -14,7 +14,10 @@ const CSP = [
   "frame-src https://checkout.razorpay.com https://api.razorpay.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // 'self' (Razorpay's subscription-billing modal, still in use) plus PayU's
+  // hosted checkout domains -- checkout now navigates the browser there via
+  // a plain form POST (no client-side PayU script/widget involved).
+  "form-action 'self' https://test.payu.in https://secure.payu.in",
 ].join("; ");
 
 const config: NextConfig = {
