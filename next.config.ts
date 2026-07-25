@@ -15,9 +15,14 @@ const CSP = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   // 'self' (Razorpay's subscription-billing modal, still in use) plus PayU's
-  // hosted checkout domains -- checkout now navigates the browser there via
-  // a plain form POST (no client-side PayU script/widget involved).
-  "form-action 'self' https://test.payu.in https://secure.payu.in",
+  // hosted checkout -- checkout now navigates the browser there via a plain
+  // form POST (no client-side PayU script/widget involved). Chrome enforces
+  // form-action against EVERY hop of a redirect chain, not just the initial
+  // submit target -- PayU's /_payment endpoint may internally redirect to a
+  // sibling subdomain (regional processing, trailing-slash normalization,
+  // etc.), so a wildcard on payu.in is needed rather than the two literal
+  // hostnames alone (which is what was silently blocking every attempt).
+  "form-action 'self' https://*.payu.in",
 ].join("; ");
 
 const config: NextConfig = {
