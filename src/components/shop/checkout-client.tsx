@@ -8,26 +8,6 @@ import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils/format";
 import { createCheckoutOrder, validateCoupon } from "@/features/orders/checkout-actions";
 
-// PayU's hosted checkout is a plain form POST redirect -- there's no
-// client-side SDK/widget (unlike Razorpay's checkout.js modal this replaces).
-// Building and submitting the form via the DOM directly (rather than React
-// state + a ref) sidesteps any render-timing gap between setting field
-// values and calling submit().
-function redirectToPayu(actionUrl: string, fields: Record<string, string>) {
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = actionUrl;
-  for (const [name, value] of Object.entries(fields)) {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    form.appendChild(input);
-  }
-  document.body.appendChild(form);
-  form.submit();
-}
-
 export function CheckoutClient({
   addressId,
   subtotal,
@@ -70,8 +50,10 @@ export function CheckoutClient({
       setLoading(false);
       return;
     }
-    redirectToPayu(res.payuUrl, res.fields);
-    // No setLoading(false) here -- the browser is navigating away to PayU.
+    // Plain top-level navigation (not a form-action) to a server-rendered
+    // bridge page that does the actual auto-submitting POST to PayU as real
+    // server-rendered HTML.
+    window.location.href = `/checkout/pay/${res.orderId}`;
   }
 
   return (

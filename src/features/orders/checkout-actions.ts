@@ -7,14 +7,7 @@ import { generatePayuRequestHash, payuBaseUrl, txnidForOrder, isPayuConfigured }
 import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type CreateOrderResult =
-  | {
-      ok: true;
-      payuUrl: string;
-      fields: {
-        key: string; txnid: string; amount: string; productinfo: string;
-        firstname: string; email: string; phone: string; surl: string; furl: string; hash: string;
-      };
-    }
+  | { ok: true; orderId: string }
   | { ok: false; error: string };
 
 // Validate a coupon against the current cart. Used by the checkout UI.
@@ -33,10 +26,12 @@ export async function validateCoupon(code: string): Promise<{ ok: boolean; disco
   return { ok: true, discount: Number(row.discount), reason: "ok" };
 }
 
-// Build a DB order from the cart, then a PayU hosted-checkout form the
-// client auto-submits (browser navigates to PayU's payment page; there is
-// no client-side widget/SDK for this flow). PayU posts the result back to
-// /api/payu/callback (see that route for hash verification + fulfilment).
+// Build a DB order from the cart, compute the PayU hosted-checkout fields,
+// and store them on the payment row. The client navigates (plain top-level
+// navigation, not a form-action) to /checkout/pay/[orderId], a server-
+// rendered page that renders the actual auto-submitting <form> as real HTML
+// -- not built via client-side DOM manipulation. PayU posts the result back
+// to /api/payu/callback (see that route for hash verification + fulfilment).
 export async function createCheckoutOrder(addressId: string, couponCode?: string): Promise<CreateOrderResult> {
   const { user } = await requireUser();
   if (!isPayuConfigured()) return { ok: false, error: "Payments are not configured yet." };
@@ -108,6 +103,7 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
     const furl = `${appUrl}/api/payu/callback`; // same route -- it reads `status` from the posted body
 
     const hash = generatePayuRequestHash({ key, txnid, amount, productinfo, firstname, email });
+    const payuFields = { payuUrl: payuBaseUrl(), key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash };
 
     const { error: paymentErr } = await supabase.from("payments").insert({
       order_id: order.id,
@@ -115,14 +111,11 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
       amount: total,
       currency: "INR",
       status: "created",
+      raw: { payu_request_fields: payuFields },
     });
     if (paymentErr) return { ok: false, error: paymentErr.message };
 
-    return {
-      ok: true,
-      payuUrl: payuBaseUrl(),
-      fields: { key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash },
-    };
+    return { ok: true, orderId: order.id };
   } catch (e) {
     return { ok: false, error: safeErrorMessage(e, "Could not start payment.", "createCheckoutOrder") };
   }
