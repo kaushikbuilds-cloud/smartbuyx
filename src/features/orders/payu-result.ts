@@ -34,21 +34,11 @@ export async function handlePayuResult(form: FormData): Promise<PayuResultOutcom
     .eq("payu_txnid", txnid)
     .maybeSingle();
 
-  // TEMPORARY diagnostic logging while investigating a payment row that
-  // exists (confirmed via direct SQL) but this lookup reports not found.
-  // Logging the query error itself this time -- previously only checked
-  // whether `data` was present, which silently masked an auth/query error
-  // as a plain "not found" result.
-  if (!valid || !payment) {
-    console.error("[payu-result] unverifiable callback", {
-      txnid: JSON.stringify(txnid), txnidLength: txnid.length, status, hashPresent: Boolean(hash),
-      keyMatchesEnv: key === process.env.PAYU_MERCHANT_KEY,
-      hasServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-      serviceRoleKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length ?? 0,
-      paymentRowFound: Boolean(payment),
-      paymentLookupError: paymentLookupError ? { message: paymentLookupError.message, code: paymentLookupError.code, details: paymentLookupError.details, hint: paymentLookupError.hint } : null,
-      amount, productinfo, firstname,
-    });
+  // A query error here (permissions, connectivity) is a real anomaly worth
+  // surfacing -- unlike a plain "no matching row", which is the expected
+  // shape of a forged/corrupted callback.
+  if (paymentLookupError) {
+    console.error("[payu-result] payments lookup failed", { txnid, message: paymentLookupError.message, code: paymentLookupError.code });
   }
 
   if (!valid || !payment) {

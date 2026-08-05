@@ -32,3 +32,6 @@ ios/App/DerivedData
 *.jks
 *.p12
 *.mobileprovision
+
+.vercel
+.env*
