@@ -105,13 +105,24 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
     const hash = generatePayuRequestHash({ key, txnid, amount, productinfo, firstname, email });
     const payuFields = { payuUrl: payuBaseUrl(), key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash };
 
-    const { error: paymentErr } = await supabase.from("payments").insert({
-      order_id: order.id,
-      payu_txnid: txnid,
-      amount: total,
-      currency: "INR",
-      status: "created",
-      raw: { payu_request_fields: payuFields },
+    const { data: insertedPayment, error: paymentErr } = await supabase
+      .from("payments")
+      .insert({
+        order_id: order.id,
+        payu_txnid: txnid,
+        amount: total,
+        currency: "INR",
+        status: "created",
+        raw: { payu_request_fields: payuFields },
+      })
+      .select("id, payu_txnid")
+      .single();
+    // TEMPORARY diagnostic while investigating payments rows that can't be
+    // found later by txnid -- remove once resolved.
+    console.error("[createCheckoutOrder] payment insert", {
+      orderId: order.id, txnidGenerated: JSON.stringify(txnid), txnidLength: txnid.length,
+      insertError: paymentErr?.message ?? null,
+      insertedTxnid: insertedPayment ? JSON.stringify(insertedPayment.payu_txnid) : null,
     });
     if (paymentErr) return { ok: false, error: paymentErr.message };
 

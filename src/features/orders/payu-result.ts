@@ -34,9 +34,16 @@ export async function handlePayuResult(form: FormData): Promise<PayuResultOutcom
   // failure on genuinely successful PayU transactions. No secrets logged
   // (salt never appears here) -- safe to leave briefly, remove once resolved.
   if (!valid || !payment) {
+    const { data: recentPayments } = await admin
+      .from("payments")
+      .select("payu_txnid, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5);
     console.error("[payu-result] unverifiable callback", {
-      txnid, status, hashPresent: Boolean(hash), keyMatchesEnv: key === process.env.PAYU_MERCHANT_KEY,
+      txnid: JSON.stringify(txnid), txnidLength: txnid.length, status, hashPresent: Boolean(hash),
+      keyMatchesEnv: key === process.env.PAYU_MERCHANT_KEY,
       paymentRowFound: Boolean(payment), amount, productinfo, firstname,
+      recentPayments: recentPayments?.map((p) => ({ txnid: JSON.stringify(p.payu_txnid), status: p.status, at: p.created_at })),
     });
   }
 
