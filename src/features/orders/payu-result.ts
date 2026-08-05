@@ -28,22 +28,26 @@ export async function handlePayuResult(form: FormData): Promise<PayuResultOutcom
   const valid = Boolean(txnid) && verifyPayuResponseHash({ key, txnid, amount, productinfo, firstname, email, status, hash });
 
   const admin = createAdminClient();
-  const { data: payment } = await admin.from("payments").select("order_id").eq("payu_txnid", txnid).maybeSingle();
+  const { data: payment, error: paymentLookupError } = await admin
+    .from("payments")
+    .select("order_id")
+    .eq("payu_txnid", txnid)
+    .maybeSingle();
 
-  // TEMPORARY diagnostic logging while investigating a hash-verification
-  // failure on genuinely successful PayU transactions. No secrets logged
-  // (salt never appears here) -- safe to leave briefly, remove once resolved.
+  // TEMPORARY diagnostic logging while investigating a payment row that
+  // exists (confirmed via direct SQL) but this lookup reports not found.
+  // Logging the query error itself this time -- previously only checked
+  // whether `data` was present, which silently masked an auth/query error
+  // as a plain "not found" result.
   if (!valid || !payment) {
-    const { data: recentPayments } = await admin
-      .from("payments")
-      .select("payu_txnid, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5);
     console.error("[payu-result] unverifiable callback", {
       txnid: JSON.stringify(txnid), txnidLength: txnid.length, status, hashPresent: Boolean(hash),
       keyMatchesEnv: key === process.env.PAYU_MERCHANT_KEY,
-      paymentRowFound: Boolean(payment), amount, productinfo, firstname,
-      recentPayments: recentPayments?.map((p) => ({ txnid: JSON.stringify(p.payu_txnid), status: p.status, at: p.created_at })),
+      hasServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      serviceRoleKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length ?? 0,
+      paymentRowFound: Boolean(payment),
+      paymentLookupError: paymentLookupError ? { message: paymentLookupError.message, code: paymentLookupError.code, details: paymentLookupError.details, hint: paymentLookupError.hint } : null,
+      amount, productinfo, firstname,
     });
   }
 
