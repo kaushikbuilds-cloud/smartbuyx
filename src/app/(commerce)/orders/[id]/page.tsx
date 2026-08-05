@@ -30,7 +30,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const variantIds = order.items.map((i) => i.variant_id);
   const [variantsRes, shipmentsRes, escrowRes] = await Promise.all([
     supabase.from("product_variants").select("id, products(id, slug)").in("id", variantIds),
-    supabase.from("shipments").select("id, status, seller_id").eq("order_id", order.id),
+    supabase.from("shipments").select("id, status, seller_id, awb, courier_name").eq("order_id", order.id),
     supabase.from("escrow_holds").select("amount, status").eq("order_id", order.id),
   ]);
   const productByVariant = new Map<string, { id: string; slug: string }>();
@@ -67,6 +67,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <Badge variant="secondary" className="gap-1">
             <ShieldCheck className="h-3 w-3" /> {formatINR(heldTotal)} held in escrow — released when you confirm delivery
           </Badge>
+        </div>
+      ) : null}
+
+      {/* Live courier tracking, once Delhivery has assigned an AWB. */}
+      {shipments.some((s) => s.awb) ? (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {shipments.filter((s) => s.awb).map((s) => (
+            <Badge key={s.id} variant="secondary">
+              {s.courier_name ?? "Courier"} · AWB {s.awb}
+            </Badge>
+          ))}
         </div>
       ) : null}
 

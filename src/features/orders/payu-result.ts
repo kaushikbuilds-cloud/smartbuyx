@@ -30,6 +30,16 @@ export async function handlePayuResult(form: FormData): Promise<PayuResultOutcom
   const admin = createAdminClient();
   const { data: payment } = await admin.from("payments").select("order_id").eq("payu_txnid", txnid).maybeSingle();
 
+  // TEMPORARY diagnostic logging while investigating a hash-verification
+  // failure on genuinely successful PayU transactions. No secrets logged
+  // (salt never appears here) -- safe to leave briefly, remove once resolved.
+  if (!valid || !payment) {
+    console.error("[payu-result] unverifiable callback", {
+      txnid, status, hashPresent: Boolean(hash), keyMatchesEnv: key === process.env.PAYU_MERCHANT_KEY,
+      paymentRowFound: Boolean(payment), amount, productinfo, firstname,
+    });
+  }
+
   if (!valid || !payment) {
     // Either a forged/corrupted POST, or no matching payment row -- never
     // trust it either way.

@@ -19,18 +19,16 @@ export default async function PlansPage({
   const plans = await listPlansByAudience(audience);
   const session = await getSession();
 
-  let buyerName = "";
-  let buyerEmail = "";
   let currentSubscriptionPlanId: string | null = null;
 
   if (session) {
     const supabase = await createClient();
-    const [{ data: profile }, { data: sub }] = await Promise.all([
-      supabase.from("profiles").select("full_name").eq("id", session.user.id).single(),
-      supabase.from("subscriptions").select("plan_id").eq("user_id", session.user.id).eq("status", "active").maybeSingle(),
-    ]);
-    buyerName = profile?.full_name ?? "";
-    buyerEmail = session.user.email ?? "";
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("plan_id")
+      .eq("user_id", session.user.id)
+      .eq("status", "active")
+      .maybeSingle();
     currentSubscriptionPlanId = sub?.plan_id ?? null;
   }
 
@@ -67,6 +65,11 @@ export default async function PlansPage({
                       /{plan.billing_period === "yearly" ? "year" : "month"}
                     </span>
                   </p>
+                  {audience === "supplier" ? (
+                    <p className="mt-1 text-sm font-medium text-emerald-600">
+                      {plan.commission_percent > 0 ? `+ ${plan.commission_percent}% commission per order` : "0% commission — keep 100%"}
+                    </p>
+                  ) : null}
                 </div>
 
                 <ul className="space-y-2">
@@ -79,7 +82,7 @@ export default async function PlansPage({
                 </ul>
 
                 {session ? (
-                  <SubscribeButton planId={plan.id} isFree={isFree} isCurrent={isCurrent} buyerName={buyerName} buyerEmail={buyerEmail} />
+                  <SubscribeButton planId={plan.id} isFree={isFree} isCurrent={isCurrent} />
                 ) : (
                   <a href="/login" className="block w-full rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-center text-sm font-medium text-white">
                     Log in to subscribe

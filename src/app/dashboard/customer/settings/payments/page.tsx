@@ -54,7 +54,7 @@ export default async function PaymentSettingsPage() {
         <UpiForm />
         <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
-          <p>We never store card numbers or CVVs. Card payments are tokenized through Razorpay automatically.</p>
+          <p>We never store card numbers or CVVs. Card payments are tokenized through PayU automatically.</p>
         </div>
       </SettingsCard>
 

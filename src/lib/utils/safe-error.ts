@@ -1,4 +1,4 @@
-// For catch blocks around third-party SDK calls (OpenAI, Razorpay, etc.):
+// For catch blocks around third-party SDK calls (OpenAI, PayU, etc.):
 // logs the real error server-side only, and always returns a generic message
 // to the client. An unexpected exception's .message can leak internal detail
 // (a variable/property name from a TypeError, an internal hostname, etc.) —

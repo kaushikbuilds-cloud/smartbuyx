@@ -12,6 +12,7 @@ export type PlanRow = {
   billing_period: string;
   features: string[];
   highlight: boolean;
+  commission_percent: number;
 };
 
 export async function listPlansByAudience(audience: string): Promise<PlanRow[]> {
@@ -19,11 +20,16 @@ export async function listPlansByAudience(audience: string): Promise<PlanRow[]> 
   const supabase = await createClient();
   const { data } = await supabase
     .from("plans")
-    .select("id, code, audience, tier, name, tagline, price_inr, billing_period, features, highlight")
+    .select("id, code, audience, tier, name, tagline, price_inr, billing_period, features, highlight, commission_percent")
     .eq("audience", audience)
     .eq("active", true)
     .order("sort_order", { ascending: true });
-  return (data ?? []).map((p) => ({ ...p, price_inr: Number(p.price_inr), features: (p.features as string[]) ?? [] }));
+  return (data ?? []).map((p) => ({
+    ...p,
+    price_inr: Number(p.price_inr),
+    features: (p.features as string[]) ?? [],
+    commission_percent: Number(p.commission_percent ?? 0),
+  }));
 }
 
 export async function listAllAudiences(): Promise<string[]> {

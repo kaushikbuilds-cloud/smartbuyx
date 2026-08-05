@@ -1,10 +1,18 @@
 "use server";
 
-import OpenAI, { toFile } from "openai";
-import { openai, isOpenAIConfigured } from "@/lib/ai/openai";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/guards";
 import { checkRateLimit } from "@/lib/rate-limit";
+
+// Gemini's OpenAI-compatibility layer (used everywhere else in src/lib/ai/openai.ts)
+// only covers chat completions, not image generation/editing -- so this one
+// feature talks to Gemini's native image model directly instead. Still just
+// the one GEMINI_API_KEY across the whole app.
+const IMAGE_MODEL = "gemini-2.5-flash-image";
+
+function isGeminiConfigured(): boolean {
+  return Boolean(process.env.GEMINI_API_KEY);
+}
 
 const ENHANCE_PROMPT =
   "Enhance this product photo for an e-commerce listing: even, bright studio lighting, " +
@@ -30,10 +38,11 @@ function isAllowedImageHost(url: string): boolean {
 }
 
 // Cleans up a seller-uploaded product photo (better lighting/background) via
-// OpenAI image edits, then re-uploads the result next to the original.
+// Gemini's native image model (image-in, image-out), then re-uploads the
+// result next to the original.
 export async function enhanceProductImage(imageUrl: string): Promise<EnhanceResult> {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  if (!isOpenAIConfigured()) return { error: "AI image enhancement isn't configured yet." };
+  if (!isGeminiConfigured()) return { error: "AI image enhancement isn't configured yet." };
   if (!isAllowedImageHost(imageUrl)) return { error: "Invalid image source." };
   // Tighter limit than text AI calls — image generation costs meaningfully more per call.
   const rl = checkRateLimit(`enhance:${user.id}`, 8, 60_000);
@@ -42,16 +51,31 @@ export async function enhanceProductImage(imageUrl: string): Promise<EnhanceResu
   try {
     const res = await fetch(imageUrl);
     if (!res.ok) return { error: "Couldn't fetch the original image." };
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    const image = await toFile(bytes, "product.png", { type: "image/png" });
+    const bytes = Buffer.from(await res.arrayBuffer());
+    const mimeType = res.headers.get("content-type") ?? "image/png";
 
-    const result = await openai().images.edit({
-      model: "gpt-image-1",
-      image,
-      prompt: ENHANCE_PROMPT,
-      size: "1024x1024",
-    });
-    const b64 = result.data?.[0]?.b64_json;
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: ENHANCE_PROMPT },
+                { inline_data: { mime_type: mimeType, data: bytes.toString("base64") } },
+              ],
+            },
+          ],
+        }),
+      }
+    );
+    if (!geminiRes.ok) return { error: "AI enhancement failed. Try again." };
+    const body = await geminiRes.json();
+    const parts = body.candidates?.[0]?.content?.parts ?? [];
+    const imagePart = parts.find((p: { inlineData?: { data?: string } }) => p.inlineData?.data);
+    const b64 = imagePart?.inlineData?.data;
     if (!b64) return { error: "AI enhancement returned no image." };
 
     const admin = createAdminClient();
@@ -63,8 +87,7 @@ export async function enhanceProductImage(imageUrl: string): Promise<EnhanceResu
 
     const { data } = admin.storage.from("product-images").getPublicUrl(path);
     return { url: data.publicUrl };
-  } catch (err) {
-    if (err instanceof OpenAI.APIError) return { error: err.message };
+  } catch {
     return { error: "AI enhancement failed. Try again." };
   }
 }

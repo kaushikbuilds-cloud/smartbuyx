@@ -6,22 +6,21 @@ import type { NextConfig } from "next";
 // hosts) rather than a maximally strict one. Tighten with nonces later if needed.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://checkout.razorpay.com https://api.razorpay.com wss://*.supabase.co",
-  "frame-src https://checkout.razorpay.com https://api.razorpay.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  // 'self' (Razorpay's subscription-billing modal, still in use) plus PayU's
-  // hosted checkout -- checkout now navigates the browser there via a plain
-  // form POST (no client-side PayU script/widget involved). Chrome enforces
-  // form-action against EVERY hop of a redirect chain, not just the initial
-  // submit target -- PayU's /_payment endpoint may internally redirect to a
-  // sibling subdomain (regional processing, trailing-slash normalization,
-  // etc.), so a wildcard on payu.in is needed rather than the two literal
-  // hostnames alone (which is what was silently blocking every attempt).
+  // Both order checkout and plan/subscription billing now use PayU's hosted
+  // checkout -- the browser navigates there via a plain form POST (no
+  // client-side PayU script/widget involved). Chrome enforces form-action
+  // against EVERY hop of a redirect chain, not just the initial submit target
+  // -- PayU's /_payment endpoint may internally redirect to a sibling
+  // subdomain (regional processing, trailing-slash normalization, etc.), so a
+  // wildcard on payu.in is needed rather than literal hostnames alone (which
+  // is what was silently blocking every attempt).
   "form-action 'self' https://*.payu.in",
 ].join("; ");
 

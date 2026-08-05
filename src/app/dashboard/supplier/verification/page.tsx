@@ -1,20 +1,23 @@
 import { ShieldCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { getMyPayoutDetails, getMyKycDocuments, getMyStoreLogo } from "@/features/seller/verification";
+import { getMyPickupAddress } from "@/features/shipping/pickup-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { PayoutDetailsForm } from "@/components/dashboard/seller/payout-details-form";
 import { KycUploader } from "@/components/dashboard/seller/kyc-uploader";
 import { StoreLogoUploader } from "@/components/dashboard/seller/store-logo-uploader";
+import { PickupAddressForm } from "@/components/dashboard/seller/pickup-address-form";
 
 export const metadata = { title: "Verification · Seller" };
 export const dynamic = "force-dynamic";
 
 export default async function SellerVerificationPage() {
   const { user } = await requireRole("supplier", "d2c_brand", "admin", "superadmin");
-  const [payout, documents, storeLogo] = await Promise.all([
+  const [payout, documents, storeLogo, pickupAddress] = await Promise.all([
     getMyPayoutDetails(user.id),
     getMyKycDocuments(user.id),
     getMyStoreLogo(user.id),
+    getMyPickupAddress(user.id),
   ]);
 
   return (
@@ -46,6 +49,16 @@ export default async function SellerVerificationPage() {
             <p className="text-sm text-muted-foreground">Where we send your earnings. Kept private and used only for payouts.</p>
           </div>
           <PayoutDetailsForm existing={payout} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <div>
+            <h2 className="font-semibold">Pickup address</h2>
+            <p className="text-sm text-muted-foreground">Where our courier partner collects orders for you to ship.</p>
+          </div>
+          <PickupAddressForm existing={pickupAddress} />
         </CardContent>
       </Card>
 

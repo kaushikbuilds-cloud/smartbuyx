@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/guards";
 import { isWhatsAppConfigured, sendWhatsAppTemplate } from "@/lib/whatsapp/client";
+import { createDelhiveryShipment } from "@/features/shipping/create-shipment";
 
 const SELLER_ROLES = ["supplier", "d2c_brand", "admin", "superadmin"] as const;
 
@@ -50,7 +51,27 @@ export async function updateShipmentStatus(
   return { ok: true };
 }
 
-async function syncOrderStatus(orderId: string) {
+// Seller-facing retry for auto-booking that failed the first time (Delhivery
+// outage, transient network error, etc.) -- only valid while still "pending"
+// with no AWB assigned yet, to avoid double-booking a courier.
+export async function retryDelhiveryBooking(shipmentId: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requireRole(...SELLER_ROLES);
+  const supabase = await createClient();
+
+  const { data: shipment } = await supabase
+    .from("shipments")
+    .select("id, status, seller_id, awb")
+    .eq("id", shipmentId)
+    .single();
+  if (!shipment || shipment.seller_id !== user.id) return { ok: false, error: "Not found." };
+  if (shipment.status !== "pending" || shipment.awb) return { ok: false, error: "Already booked." };
+
+  await createDelhiveryShipment(shipmentId);
+  revalidatePath("/dashboard/supplier/orders");
+  return { ok: true };
+}
+
+export async function syncOrderStatus(orderId: string) {
   const admin = createAdminClient();
   const { data: shipments } = await admin.from("shipments").select("status").eq("order_id", orderId);
   const statuses = (shipments ?? []).map((s) => s.status);

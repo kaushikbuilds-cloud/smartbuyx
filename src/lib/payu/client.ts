@@ -73,3 +73,9 @@ function safeEqual(a: string, b: string): boolean {
 export function txnidForOrder(orderId: string): string {
   return `sbx${orderId.replace(/-/g, "").slice(0, 20)}`;
 }
+
+// Distinct prefix from txnidForOrder so a txnid alone is enough to tell which
+// callback route (order vs. plan payment) generated it, if ever needed.
+export function txnidForPlanPayment(paymentId: string): string {
+  return `sbp${paymentId.replace(/-/g, "").slice(0, 20)}`;
+}

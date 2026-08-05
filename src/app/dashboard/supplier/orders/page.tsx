@@ -48,7 +48,14 @@ export default async function SellerOrdersPage() {
                     </p>
                   </div>
                   <div className="text-right font-semibold">{formatINR(o.amount)}</div>
-                  <ShipmentStatusControl shipmentId={o.shipmentId} status={o.status} />
+                  <ShipmentStatusControl
+                    shipmentId={o.shipmentId}
+                    status={o.status}
+                    awb={o.awb}
+                    courierName={o.courierName}
+                    labelUrl={o.labelUrl}
+                    bookingError={o.bookingError}
+                  />
                 </CardContent>
               </Card>
             );

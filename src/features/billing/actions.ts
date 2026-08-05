@@ -4,17 +4,19 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth/guards";
-import { razorpay, toPaise } from "@/lib/razorpay/client";
-import { verifyPaymentSignature } from "@/lib/razorpay/verify";
+import { generatePayuRequestHash, payuBaseUrl, txnidForPlanPayment, isPayuConfigured } from "@/lib/payu/client";
 import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type PlanOrderResult =
-  | { ok: true; razorpayOrderId: string; amount: number; keyId: string; planId: string }
+  | { ok: true; paymentId: string }
   | { ok: false; error: string };
 
-// Free plans skip Razorpay entirely.
+// Free plans skip PayU entirely. Paid plans get a `plan_payments` row (mirrors
+// how `payments` backs order checkout) and the client navigates to the same
+// server-rendered auto-submit bridge-page pattern used for orders.
 export async function startPlanCheckout(planId: string): Promise<PlanOrderResult> {
   const { user } = await requireUser();
+  if (!isPayuConfigured()) return { ok: false, error: "Payments are not configured yet." };
   const supabase = await createClient();
 
   const { data: plan } = await supabase
@@ -24,51 +26,47 @@ export async function startPlanCheckout(planId: string): Promise<PlanOrderResult
     .single();
   if (!plan) return { ok: false, error: "Plan not found." };
 
+  const { data: profile } = await supabase.from("profiles").select("full_name, phone").eq("id", user.id).single();
+  if (!profile?.phone) return { ok: false, error: "Add a phone number to your account before subscribing." };
+
   const price = Number(plan.price_inr);
   if (price <= 0) {
     await activateSubscription(user.id, planId, null);
     return { ok: false, error: "FREE_ACTIVATED" }; // sentinel handled client-side
   }
 
+  const admin = createAdminClient();
+  const { data: planPayment, error: insertErr } = await admin
+    .from("plan_payments")
+    .insert({ user_id: user.id, plan_id: planId, amount: price, status: "created" })
+    .select("id")
+    .single();
+  if (insertErr || !planPayment) return { ok: false, error: insertErr?.message ?? "Could not start payment." };
+
   try {
-    const rzpOrder = await razorpay().orders.create({
-      amount: toPaise(price),
-      currency: "INR",
-      receipt: `plan_${planId.slice(0, 8)}_${Date.now()}`,
-      notes: { plan_id: planId, user_id: user.id, kind: "subscription" },
-    });
-    return {
-      ok: true,
-      razorpayOrderId: rzpOrder.id,
-      amount: toPaise(price),
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-      planId,
-    };
+    const key = process.env.PAYU_MERCHANT_KEY!;
+    const txnid = txnidForPlanPayment(planPayment.id);
+    const amount = price.toFixed(2);
+    const productinfo = `SmartBuyX ${plan.name} Plan`;
+    const firstname = (profile.full_name ?? user.email ?? "Customer").split(" ")[0];
+    const email = user.email ?? "";
+    const phone = profile.phone;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+    const surl = `${appUrl}/api/payu/plan-callback`;
+    const furl = `${appUrl}/api/payu/plan-callback`;
+
+    const hash = generatePayuRequestHash({ key, txnid, amount, productinfo, firstname, email });
+    const payuFields = { payuUrl: payuBaseUrl(), key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash };
+
+    await admin.from("plan_payments").update({ payu_txnid: txnid, raw: { payu_request_fields: payuFields } }).eq("id", planPayment.id);
+
+    return { ok: true, paymentId: planPayment.id };
   } catch (e) {
     return { ok: false, error: safeErrorMessage(e, "Could not start payment.", "startPlanCheckout") };
   }
 }
 
-export async function verifyPlanPayment(input: {
-  planId: string;
-  razorpayOrderId: string;
-  razorpayPaymentId: string;
-  razorpaySignature: string;
-}): Promise<{ ok: boolean; error?: string }> {
-  const { user } = await requireUser();
-
-  const valid = verifyPaymentSignature({
-    orderId: input.razorpayOrderId,
-    paymentId: input.razorpayPaymentId,
-    signature: input.razorpaySignature,
-  });
-  if (!valid) return { ok: false, error: "Payment verification failed." };
-
-  await activateSubscription(user.id, input.planId, input.razorpayOrderId);
-  return { ok: true };
-}
-
-async function activateSubscription(userId: string, planId: string, razorpayOrderId: string | null): Promise<void> {
+export async function activateSubscription(userId: string, planId: string, payuTxnid: string | null): Promise<void> {
   const admin = createAdminClient();
 
   const { data: plan } = await admin.from("plans").select("audience, billing_period").eq("id", planId).single();
@@ -95,7 +93,7 @@ async function activateSubscription(userId: string, planId: string, razorpayOrde
     plan_id: planId,
     status: "active",
     current_period_end: periodEnd,
-    razorpay_subscription_id: razorpayOrderId,
+    payu_txnid: payuTxnid,
   });
 
   revalidatePath("/dashboard/subscription");

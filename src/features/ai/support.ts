@@ -75,7 +75,7 @@ Platform facts you can rely on:
 - Returns: allowed within 7 days of delivery from the order page. Refunds credit the SmartBuyX wallet within 24h of pickup.
 - Escrow: payment is held until the buyer confirms delivery, then released to the seller.
 - Wallet/Smart Coins: 1 coin = ₹1, usable on any purchase; earned via referrals (100/friend) and cashback.
-- Payments: Razorpay (UPI, cards, net banking). Saved UPI under Settings → Payments.
+- Payments: PayU (UPI, cards, net banking). Saved UPI under Settings → Payments.
 - Sellers: apply via supplier dashboard; GST-verified sellers get a Trust Score badge.
 - Contact: hello@smartbuyx.in for anything you cannot resolve.
 Rules:
