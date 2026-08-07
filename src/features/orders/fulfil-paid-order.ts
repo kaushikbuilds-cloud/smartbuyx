@@ -10,7 +10,7 @@
 // verification) and the Razorpay webhook (after signature verification).
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createDelhiveryShipment } from "@/features/shipping/create-shipment";
+import { createShiprocketShipment } from "@/features/shipping/create-shipment";
 
 // Idempotent fulfilment shared by the client callback and the Razorpay webhook.
 // The atomic pending->paid claim guarantees the body runs exactly once, no matter
@@ -76,7 +76,7 @@ export async function fulfilPaidOrder(orderId: string): Promise<void> {
       const itemIds = (items ?? []).filter((i) => i.supplier_id === sellerId).map((i) => i.id);
       await admin.from("order_items").update({ shipment_id: shipment.id }).in("id", itemIds);
       // Best-effort auto-booking -- never throws, leaves shipment "pending" on failure.
-      await createDelhiveryShipment(shipment.id);
+      await createShiprocketShipment(shipment.id);
     }
 
     // ESCROW: hold this seller's portion of the payment until buyer confirms delivery.

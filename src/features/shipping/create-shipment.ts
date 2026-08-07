@@ -4,13 +4,13 @@
 // payment is verified) and from the seller-triggered retry action (which does
 // its own auth + ownership check before calling in).
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchWaybill, createOrder, createPickupRequest, checkPincodeServiceable, isDelhiveryConfigured } from "@/lib/delhivery/client";
+import { createShiprocketOrder, assignAwb, generateLabel, isShiprocketConfigured } from "@/lib/shiprocket/client";
 
 // Best-effort: on any failure the shipment simply stays "pending" with no awb,
-// and the seller can retry from their dashboard (see retryDelhiveryBooking).
-// Never throws -- must not block order fulfilment if Delhivery is down.
-export async function createDelhiveryShipment(shipmentId: string): Promise<void> {
-  if (!isDelhiveryConfigured()) return;
+// and the seller can retry from their dashboard (see retryShiprocketBooking).
+// Never throws -- must not block order fulfilment if Shiprocket is down.
+export async function createShiprocketShipment(shipmentId: string): Promise<void> {
+  if (!isShiprocketConfigured()) return;
   const admin = createAdminClient();
 
   const { data: shipment } = await admin
@@ -47,15 +47,9 @@ export async function createDelhiveryShipment(shipmentId: string): Promise<void>
     }
 
     const { data: profile } = await admin.from("profiles").select("full_name, phone").eq("id", order.buyer_id).single();
-
-    const serviceable = await checkPincodeServiceable(address.pincode);
-    if (!serviceable) {
-      await admin
-        .from("shipments")
-        .update({ raw: { error: `Delhivery does not currently service pincode ${address.pincode}.` } })
-        .eq("id", shipmentId);
-      return;
-    }
+    const {
+      data: { user: buyer },
+    } = await admin.auth.admin.getUserById(order.buyer_id);
 
     const { data: items } = await admin
       .from("order_items")
@@ -80,47 +74,42 @@ export async function createDelhiveryShipment(shipmentId: string): Promise<void>
       }
     }
 
-    const waybill = await fetchWaybill();
-    const result = await createOrder({
-      waybill,
+    const result = await createShiprocketOrder({
       orderId: `${order.id.replace(/-/g, "").slice(0, 14)}-${shipment.seller_id.replace(/-/g, "").slice(0, 6)}`,
+      orderDate: new Date(order.created_at).toISOString().slice(0, 16).replace("T", " "),
       pickupLocation: sellerProfile.pickup_location_code,
-      paymentMode: "Prepaid", // already captured via PayU
-      consigneeName: profile?.full_name ?? "Customer",
-      consigneeAddress: [address.line1, address.line2].filter(Boolean).join(", "),
-      consigneeCity: address.city,
-      consigneeState: address.state,
-      consigneePincode: address.pincode,
-      consigneePhone: profile?.phone ?? "9999999999",
-      productsDesc: items.map((i) => i.title).join(", ").slice(0, 200),
+      billingName: profile?.full_name ?? "Customer",
+      billingAddress: [address.line1, address.line2].filter(Boolean).join(", "),
+      billingCity: address.city,
+      billingState: address.state,
+      billingPincode: address.pincode,
+      billingPhone: profile?.phone ?? "9999999999",
+      billingEmail: buyer?.email ?? "",
+      items: items.map((i) => ({ name: i.title, units: i.quantity, selling_price: Number(i.unit_price) })),
       subTotal,
       weightKg: Math.max(weightKg, 0.1),
       lengthCm, breadthCm, heightCm,
     });
 
-    // Best-effort -- a missed pickup request doesn't block the booking itself.
-    await createPickupRequest({
-      warehouseName: sellerProfile.pickup_location_code,
-      pickupDate: new Date().toISOString().slice(0, 10),
-      pickupTime: "14:00:00",
-      count: 1,
-    });
+    const awbResult = await assignAwb(result.shipment_id);
+    const labelUrl = await generateLabel(result.shipment_id).catch(() => null);
 
-    const { data: partner } = await admin.from("delivery_partners").select("id").eq("code", "delhivery").single();
+    const { data: partner } = await admin.from("delivery_partners").select("id").eq("code", "shiprocket").single();
 
     await admin
       .from("shipments")
       .update({
         partner_id: partner?.id ?? null,
-        partner_order_id: result.waybill,
-        partner_shipment_id: result.waybill,
-        awb: result.waybill,
-        tracking_number: result.waybill,
-        courier_name: "Delhivery",
+        partner_order_id: String(result.order_id),
+        partner_shipment_id: String(result.shipment_id),
+        awb: awbResult.awb_code,
+        tracking_number: awbResult.awb_code,
+        courier_name: awbResult.courier_name,
+        label_url: labelUrl,
         status: "ready_to_ship",
         shipped_at: null,
         updated_at: new Date().toISOString(),
-        raw: { delhivery: result.raw },
+        raw: { shiprocket: result },
       })
       .eq("id", shipmentId);
   } catch (e) {

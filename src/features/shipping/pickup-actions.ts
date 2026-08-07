@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/guards";
-import { createWarehouse, isDelhiveryConfigured } from "@/lib/delhivery/client";
+import { addPickupLocation, isShiprocketConfigured } from "@/lib/shiprocket/client";
 
 export type PickupState = { error?: string; success?: string } | null;
 
@@ -20,29 +20,29 @@ const pickupSchema = z.object({
 });
 
 // Registers (or re-registers, if the address changed) this seller's pickup
-// address as a distinct named warehouse on our single Delhivery client
-// account -- Delhivery has no concept of per-seller sub-accounts, so every
-// seller's address lives as a distinct named warehouse on our one account
-// instead (same reasoning as the earlier Shiprocket integration this
-// replaced).
+// address as a distinct named pickup location on our single Shiprocket
+// account -- Shiprocket has no concept of per-seller sub-accounts, so every
+// seller's address lives as a distinct named location on our one account
+// instead.
 export async function savePickupAddress(_prev: PickupState, formData: FormData): Promise<PickupState> {
   const { user } = await requireUser();
-  if (!isDelhiveryConfigured()) return { error: "Shipping is not configured yet." };
+  if (!isShiprocketConfigured()) return { error: "Shipping is not configured yet." };
 
   const parsed = pickupSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
 
   const pickupLocationCode = `sbx-${user.id.replace(/-/g, "").slice(0, 12)}`;
-  const result = await createWarehouse({
-    name: pickupLocationCode,
-    registeredName: d.name,
-    address: [d.addressLine1, d.addressLine2].filter(Boolean).join(", "),
+  const result = await addPickupLocation({
+    pickupLocation: pickupLocationCode,
+    name: d.name,
+    email: d.email,
+    phone: d.phone,
+    addressLine1: d.addressLine1,
+    addressLine2: d.addressLine2,
     city: d.city,
     state: d.state,
     pincode: d.pincode,
-    phone: d.phone,
-    email: d.email,
   });
   if (!result.ok) return { error: `Could not register with our courier partner: ${result.error}` };
 
