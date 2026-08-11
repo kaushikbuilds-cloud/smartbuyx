@@ -6,21 +6,24 @@ import type { NextConfig } from "next";
 // hosts) rather than a maximally strict one. Tighten with nonces later if needed.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline'",
+  // Order checkout now uses Fastrr (Shiprocket Checkout)'s client-side
+  // script + iframe overlay, loaded from their *.shiprocket.com domains.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout-ui.shiprocket.com",
+  "style-src 'self' 'unsafe-inline' https://checkout-ui.shiprocket.com",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://checkout-api.shiprocket.com https://checkout-ui.shiprocket.com",
+  "frame-src https://checkout-ui.shiprocket.com https://checkout-api.shiprocket.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  // Both order checkout and plan/subscription billing now use PayU's hosted
-  // checkout -- the browser navigates there via a plain form POST (no
-  // client-side PayU script/widget involved). Chrome enforces form-action
-  // against EVERY hop of a redirect chain, not just the initial submit target
-  // -- PayU's /_payment endpoint may internally redirect to a sibling
-  // subdomain (regional processing, trailing-slash normalization, etc.), so a
-  // wildcard on payu.in is needed rather than literal hostnames alone (which
-  // is what was silently blocking every attempt).
+  // Plan/subscription billing still uses PayU's hosted checkout (order
+  // checkout switched to Fastrr; subscriptions did not) -- the browser
+  // navigates there via a plain form POST. Chrome enforces form-action
+  // against EVERY hop of a redirect chain, not just the initial submit
+  // target -- PayU's /_payment endpoint may internally redirect to a
+  // sibling subdomain, so a wildcard on payu.in is needed rather than
+  // literal hostnames alone (which is what silently blocked every attempt
+  // the first time this was integrated).
   "form-action 'self' https://*.payu.in",
 ].join("; ");
 

@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 import { toast } from "sonner";
 import { Loader2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils/format";
-import { createCheckoutOrder, validateCoupon } from "@/features/orders/checkout-actions";
+import { validateCoupon } from "@/features/orders/checkout-actions";
+import { startFastrrCheckout } from "@/features/orders/fastrr-checkout-actions";
+
+declare global {
+  interface Window {
+    HeadlessCheckout: {
+      addToCart: (event: Event, token: string, opts: { fallbackUrl: string }) => void;
+    };
+  }
+}
 
 export function CheckoutClient({
   addressId,
@@ -38,26 +48,32 @@ export function CheckoutClient({
     toast.success(`Coupon applied — you save ${formatINR(res.discount)}`);
   }
 
-  async function pay() {
+  async function pay(e: React.MouseEvent) {
     if (!addressId) {
       toast.error("Please add a delivery address.");
       return;
     }
     setLoading(true);
-    const res = await createCheckoutOrder(addressId, appliedCode ?? undefined);
+    const res = await startFastrrCheckout(addressId, appliedCode ?? undefined);
+    setLoading(false);
     if (!res.ok) {
       toast.error(res.error);
-      setLoading(false);
       return;
     }
-    // Plain top-level navigation (not a form-action) to a server-rendered
-    // bridge page that does the actual auto-submitting POST to PayU as real
-    // server-rendered HTML.
-    window.location.href = `/checkout/pay/${res.orderId}`;
+    // Opens Fastrr's checkout iframe overlay directly on this page -- see
+    // the "SR Checkout Integration Guide" embedding pattern. fallbackUrl is
+    // used if the iframe itself can't load for some reason.
+    window.HeadlessCheckout.addToCart(e.nativeEvent, res.token, {
+      fallbackUrl: `${window.location.origin}/checkout/failure`,
+    });
   }
 
   return (
     <>
+      <Script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" strategy="afterInteractive" />
+      <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css" />
+      <input type="hidden" id="sellerDomain" value="smartbuyx.in" />
+
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

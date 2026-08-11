@@ -77,7 +77,7 @@ export default async function CheckoutPage() {
               addressId={defaultAddress?.id ?? null}
               subtotal={cart.subtotal}
             />
-            <p className="text-center text-xs text-muted-foreground">Secured by PayU · UPI, cards, net banking</p>
+            <p className="text-center text-xs text-muted-foreground">Secured by Shiprocket Checkout · UPI, cards, net banking, COD</p>
           </CardContent>
         </Card>
       </div>
