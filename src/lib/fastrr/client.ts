@@ -23,7 +23,11 @@ async function signedFetch(path: string, body: unknown): Promise<Response> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Api-Key": `Bearer ${process.env.FASTRR_API_KEY}`,
+      // The guide's prose says "Bearer <key>" but its own working curl
+      // example shows the raw key with no prefix -- following the concrete
+      // example over the summary text (same class of contradiction that
+      // caused the original PayU hash bug).
+      "X-Api-Key": process.env.FASTRR_API_KEY!,
       "X-Api-HMAC-SHA256": hmac(payload),
     },
     body: payload,
