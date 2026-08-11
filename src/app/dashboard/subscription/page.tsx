@@ -2,17 +2,28 @@ import Link from "next/link";
 import { Crown, Check, ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/auth/guards";
 import { getMySubscription } from "@/features/billing/queries";
+import { getUsageSummary, type CurrentPlan } from "@/features/billing/gating";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PageShell, ComingSoonCard } from "@/components/dashboard/page-shell";
 import { CancelSubscriptionButton } from "@/components/billing/cancel-subscription-button";
+import { UsageBars } from "@/components/billing/usage-bars";
 
 export const metadata = { title: "My Subscription" };
+
+const STATUS_LABEL: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
+  active: { label: "Active", variant: "default" },
+  trialing: { label: "Trial", variant: "secondary" },
+};
 
 export default async function MySubscriptionPage() {
   const { user } = await requireUser();
   const sub = await getMySubscription(user.id);
+  const usage = sub
+    ? await getUsageSummary(user.id, { id: sub.planId, code: "", tier: sub.planTier, name: sub.planName, audience: sub.audience, subscriptionStatus: sub.status as CurrentPlan["subscriptionStatus"], currentPeriodEnd: sub.currentPeriodEnd })
+    : [];
 
   return (
     <PageShell
@@ -27,7 +38,10 @@ export default async function MySubscriptionPage() {
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="flex items-center gap-2 text-sm text-white/80"><Crown className="h-4 w-4" /> Active plan</p>
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <Crown className="h-4 w-4" /> Your plan
+                  <Badge variant={STATUS_LABEL[sub.status]?.variant ?? "secondary"}>{STATUS_LABEL[sub.status]?.label ?? sub.status}</Badge>
+                </div>
                 <h2 className="mt-1 text-2xl font-bold">{sub.planName}</h2>
                 <p className="text-sm capitalize text-white/80">{sub.audience} · {sub.planTier}</p>
               </div>
@@ -47,6 +61,11 @@ export default async function MySubscriptionPage() {
                 </li>
               ))}
             </ul>
+            {usage.length > 0 ? (
+              <div className="border-t pt-4">
+                <UsageBars usage={usage} />
+              </div>
+            ) : null}
             <div className="flex gap-2">
               <Button variant="outline" asChild><Link href="/plans">Change plan <ArrowRight className="h-4 w-4" /></Link></Button>
               <CancelSubscriptionButton subscriptionId={sub.id} />

@@ -80,11 +80,24 @@ export async function fetchOrderDetails(orderId: string): Promise<FastrrOrderDet
 }
 
 // Push-on-change sync -- call whenever a product/collection is created or
-// updated so Fastrr's catalog copy doesn't drift from ours.
+// updated so Fastrr's catalog copy doesn't drift from ours. Logs (rather than
+// silently swallows) a non-2xx response -- their `id`/`variant_id` fields
+// are shown as numeric in the guide's example, so a UUID-based id here is a
+// real candidate for silent rejection on their side.
 export async function pushProductUpdate(product: unknown): Promise<void> {
-  await signedFetch("/wh/v1/custom/product", product).catch(() => null); // best-effort
+  try {
+    const res = await signedFetch("/wh/v1/custom/product", product);
+    if (!res.ok) console.error("[fastrr] product push rejected", { status: res.status, body: await res.text() });
+  } catch (e) {
+    console.error("[fastrr] product push failed", e instanceof Error ? e.message : e);
+  }
 }
 
 export async function pushCollectionUpdate(collection: unknown): Promise<void> {
-  await signedFetch("/wh/v1/custom/collection", collection).catch(() => null); // best-effort
+  try {
+    const res = await signedFetch("/wh/v1/custom/collection", collection);
+    if (!res.ok) console.error("[fastrr] collection push rejected", { status: res.status, body: await res.text() });
+  } catch (e) {
+    console.error("[fastrr] collection push failed", e instanceof Error ? e.message : e);
+  }
 }

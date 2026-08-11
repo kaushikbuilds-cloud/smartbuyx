@@ -110,3 +110,14 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
     .eq("user_id", user.id);
   revalidatePath("/dashboard/subscription");
 }
+
+// Enterprise services are quote/consultation-based ("Contact us"), not
+// self-serve checkout -- this just queues a request for the team to follow
+// up on, rather than faking a purchase flow for services that need a human.
+export async function requestEnterpriseService(serviceId: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.from("enterprise_service_requests").insert({ user_id: user.id, service_id: serviceId });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}

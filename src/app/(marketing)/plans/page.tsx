@@ -1,12 +1,14 @@
 import { Check, Sparkles } from "lucide-react";
 import { getSession } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
-import { listPlansByAudience } from "@/features/billing/queries";
+import { listPlansByAudience, listPlanFeatureLimits, listEnterpriseServices } from "@/features/billing/queries";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AudienceTabs } from "@/components/billing/audience-tabs";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
+import { EnterpriseServicesGrid } from "@/components/billing/enterprise-services-grid";
+import { PlanComparisonTable } from "@/components/billing/plan-comparison-table";
 
 export const metadata = { title: "Pricing" };
 
@@ -15,9 +17,32 @@ export default async function PlansPage({
 }: {
   searchParams: Promise<{ for?: string }>;
 }) {
-  const { for: audience = "architect" } = await searchParams;
-  const plans = await listPlansByAudience(audience);
+  const { for: audience = "customer" } = await searchParams;
   const session = await getSession();
+
+  if (audience === "enterprise") {
+    const services = await listEnterpriseServices();
+    return (
+      <main className="container mx-auto space-y-8 px-4 py-16">
+        <div className="text-center">
+          <Badge variant="secondary" className="mb-3 gap-1"><Sparkles className="h-3 w-3" /> Grow with SmartBuyX</Badge>
+          <h1 className="text-4xl font-bold">Subscription Plans</h1>
+          <p className="mt-2 text-muted-foreground">Choose your role and the right plan for your needs</p>
+        </div>
+        <AudienceTabs active={audience} />
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-bold">Enterprise Services</h2>
+          <p className="mt-2 text-muted-foreground">
+            Company setup, compliance, and growth services — handled by our team, not self-serve subscriptions.
+          </p>
+        </div>
+        <EnterpriseServicesGrid services={services} loggedIn={Boolean(session)} />
+      </main>
+    );
+  }
+
+  const plans = await listPlansByAudience(audience);
+  const limits = await listPlanFeatureLimits(plans.map((p) => p.id));
 
   let currentSubscriptionPlanId: string | null = null;
 
@@ -96,6 +121,13 @@ export default async function PlansPage({
           <p className="col-span-full text-center text-muted-foreground">No plans available for this category yet.</p>
         ) : null}
       </div>
+
+      {plans.length > 0 ? (
+        <div>
+          <h2 className="mb-4 text-center text-xl font-bold">Compare plans</h2>
+          <PlanComparisonTable plans={plans} limits={limits} />
+        </div>
+      ) : null}
     </main>
   );
 }

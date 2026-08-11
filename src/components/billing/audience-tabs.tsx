@@ -1,14 +1,16 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Building2, Users, Zap, ShieldCheck } from "lucide-react";
+import { Building2, Users, Zap, ShieldCheck, UserRound, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const AUDIENCES = [
+  { value: "customer", label: "Customer", icon: UserRound },
+  { value: "supplier", label: "Seller", icon: ShieldCheck },
+  { value: "contractor", label: "Builder", icon: Zap },
   { value: "architect", label: "Architect", icon: Building2 },
   { value: "engineer", label: "Consultant", icon: Users },
-  { value: "contractor", label: "Builder", icon: Zap },
-  { value: "supplier", label: "Supplier", icon: ShieldCheck },
+  { value: "enterprise", label: "Enterprise", icon: Briefcase },
 ];
 
 export function AudienceTabs({ active }: { active: string }) {

@@ -7,6 +7,7 @@ import { openai, isOpenAIConfigured, AI_MODEL } from "@/lib/ai/openai";
 import { requireUser } from "@/lib/auth/guards";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { safeErrorMessage } from "@/lib/utils/safe-error";
+import { canUseFeature, incrementUsage } from "@/features/billing/gating";
 
 export type FloorPlanRoom = { name: string; approxSqft: number; notes: string };
 export type BoqItem = { material: string; quantity: string; notes: string };
@@ -82,6 +83,20 @@ export async function generateHouseBuilderPlan(input: unknown): Promise<HouseBui
   const rl = checkRateLimit(`house-builder:${user.id}`, 6, 60_000);
   if (!rl.ok) return { ok: false, error: `Too many requests — try again in ${rl.retryAfterSeconds}s.` };
 
+  // Numeric per-plan limits (Starter: 1/mo, Growth: 10/mo, Premium: unlimited)
+  // only apply to the Builder audience this limit is spec'd for -- other
+  // roles keep the tool's existing unrestricted access rather than silently
+  // losing a feature they already had.
+  if (user.role === "contractor") {
+    const gate = await canUseFeature(user.id, "contractor", "ai_house_builder");
+    if (!gate.ok) {
+      const reason = gate.reason === "limit_reached"
+        ? "You've used all your AI House Builder generations for this plan this month. Upgrade for more."
+        : "AI House Builder isn't included on your current plan.";
+      return { ok: false, error: reason };
+    }
+  }
+
   const supabase = await createClient();
   const { data: run, error: insertError } = await supabase
     .from("house_builder_runs")
@@ -131,6 +146,8 @@ export async function generateHouseBuilderPlan(input: unknown): Promise<HouseBui
       .from("house_builder_runs")
       .update({ status: "done", outputs: parsedOutput.data })
       .eq("id", run.id);
+
+    if (user.role === "contractor") await incrementUsage(user.id, "ai_house_builder");
 
     return { ok: true, runId: run.id, output: parsedOutput.data };
   } catch (err) {

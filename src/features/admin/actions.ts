@@ -13,6 +13,28 @@ function logIfError(label: string, error: unknown) {
   if (error) console.error(`[admin/actions:${label}]`, error);
 }
 
+export async function adminSetSubscriptionStatus(subscriptionId: string, status: "active" | "cancelled"): Promise<{ error?: string }> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const { error } = await db.from("subscriptions").update({ status }).eq("id", subscriptionId);
+  logIfError("adminSetSubscriptionStatus", error);
+  if (error) return { error: error.message };
+  await logAdminAction(user.id, "set_subscription_status", "subscription", subscriptionId, { status });
+  revalidatePath("/dashboard/admin/subscriptions");
+  return {};
+}
+
+export async function adminChangeSubscriptionPlan(subscriptionId: string, planId: string): Promise<{ error?: string }> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const { error } = await db.from("subscriptions").update({ plan_id: planId }).eq("id", subscriptionId);
+  logIfError("adminChangeSubscriptionPlan", error);
+  if (error) return { error: error.message };
+  await logAdminAction(user.id, "change_subscription_plan", "subscription", subscriptionId, { plan_id: planId });
+  revalidatePath("/dashboard/admin/subscriptions");
+  return {};
+}
+
 export async function setUserRole(userId: string, role: UserRole): Promise<{ error?: string }> {
   const { user, role: callerRole } = await requireRole(...ADMIN);
 

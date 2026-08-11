@@ -318,6 +318,40 @@ export async function listAllOrders(): Promise<AdminOrder[]> {
   return (data ?? []).map((o) => ({ ...o, total: Number(o.total) })) as AdminOrder[];
 }
 
+export type AdminSubscription = {
+  id: string;
+  userId: string;
+  userName: string | null;
+  status: string;
+  currentPeriodEnd: string | null;
+  createdAt: string;
+  planId: string;
+  planName: string;
+  planCode: string;
+  audience: string;
+  priceInr: number;
+};
+
+export async function listAllSubscriptions(): Promise<AdminSubscription[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("subscriptions")
+    .select("id, user_id, status, current_period_end, started_at, profiles!inner(full_name), plans!inner(id, name, code, audience, price_inr)")
+    .order("started_at", { ascending: false })
+    .limit(200);
+  logIfError("listAllSubscriptions", error);
+  return (data ?? []).map((s) => {
+    const profile = s.profiles as unknown as { full_name: string | null };
+    const plan = s.plans as unknown as { id: string; name: string; code: string; audience: string; price_inr: number };
+    return {
+      id: s.id, userId: s.user_id, userName: profile?.full_name ?? null,
+      status: s.status, currentPeriodEnd: s.current_period_end, createdAt: s.started_at,
+      planId: plan.id, planName: plan.name, planCode: plan.code, audience: plan.audience, priceInr: Number(plan.price_inr),
+    };
+  });
+}
+
 export type FraudFlag = {
   returnId: string;
   userId: string;
