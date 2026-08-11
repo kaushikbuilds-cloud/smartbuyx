@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, requireUser } from "@/lib/auth/guards";
 import { uniqueSlug } from "@/lib/utils/format";
 import { productSchema, reviewSchema, parseSizeChart } from "./schemas";
+import { syncProductToFastrr } from "@/lib/fastrr/sync";
 
 export type ActionState = { error?: string; success?: string } | null;
 
@@ -68,6 +69,8 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
     await supabase.from("inventory").update({ quantity: p.stock }).eq("variant_id", variant.id);
   }
 
+  await syncProductToFastrr(product.id).catch(() => null); // best-effort, never blocks listing
+
   revalidatePath("/dashboard/supplier/products");
   redirect("/dashboard/supplier/products");
 }
@@ -108,6 +111,8 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
     .eq("id", id)
     .eq("supplier_id", user.id);
   if (error) return { error: error.message };
+
+  await syncProductToFastrr(id).catch(() => null); // best-effort, never blocks the save
 
   revalidatePath("/dashboard/supplier/products");
   return { success: "Product updated." };
