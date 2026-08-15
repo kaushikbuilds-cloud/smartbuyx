@@ -102,5 +102,31 @@ export async function fulfillFastrrOrder(order: FastrrOrderDetails): Promise<Ful
   const { data: cart } = await admin.from("carts").select("id").eq("user_id", profile.id).single();
   if (cart) await admin.from("cart_items").delete().eq("cart_id", cart.id);
 
+  // Convert any Loyalty Points hold on this order into a permanent debit --
+  // the block already reduced *available* balance during checkout; this
+  // now reduces the actual balance to match.
+  const { data: block } = await admin
+    .from("wallet_point_blocks")
+    .select("id, user_id, points, status")
+    .eq("fastrr_order_id", order.order_id)
+    .eq("status", "blocked")
+    .maybeSingle();
+  if (block) {
+    const { data: wallet } = await admin.from("wallets").select("balance, blocked_balance").eq("user_id", block.user_id).maybeSingle();
+    await admin
+      .from("wallets")
+      .update({
+        balance: Math.max(0, Number(wallet?.balance ?? 0) - block.points),
+        blocked_balance: Math.max(0, Number(wallet?.blocked_balance ?? 0) - block.points),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", block.user_id);
+    await admin.from("wallet_transactions").insert({
+      user_id: block.user_id, kind: "debit", amount: -block.points, reference: newOrder.id,
+      balance_after: Math.max(0, Number(wallet?.balance ?? 0) - block.points),
+    });
+    await admin.from("wallet_point_blocks").update({ status: "used", updated_at: new Date().toISOString() }).eq("id", block.id);
+  }
+
   return { ok: true, orderId: newOrder.id };
 }
