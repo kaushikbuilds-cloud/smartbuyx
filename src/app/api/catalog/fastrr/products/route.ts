@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient();
   const { data: products, count } = await admin
     .from("products")
-    .select("id, title, description, brand, category_id, images, status, updated_at, weight_kg, categories(name), product_variants(id, sku, price, options, updated_at, inventory(quantity))", { count: "exact" })
+    .select("id, fastrr_numeric_id, title, description, brand, category_id, images, status, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, updated_at, inventory(quantity))", { count: "exact" })
     .eq("status", "active")
     .order("updated_at", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -24,11 +24,11 @@ export async function GET(req: NextRequest) {
     const images = (p.images as string[]) ?? [];
     const category = p.categories as unknown as { name: string } | null;
     const variants = (p.product_variants as unknown as {
-      id: string; sku: string; price: number; options: Record<string, string>; updated_at: string;
+      id: string; fastrr_numeric_id: number; sku: string; price: number; options: Record<string, string>; updated_at: string;
       inventory: { quantity: number } | null;
     }[]) ?? [];
     return {
-      id: p.id,
+      id: p.fastrr_numeric_id,
       title: p.title,
       body_html: p.description ?? "",
       vendor: p.brand ?? "",
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       updated_at: p.updated_at,
       status: p.status === "active" ? "active" : "draft",
       variants: variants.map((v) => ({
-        id: v.id,
+        id: v.fastrr_numeric_id,
         title: Object.values(v.options ?? {}).join(" / ") || "Default",
         price: Number(v.price).toFixed(2),
         quantity: v.inventory?.quantity ?? 0,

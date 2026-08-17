@@ -66,9 +66,19 @@ export async function startFastrrCheckout(addressId: string, couponCode?: string
   if (sessionErr || !session) return { ok: false, error: sessionErr?.message ?? "Could not start checkout." };
 
   try {
+    // Fastrr's catalog (and therefore the access-token API) identifies
+    // variants by the numeric fastrr_numeric_id, not our uuid primary key --
+    // confirmed directly by their support team after the access-token call
+    // kept failing with a generic 500 despite everything else being correct.
+    const { data: variantRows } = await admin
+      .from("product_variants")
+      .select("id, fastrr_numeric_id")
+      .in("id", cart.lines.map((l) => l.variantId));
+    const numericIdByVariant = new Map((variantRows ?? []).map((v) => [v.id, v.fastrr_numeric_id]));
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
     const { token } = await generateAccessToken(
-      cart.lines.map((l) => ({ variant_id: l.variantId, quantity: l.quantity })),
+      cart.lines.map((l) => ({ variant_id: String(numericIdByVariant.get(l.variantId)), quantity: l.quantity })),
       `${appUrl}/checkout/fastrr-return?ref=${session.id}`
     );
     return { ok: true, token };

@@ -10,7 +10,7 @@ export async function syncProductToFastrr(productId: string): Promise<void> {
   const admin = createAdminClient();
   const { data: product } = await admin
     .from("products")
-    .select("id, title, description, brand, status, updated_at, weight_kg, categories(name), product_variants(id, sku, price, options, updated_at, inventory(quantity)), images")
+    .select("id, fastrr_numeric_id, title, description, brand, status, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, updated_at, inventory(quantity)), images")
     .eq("id", productId)
     .single();
   if (!product) return;
@@ -18,12 +18,12 @@ export async function syncProductToFastrr(productId: string): Promise<void> {
   const images = (product.images as string[]) ?? [];
   const category = product.categories as unknown as { name: string } | null;
   const variants = (product.product_variants as unknown as {
-    id: string; sku: string; price: number; options: Record<string, string>; updated_at: string;
+    id: string; fastrr_numeric_id: number; sku: string; price: number; options: Record<string, string>; updated_at: string;
     inventory: { quantity: number } | null;
   }[]) ?? [];
 
   await pushProductUpdate({
-    id: product.id,
+    id: product.fastrr_numeric_id,
     title: product.title,
     body_html: product.description ?? "",
     vendor: product.brand ?? "",
@@ -31,7 +31,7 @@ export async function syncProductToFastrr(productId: string): Promise<void> {
     updated_at: product.updated_at,
     status: product.status === "active" ? "active" : "draft",
     variants: variants.map((v) => ({
-      id: v.id,
+      id: v.fastrr_numeric_id,
       title: Object.values(v.options ?? {}).join(" / ") || "Default",
       price: Number(v.price).toFixed(2),
       quantity: v.inventory?.quantity ?? 0,
@@ -46,11 +46,11 @@ export async function syncProductToFastrr(productId: string): Promise<void> {
 
 export async function syncCollectionToFastrr(categoryId: string): Promise<void> {
   const admin = createAdminClient();
-  const { data: category } = await admin.from("categories").select("id, name, created_at").eq("id", categoryId).single();
+  const { data: category } = await admin.from("categories").select("id, fastrr_numeric_id, name, created_at").eq("id", categoryId).single();
   if (!category) return;
 
   await pushCollectionUpdate({
-    id: category.id,
+    id: category.fastrr_numeric_id,
     title: category.name,
     body_html: "",
     updated_at: category.created_at,

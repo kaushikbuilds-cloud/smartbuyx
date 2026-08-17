@@ -11,12 +11,12 @@ export async function GET(req: NextRequest) {
   const admin = createAdminClient();
   const { data: categories, count } = await admin
     .from("categories")
-    .select("id, name, created_at", { count: "exact" })
+    .select("id, fastrr_numeric_id, name, created_at", { count: "exact" })
     .order("name", { ascending: true })
     .range(offset, offset + limit - 1);
 
   const items = (categories ?? []).map((c) => ({
-    id: c.id,
+    id: c.fastrr_numeric_id,
     title: c.name,
     body_html: "",
     updated_at: c.created_at,
