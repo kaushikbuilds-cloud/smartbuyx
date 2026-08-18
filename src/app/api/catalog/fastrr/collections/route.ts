@@ -18,7 +18,9 @@ export async function GET(req: NextRequest) {
   const items = (categories ?? []).map((c) => ({
     id: c.fastrr_numeric_id,
     title: c.name,
-    body_html: "",
+    // categories has no description field of its own -- a short generated
+    // line beats sending an empty string for every collection.
+    body_html: `Shop the best in ${c.name} at SmartBuyX.`,
     updated_at: c.created_at,
     image: null,
   }));

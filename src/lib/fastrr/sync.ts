@@ -52,7 +52,7 @@ export async function syncCollectionToFastrr(categoryId: string): Promise<void> 
   await pushCollectionUpdate({
     id: category.fastrr_numeric_id,
     title: category.name,
-    body_html: "",
+    body_html: `Shop the best in ${category.name} at SmartBuyX.`,
     updated_at: category.created_at,
     image: null,
   });
