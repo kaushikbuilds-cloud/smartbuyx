@@ -7,6 +7,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // (not a bare object), which earlier versions of this route did NOT do.
 // That mismatch is a strong candidate for the generic 500s the access-token
 // API kept returning even after catalog sync and numeric ids were fixed.
+// Without this, Next.js can treat a GET route with no cookies/headers usage
+// as statically cacheable and serve one build-time snapshot forever --
+// which would explain persistent "0 products" regardless of real DB state.
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(req.nextUrl.searchParams.get("page") ?? "1"));
   const limit = Math.min(250, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? "100")));

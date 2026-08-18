@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 // Called by Fastrr to sync our category tree -- see products/route.ts for
 // the same auth/shape reasoning.
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(req.nextUrl.searchParams.get("page") ?? "1"));
   const limit = Math.min(250, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? "100")));

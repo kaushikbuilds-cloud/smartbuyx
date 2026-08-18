@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // per the guide's example endpoint shape (not a path param). Same product
 // shape and "data" envelope as products/route.ts -- see that file for the
 // field-by-field reasoning.
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const collectionNumericId = req.nextUrl.searchParams.get("collection_id");
   const page = Math.max(1, Number(req.nextUrl.searchParams.get("page") ?? "1"));
