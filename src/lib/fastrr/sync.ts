@@ -8,17 +8,18 @@ import { pushProductUpdate, pushCollectionUpdate } from "./client";
 
 export async function syncProductToFastrr(productId: string): Promise<void> {
   const admin = createAdminClient();
-  const { data: product } = await admin
+  const { data: product, error } = await admin
     .from("products")
-    .select("id, fastrr_numeric_id, title, description, brand, status, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, updated_at, inventory(quantity)), images")
+    .select("id, fastrr_numeric_id, title, description, brand, status, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, created_at, inventory(quantity)), images")
     .eq("id", productId)
     .single();
+  if (error) console.error("[fastrr/sync] product fetch failed", { message: error.message, code: error.code });
   if (!product) return;
 
   const images = (product.images as string[]) ?? [];
   const category = product.categories as unknown as { name: string } | null;
   const variants = (product.product_variants as unknown as {
-    id: string; fastrr_numeric_id: number; sku: string; price: number; options: Record<string, string>; updated_at: string;
+    id: string; fastrr_numeric_id: number; sku: string; price: number; options: Record<string, string>; created_at: string;
     inventory: { quantity: number } | null;
   }[]) ?? [];
 
@@ -36,7 +37,7 @@ export async function syncProductToFastrr(productId: string): Promise<void> {
       price: Number(v.price).toFixed(2),
       quantity: v.inventory?.quantity ?? 0,
       sku: v.sku,
-      updated_at: v.updated_at,
+      updated_at: v.created_at, // product_variants has no updated_at column
       image: images[0] ? { src: images[0] } : null,
       weight: Number(product.weight_kg ?? 0.5),
     })),

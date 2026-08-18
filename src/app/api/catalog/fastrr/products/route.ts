@@ -18,22 +18,27 @@ export async function GET(req: NextRequest) {
   const offset = (page - 1) * limit;
 
   const admin = createAdminClient();
-  const { data: products, count } = await admin
+  const { data: products, count, error } = await admin
     .from("products")
     .select(
-      "id, fastrr_numeric_id, title, slug, description, brand, compare_at_price, gst_rate, images, status, created_at, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, created_at, updated_at, inventory(quantity))",
+      "id, fastrr_numeric_id, title, slug, description, brand, compare_at_price, gst_rate, images, status, created_at, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, created_at, inventory(quantity))",
       { count: "exact" }
     )
     .eq("status", "active")
     .order("updated_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
+  // A query error here (bad grants, a malformed nested select) previously
+  // vanished into "0 total" -- surface it instead of silently masking it,
+  // same lesson as the PayU "permission denied" bug earlier.
+  if (error) console.error("[fastrr/products] query failed", { message: error.message, code: error.code, details: error.details, hint: error.hint });
+
   const items = (products ?? []).map((p) => {
     const images = (p.images as string[]) ?? [];
     const category = p.categories as unknown as { name: string } | null;
     const variants = (p.product_variants as unknown as {
       id: string; fastrr_numeric_id: number; sku: string; price: number; options: Record<string, string>;
-      created_at: string; updated_at: string; inventory: { quantity: number } | null;
+      created_at: string; inventory: { quantity: number } | null;
     }[]) ?? [];
 
     // Product-level `options` = every distinct {name, values[]} across this
@@ -65,7 +70,7 @@ export async function GET(req: NextRequest) {
         sku: v.sku,
         quantity: v.inventory?.quantity ?? 0,
         created_at: v.created_at,
-        updated_at: v.updated_at,
+        updated_at: v.created_at, // product_variants has no updated_at column
         taxable: Number(p.gst_rate ?? 0) > 0,
         option_values: v.options ?? {},
         grams: Math.round(Number(p.weight_kg ?? 0.5) * 1000),
