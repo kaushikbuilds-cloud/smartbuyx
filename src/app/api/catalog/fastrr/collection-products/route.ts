@@ -13,20 +13,27 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(250, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? "100")));
   const offset = (page - 1) * limit;
 
-  if (!collectionNumericId) return NextResponse.json({ data: { total: 0, products: [] } });
-
   const admin = createAdminClient();
-  const { data: category } = await admin.from("categories").select("id").eq("fastrr_numeric_id", collectionNumericId).maybeSingle();
-  if (!category) return NextResponse.json({ data: { total: 0, products: [] } });
 
-  const { data: products, count, error } = await admin
+  // Fastrr always calls this with a real collection_id -- this branch only
+  // matters for manual testing (visiting the bare URL), where showing every
+  // active product is more useful than an empty result.
+  let categoryId: string | null = null;
+  if (collectionNumericId) {
+    const { data: category } = await admin.from("categories").select("id").eq("fastrr_numeric_id", collectionNumericId).maybeSingle();
+    if (!category) return NextResponse.json({ data: { total: 0, products: [] } });
+    categoryId = category.id;
+  }
+
+  let query = admin
     .from("products")
     .select(
       "id, fastrr_numeric_id, title, slug, description, brand, compare_at_price, gst_rate, images, status, created_at, updated_at, weight_kg, categories(name), product_variants(id, fastrr_numeric_id, sku, price, options, created_at, inventory(quantity))",
       { count: "exact" }
     )
-    .eq("status", "active")
-    .eq("category_id", category.id)
+    .eq("status", "active");
+  if (categoryId) query = query.eq("category_id", categoryId);
+  const { data: products, count, error } = await query
     .order("updated_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
