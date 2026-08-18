@@ -25,5 +25,7 @@ export async function GET(req: NextRequest) {
     image: null,
   }));
 
-  return NextResponse.json({ collections: items, page, limit, total: count ?? 0 });
+  // Same "data" envelope as products/collection-products -- see that file
+  // for why (their example response is data-wrapped; ours previously wasn't).
+  return NextResponse.json({ data: { total: count ?? 0, collections: items } });
 }
