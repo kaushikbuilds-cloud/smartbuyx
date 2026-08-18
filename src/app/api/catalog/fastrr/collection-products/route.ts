@@ -5,11 +5,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // per the guide's example endpoint shape (not a path param).
 export async function GET(req: NextRequest) {
   const collectionNumericId = req.nextUrl.searchParams.get("collection_id");
-  if (!collectionNumericId) return NextResponse.json({ error: "collection_id is required" }, { status: 400 });
-
   const page = Math.max(1, Number(req.nextUrl.searchParams.get("page") ?? "1"));
   const limit = Math.min(250, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? "100")));
   const offset = (page - 1) * limit;
+
+  // A missing/unrecognized collection_id (health-check crawl, stale id,
+  // etc.) returns an empty result set instead of an error -- keeps this
+  // endpoint's response shape consistent with products/collections, which
+  // always return 200.
+  if (!collectionNumericId) return NextResponse.json({ products: [], page, limit, total: 0 });
 
   const admin = createAdminClient();
   // collection_id is Fastrr's numeric id (see /collections), not our uuid.
