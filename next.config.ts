@@ -20,7 +20,13 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://*.shiprocket.com https://*.pickrr.com https://fonts.googleapis.com",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com",
+  // The actual UPI payment step (once inside Fastrr's checkout) connects
+  // directly to individual UPI app/payment-provider domains -- confirmed
+  // via live console errors blocking CRED (cred.club) and Google Pay
+  // (tez.google.com). Added those plus the other major Indian UPI/payment
+  // providers proactively, rather than discovering each one via another
+  // failed checkout attempt.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com https://*.payu.in https://cred.club https://tez.google.com https://*.phonepe.com https://*.paytm.com https://*.npci.org.in https://*.amazonpay.in",
   "frame-src https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
