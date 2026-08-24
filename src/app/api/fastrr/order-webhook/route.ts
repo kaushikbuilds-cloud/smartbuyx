@@ -1,38 +1,35 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { fetchOrderDetails } from "@/lib/fastrr/client";
-import { fulfillFastrrOrder } from "@/features/orders/fastrr-fulfil";
+import { fulfillFastrrOrder, type FastrrWebhookPayload } from "@/features/orders/fastrr-fulfil";
 
-// Registered as <SELLER_REGISTERED_WEBHOOK_URL> in Fastrr's dashboard
-// (Settings -> Webhooks). Their example payload has no signature/HMAC header
-// (unlike every other call in this integration, which are all HMAC-signed) --
-// so this never trusts the webhook body alone. Instead it takes only the
-// order_id from the POST and independently re-fetches the order server-to-
-// server via fetchOrderDetails (HMAC-authenticated, using our own secret),
-// then acts on that response.
+// Registered as the Order Webhook (Real Time, "Order Placed" stage) in
+// Fastrr's dashboard. The integration guide's documented example payload
+// ({order_id, cart_data, status, phone, email, payment_type,
+// total_amount_payable}) does NOT match what Fastrr actually sends in
+// production -- confirmed via live runtime logs, which show
+// {cart_id, latest_stage, items[], total_price, billing_address,
+// shipping_address, ...} instead. This parses the real shape.
+//
+// No signature/HMAC is present on this webhook (same as the guide's
+// example showed), so authenticity instead comes from items[].variant_id
+// matching our own fastrr_numeric_id values -- only real checkout traffic
+// through our access-token flow would carry those.
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => null);
-  const orderId = body?.order_id;
-  if (!orderId || typeof orderId !== "string") {
+  const body = await req.json().catch(() => null) as FastrrWebhookPayload | null;
+  if (!body?.cart_id || !Array.isArray(body.items)) {
+    console.error("[fastrr-order-webhook] invalid payload", body);
     return NextResponse.json({ error: "invalid payload" }, { status: 400 });
   }
 
-  let order;
-  try {
-    order = await fetchOrderDetails(orderId);
-  } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "could not verify order" }, { status: 502 });
+  if (body.latest_stage !== "ORDER_PLACED") {
+    return NextResponse.json({ received: true, stage: body.latest_stage });
   }
 
-  if (order.status !== "SUCCESS") {
-    return NextResponse.json({ received: true, status: order.status });
-  }
-
-  const result = await fulfillFastrrOrder(order);
+  const result = await fulfillFastrrOrder(body);
   if (!result.ok) {
     // Logged for manual reconciliation -- same category of issue as a
     // stuck PayU transaction: money/order exists on Fastrr's side but
-    // couldn't be matched to a buyer here.
-    console.error("[fastrr-order-webhook] fulfilment failed", { orderId, reason: result.reason });
+    // couldn't be matched to a buyer/catalog item here.
+    console.error("[fastrr-order-webhook] fulfilment failed", { cartId: body.cart_id, reason: result.reason });
     return NextResponse.json({ received: true, matched: false, reason: result.reason });
   }
 

@@ -1,64 +1,127 @@
 // Fastrr counterpart to fulfil-paid-order.ts. Structurally different because
 // Fastrr owns checkout entirely: there's no pre-existing "pending" order to
 // flip to "paid" the way PayU's flow works -- the order is created here,
-// already paid, once Fastrr's webhook (re-confirmed via fetchOrderDetails)
-// tells us it happened. Not "use server" for the same reason as
-// fulfil-paid-order.ts: no auth check of its own, must not be client-callable.
+// already paid, once Fastrr's webhook tells us it happened. Not "use server"
+// for the same reason as fulfil-paid-order.ts: no auth check of its own,
+// must not be client-callable.
+//
+// IMPORTANT: the real production webhook payload (confirmed via live
+// runtime logs) does NOT match the integration guide's documented example.
+// The guide showed {order_id, cart_data, status, phone, email,
+// payment_type, total_amount_payable}; the actual payload Fastrr sends is
+// {cart_id, latest_stage, items[], total_price, total_discount,
+// billing_address, shipping_address, ...} -- no order_id, no email, no
+// top-level phone/status. This type reflects what's actually received.
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createShiprocketShipment } from "@/features/shipping/create-shipment";
-import type { FastrrOrderDetails } from "@/lib/fastrr/client";
+
+export type FastrrWebhookAddress = {
+  name: string;
+  first_name?: string;
+  last_name?: string;
+  phone: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  zip: string;
+  country?: string;
+};
+
+export type FastrrWebhookItem = {
+  product_id: number;
+  variant_id: number;
+  title: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
+export type FastrrWebhookPayload = {
+  cart_id: string;
+  latest_stage: string;
+  items: FastrrWebhookItem[];
+  total_price: number;
+  shipping_price?: number;
+  total_discount?: number;
+  tax?: number;
+  billing_address: FastrrWebhookAddress;
+  shipping_address?: FastrrWebhookAddress;
+};
 
 export type FulfilResult = { ok: true; orderId: string } | { ok: false; reason: string };
 
-// Fastrr's order webhook carries no reference to which of our users placed
-// the order (see the integration guide -- payload is order_id, cart_data,
-// status, phone, email, payment_type, total_amount_payable only). Matched
-// here via phone number against this buyer's own recent "initiated" checkout
-// session, since that's the only reliable link available. Needs verifying
-// against a real test order -- if phone numbers ever collide or a session is
-// matched incorrectly, that's the first place to look.
-export async function fulfillFastrrOrder(order: FastrrOrderDetails): Promise<FulfilResult> {
+export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise<FulfilResult> {
   const admin = createAdminClient();
 
-  const { data: existing } = await admin.from("orders").select("id").eq("fastrr_order_id", order.order_id).maybeSingle();
+  const { data: existing } = await admin.from("orders").select("id").eq("fastrr_order_id", payload.cart_id).maybeSingle();
   if (existing) return { ok: true, orderId: existing.id }; // already processed -- idempotent
 
-  const { data: profile } = await admin.from("profiles").select("id").eq("phone", order.phone).maybeSingle();
-  if (!profile) return { ok: false, reason: `No profile matches phone ${order.phone}` };
+  const address = payload.shipping_address ?? payload.billing_address;
+  const phone = address.phone;
+  const { data: profile } = await admin.from("profiles").select("id").eq("phone", phone).maybeSingle();
+  if (!profile) return { ok: false, reason: `No profile matches phone ${phone}` };
 
-  const { data: sessions } = await admin
-    .from("fastrr_checkout_sessions")
-    .select("id, address_id, coupon_id, discount, subtotal, total, cart_snapshot")
-    .eq("user_id", profile.id)
-    .eq("status", "initiated")
-    .order("created_at", { ascending: false })
-    .limit(5);
+  // Items carry the numeric ids we handed Fastrr at checkout (see
+  // fastrr-checkout-actions.ts) -- resolve them back to real variant rows
+  // rather than trusting title/price from the webhook body.
+  const numericIds = payload.items.map((i) => i.variant_id);
+  const { data: variantRows } = await admin
+    .from("product_variants")
+    .select("id, fastrr_numeric_id, price, product_id, products(title, supplier_id)")
+    .in("fastrr_numeric_id", numericIds);
 
-  const session = (sessions ?? []).find((s) => Math.abs(Number(s.total) - order.total_amount_payable) < 5);
-  if (!session) return { ok: false, reason: `No matching checkout session for user ${profile.id}, amount ${order.total_amount_payable}` };
+  const variantByNumericId = new Map((variantRows ?? []).map((v) => [v.fastrr_numeric_id, v]));
+  const resolvedItems: { variant_id: string; product_id: string; supplier_id: string; title: string; unit_price: number; quantity: number }[] = [];
+  for (const item of payload.items) {
+    const variant = variantByNumericId.get(item.variant_id);
+    if (!variant) return { ok: false, reason: `No variant matches Fastrr numeric id ${item.variant_id}` };
+    const product = variant.products as unknown as { title: string; supplier_id: string };
+    resolvedItems.push({
+      variant_id: variant.id,
+      product_id: variant.product_id,
+      supplier_id: product.supplier_id,
+      title: product.title,
+      unit_price: Number(variant.price),
+      quantity: item.quantity,
+    });
+  }
 
-  const cartSnapshot = session.cart_snapshot as { variant_id: string; product_id: string; quantity: number; unit_price: number; title: string; supplier_id: string }[];
+  const { data: newAddress } = await admin
+    .from("addresses")
+    .insert({
+      user_id: profile.id,
+      label: "Fastrr checkout",
+      line1: address.address1,
+      line2: address.address2 || null,
+      city: address.city,
+      state: address.city, // Fastrr's payload has no separate state field
+      pincode: address.zip,
+      country: "IN",
+    })
+    .select("id")
+    .single();
+
+  const subtotal = resolvedItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
+  const discount = Number(payload.total_discount ?? 0);
+  const shipping = Number(payload.shipping_price ?? 0);
+  const tax = Number(payload.tax ?? 0);
+  const total = Number(payload.total_price);
 
   const { data: newOrder, error: orderErr } = await admin
     .from("orders")
     .insert({
       buyer_id: profile.id,
-      shipping_address_id: session.address_id,
-      subtotal: session.subtotal,
-      tax: 0,
-      shipping: 0,
-      discount: session.discount,
-      coupon_id: session.coupon_id,
-      total: session.total,
+      shipping_address_id: newAddress?.id ?? null,
+      subtotal, tax, shipping, discount,
+      total,
       status: "paid",
-      fastrr_order_id: order.order_id,
-      session_ref: session.id,
+      fastrr_order_id: payload.cart_id,
     })
     .select("id")
     .single();
   if (orderErr || !newOrder) return { ok: false, reason: orderErr?.message ?? "Order insert failed" };
 
-  const items = cartSnapshot.map((l) => ({
+  const items = resolvedItems.map((l) => ({
     order_id: newOrder.id,
     variant_id: l.variant_id,
     supplier_id: l.supplier_id,
@@ -69,20 +132,12 @@ export async function fulfillFastrrOrder(order: FastrrOrderDetails): Promise<Ful
   }));
   await admin.from("order_items").insert(items);
   await admin.from("order_status_history").insert({ order_id: newOrder.id, status: "paid", note: "Payment captured via Fastrr" });
-  await admin.from("fastrr_checkout_sessions").update({ status: "completed", fastrr_order_id: order.order_id }).eq("id", session.id);
 
-  for (const l of cartSnapshot) {
+  for (const l of resolvedItems) {
     await admin.rpc("fulfil_inventory", { p_variant: l.variant_id, p_qty: l.quantity, p_product: l.product_id });
   }
 
-  if (session.coupon_id) {
-    await admin.from("coupon_redemptions").insert({
-      coupon_id: session.coupon_id, user_id: profile.id, order_id: newOrder.id, amount: session.discount,
-    });
-    await admin.rpc("increment_coupon_use", { p_coupon: session.coupon_id });
-  }
-
-  const sellers = [...new Set(cartSnapshot.map((l) => l.supplier_id))];
+  const sellers = [...new Set(resolvedItems.map((l) => l.supplier_id))];
   for (const sellerId of sellers) {
     const { data: shipment } = await admin
       .from("shipments")
@@ -95,7 +150,7 @@ export async function fulfillFastrrOrder(order: FastrrOrderDetails): Promise<Ful
       await createShiprocketShipment(shipment.id);
     }
 
-    const sellerAmount = cartSnapshot.filter((l) => l.supplier_id === sellerId).reduce((sum, l) => sum + l.unit_price * l.quantity, 0);
+    const sellerAmount = resolvedItems.filter((l) => l.supplier_id === sellerId).reduce((sum, l) => sum + l.unit_price * l.quantity, 0);
     await admin.from("escrow_holds").insert({ order_id: newOrder.id, seller_id: sellerId, amount: sellerAmount, status: "held" });
   }
 
@@ -104,11 +159,13 @@ export async function fulfillFastrrOrder(order: FastrrOrderDetails): Promise<Ful
 
   // Convert any Loyalty Points hold on this order into a permanent debit --
   // the block already reduced *available* balance during checkout; this
-  // now reduces the actual balance to match.
+  // now reduces the actual balance to match. Blocks are keyed by whatever
+  // order_id Fastrr passed to the Block Points call, which may or may not
+  // be this same cart_id -- best-effort match.
   const { data: block } = await admin
     .from("wallet_point_blocks")
     .select("id, user_id, points, status")
-    .eq("fastrr_order_id", order.order_id)
+    .eq("fastrr_order_id", payload.cart_id)
     .eq("status", "blocked")
     .maybeSingle();
   if (block) {
