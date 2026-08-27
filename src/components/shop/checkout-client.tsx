@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 import { toast } from "sonner";
 import { Loader2, Tag } from "lucide-react";
@@ -30,6 +30,13 @@ export function CheckoutClient({
   const [discount, setDiscount] = useState(0);
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
+  // Shiprocket's shopify.js scans/mutates the DOM (e.g. the #sellerDomain
+  // input) as soon as it loads, which can race React's hydration of this
+  // subtree and trip "Hydration failed" (#418) on /checkout. Mounting these
+  // elements only after hydration completes keeps them out of the
+  // server/client diff entirely.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const total = Math.max(0, subtotal - discount);
 
@@ -70,9 +77,13 @@ export function CheckoutClient({
 
   return (
     <>
-      <Script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" strategy="afterInteractive" />
-      <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css" />
-      <input type="hidden" id="sellerDomain" value="smartbuyx.in" />
+      {mounted ? (
+        <>
+          <Script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" strategy="afterInteractive" />
+          <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css" />
+          <input type="hidden" id="sellerDomain" value="smartbuyx.in" readOnly />
+        </>
+      ) : null}
 
       <div className="flex gap-2">
         <div className="relative flex-1">

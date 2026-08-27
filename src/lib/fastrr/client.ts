@@ -51,6 +51,7 @@ export async function generateAccessToken(items: CartItem[], redirectUrl: string
   });
   if (!res.ok) throw new Error(`Fastrr access-token failed: ${res.status} ${await res.text()}`);
   const raw = await res.json();
+  console.log("[fastrr] access-token raw response", JSON.stringify(raw));
   const token = raw?.result?.token;
   if (!token) throw new Error(`Fastrr access-token response missing token: ${JSON.stringify(raw)}`);
   return { token, raw };
