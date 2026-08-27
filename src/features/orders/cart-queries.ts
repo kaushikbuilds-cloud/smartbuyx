@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type CartLine = {
   itemId: string;
@@ -24,7 +25,15 @@ export async function getCart(userId: string): Promise<Cart> {
   const { data: cart } = await supabase.from("carts").select("id").eq("user_id", userId).single();
   if (!cart) return { lines: [], subtotal: 0, itemCount: 0 };
 
-  const { data } = await supabase
+  // Ownership of `cart` is already proven above via the RLS-scoped client
+  // (carts.user_id = userId). Fetch the line items with the admin client
+  // instead of the RLS client so a non-active product (e.g. archived by an
+  // admin) doesn't silently vanish from the join for regular customers --
+  // the "products public read" RLS policy only shows non-active listings to
+  // their supplier or an admin, which was making carts appear empty (and
+  // checkout impossible) for non-admin accounts while admins saw everything.
+  const admin = createAdminClient();
+  const { data } = await admin
     .from("cart_items")
     .select(
       `id, quantity, variant_id,
