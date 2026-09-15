@@ -77,10 +77,14 @@ export async function startFastrrCheckout(addressId: string, couponCode?: string
     const numericIdByVariant = new Map((variantRows ?? []).map((v) => [v.id, v.fastrr_numeric_id]));
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
-    const { token } = await generateAccessToken(
+    const { token, orderId } = await generateAccessToken(
       cart.lines.map((l) => ({ variant_id: String(numericIdByVariant.get(l.variantId)), quantity: l.quantity })),
       `${appUrl}/checkout/fastrr-return?ref=${session.id}`
     );
+    // Store Fastrr's own order_id (== the cart_id their order-webhook later
+    // sends) so fulfillFastrrOrder can reliably identify this session/user
+    // instead of falling back to matching phone numbers.
+    if (orderId) await admin.from("fastrr_checkout_sessions").update({ fastrr_order_id: orderId }).eq("id", session.id);
     return { ok: true, token };
   } catch (e) {
     return { ok: false, error: safeErrorMessage(e, "Could not start checkout.", "startFastrrCheckout") };

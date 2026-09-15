@@ -57,9 +57,28 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
   if (existing) return { ok: true, orderId: existing.id }; // already processed -- idempotent
 
   const address = payload.shipping_address ?? payload.billing_address;
-  const phone = address.phone;
-  const { data: profile } = await admin.from("profiles").select("id").eq("phone", phone).maybeSingle();
-  if (!profile) return { ok: false, reason: `No profile matches phone ${phone}` };
+
+  // Reliable path: startFastrrCheckout stores Fastrr's own order_id (which
+  // matches this webhook's cart_id) on the checkout session it created for
+  // this user. Fall back to matching by phone only for sessions that predate
+  // this being wired up -- that match is unreliable since profiles.phone is
+  // optional and often never set, which was silently dropping most orders
+  // (they'd never appear in either the buyer's or the seller's dashboard).
+  const { data: session } = await admin
+    .from("fastrr_checkout_sessions")
+    .select("id, user_id, coupon_id, coupon_code")
+    .eq("fastrr_order_id", payload.cart_id)
+    .maybeSingle();
+
+  let buyerId: string;
+  if (session) {
+    buyerId = session.user_id;
+  } else {
+    const phone = address.phone;
+    const { data: profile } = await admin.from("profiles").select("id").eq("phone", phone).maybeSingle();
+    if (!profile) return { ok: false, reason: `No checkout session or profile matches this order (cart_id ${payload.cart_id}, phone ${phone})` };
+    buyerId = profile.id;
+  }
 
   // Items carry the numeric ids we handed Fastrr at checkout (see
   // fastrr-checkout-actions.ts) -- resolve them back to real variant rows
@@ -89,7 +108,7 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
   const { data: newAddress, error: addressErr } = await admin
     .from("addresses")
     .insert({
-      user_id: profile.id,
+      user_id: buyerId,
       label: "Fastrr checkout",
       line1: address.address1,
       line2: address.address2 || null,
@@ -125,16 +144,32 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
   const { data: newOrder, error: orderErr } = await admin
     .from("orders")
     .insert({
-      buyer_id: profile.id,
+      buyer_id: buyerId,
       shipping_address_id: newAddress?.id ?? null,
       subtotal, tax, shipping, discount,
       total,
       status: "paid",
       fastrr_order_id: payload.cart_id,
+      session_ref: session?.id ?? null,
+      coupon_id: session?.coupon_id ?? null,
     })
     .select("id")
     .single();
   if (orderErr || !newOrder) return { ok: false, reason: orderErr?.message ?? "Order insert failed" };
+
+  // Now that the checkout session reliably links back to which coupon (if
+  // any) the buyer applied, record the redemption -- previously this never
+  // happened for Fastrr-path orders, so a coupon's per-user usage limit was
+  // never actually enforced on the primary checkout path.
+  if (session?.coupon_id) {
+    await admin.from("coupon_redemptions").insert({
+      coupon_id: session.coupon_id,
+      user_id: buyerId,
+      order_id: newOrder.id,
+      amount: discount,
+    });
+    await admin.rpc("increment_coupon_use", { p_coupon: session.coupon_id });
+  }
 
   const items = resolvedItems.map((l) => ({
     order_id: newOrder.id,
@@ -173,7 +208,7 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
     await admin.from("escrow_holds").insert({ order_id: newOrder.id, seller_id: sellerId, amount: sellerAmount, status: "held" });
   }
 
-  const { data: cart } = await admin.from("carts").select("id").eq("user_id", profile.id).single();
+  const { data: cart } = await admin.from("carts").select("id").eq("user_id", buyerId).single();
   if (cart) await admin.from("cart_items").delete().eq("cart_id", cart.id);
 
   // Convert any Loyalty Points hold on this order into a permanent debit --
