@@ -27,7 +27,7 @@ export function GoldBenefitsCard({ saved }: { saved: number }) {
 
         <div className="h-2 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-teal-600 to-orange-500 transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>

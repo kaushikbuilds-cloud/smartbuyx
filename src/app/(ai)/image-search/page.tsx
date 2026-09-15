@@ -9,7 +9,7 @@ export default async function ImageSearchPage() {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white shadow-md">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-teal-600 text-white shadow-md">
           <Camera className="h-5 w-5" />
         </span>
         <div>

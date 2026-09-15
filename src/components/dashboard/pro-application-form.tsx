@@ -38,7 +38,7 @@ function Section({ step, title, children }: { step: number; title: string; child
   return (
     <fieldset className="space-y-4 rounded-lg border p-4">
       <legend className="flex items-center gap-2 px-1 text-sm font-semibold">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-[11px] text-white">{step}</span>
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[11px] text-white">{step}</span>
         {title}
       </legend>
       {children}

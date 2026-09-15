@@ -14,13 +14,13 @@ import { OnboardingChecklist } from "@/components/dashboard/seller/onboarding-ch
 export const metadata = { title: "Seller Hub" };
 
 const TOOLS = [
-  { href: "/dashboard/supplier/products/new", label: "Add product", desc: "AI-assisted listing", icon: PlusCircle, color: "from-purple-600 to-indigo-600" },
+  { href: "/dashboard/supplier/products/new", label: "Add product", desc: "AI-assisted listing", icon: PlusCircle, color: "from-teal-600 to-amber-600" },
   { href: "/dashboard/supplier/products", label: "My Products", desc: "Manage listings", icon: Package, color: "from-blue-600 to-cyan-600" },
   { href: "/dashboard/supplier/orders", label: "Orders", desc: "Fulfil & track", icon: FileText, color: "from-emerald-600 to-teal-600" },
   { href: "/dashboard/supplier/analytics", label: "Analytics", desc: "Revenue & returns", icon: TrendingUp, color: "from-amber-500 to-orange-600" },
   { href: "/dashboard/supplier/returns", label: "Returns & Disputes", desc: "Review & flag returns", icon: RotateCcw, color: "from-red-500 to-rose-600" },
   { href: "/dashboard/supplier/inventory", label: "Inventory Intelligence", desc: "Stockout alerts & forecast", icon: Boxes, color: "from-rose-600 to-pink-600" },
-  { href: "/dashboard/supplier/competitors", label: "Competitor Analysis", desc: "Pricing guidance", icon: Scale, color: "from-fuchsia-600 to-purple-600" },
+  { href: "/dashboard/supplier/competitors", label: "Competitor Analysis", desc: "Pricing guidance", icon: Scale, color: "from-orange-600 to-teal-600" },
   { href: "/dashboard/supplier/rfqs", label: "Incoming RFQs", desc: "Quote requests", icon: FileText, color: "from-cyan-600 to-blue-600" },
   { href: "/dashboard/supplier/refurbished", label: "Refurbished Products", desc: "List & track inspections", icon: RefreshCw, color: "from-teal-600 to-emerald-600" },
   { href: "/dashboard/supplier/verification", label: "Verification & Payouts", desc: "Bank details & KYC", icon: ShieldCheck, color: "from-emerald-600 to-teal-600" },

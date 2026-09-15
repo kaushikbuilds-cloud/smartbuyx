@@ -31,7 +31,7 @@ export function UpgradeModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-amber-600 text-white">
             <Crown className="h-5 w-5" />
           </span>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -46,7 +46,7 @@ export function UpgradeModal({
           <span className="text-muted-foreground">Your plan</span>
           <span className="font-medium">{currentPlanName}</span>
         </div>
-        <div className="mt-2 flex items-center justify-between rounded-lg border border-purple-400 bg-purple-50 p-3 text-sm dark:bg-purple-950/20">
+        <div className="mt-2 flex items-center justify-between rounded-lg border border-teal-400 bg-teal-50 p-3 text-sm dark:bg-teal-950/20">
           <span>{requiredPlanName}</span>
           <span className="font-bold">{formatINR(requiredPlanPriceInr)}/mo</span>
         </div>

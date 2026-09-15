@@ -73,7 +73,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <div>
             <h2 className="text-xl font-bold">{q ? `Results for "${q}"` : "All Products"}</h2>
             {aiApplied ? (
-              <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+              <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
                 <Sparkles className="h-3 w-3" />
                 AI understood: {parsed.keywords}
                 {parsed.maxPrice ? ` · under ${formatINR(parsed.maxPrice)}` : ""}

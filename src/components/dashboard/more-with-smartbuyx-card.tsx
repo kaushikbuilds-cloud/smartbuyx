@@ -16,7 +16,7 @@ export function MoreWithSmartBuyxCard() {
         <ul className="space-y-2">
           {ITEMS.map((it) => (
             <li key={it.title} className="flex items-center gap-3 rounded-lg p-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
                 <it.icon className="h-4 w-4" />
               </span>
               <div>

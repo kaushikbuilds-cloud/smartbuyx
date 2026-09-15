@@ -7,7 +7,7 @@ import { SettingsSection } from "@/components/dashboard/settings-section";
 export const metadata = { title: "Support" };
 
 const ACTIONS = [
-  { icon: LifeBuoy, title: "Help Center", desc: "Browse FAQs and how-to guides", href: "/dashboard/customer/support", color: "from-purple-600 to-indigo-600" },
+  { icon: LifeBuoy, title: "Help Center", desc: "Browse FAQs and how-to guides", href: "/dashboard/customer/support", color: "from-teal-600 to-amber-600" },
   { icon: Mail, title: "Contact Support", desc: "Email hello@smartbuyx.in", href: "mailto:hello@smartbuyx.in", color: "from-blue-600 to-cyan-600" },
   { icon: FileQuestion, title: "Raise a Ticket", desc: "Track an open request", href: "/dashboard/customer/support", color: "from-emerald-600 to-teal-600" },
   { icon: MessageCircle, title: "Live Chat", desc: "Mon–Sat · 9 AM to 9 PM IST", href: "#", color: "from-amber-500 to-orange-600" },

@@ -39,7 +39,7 @@ export function SettingsNav() {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    ? "bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >

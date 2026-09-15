@@ -61,7 +61,7 @@ export function DashboardSidebar({
 }) {
   const pathname = usePathname();
   const items = mode === "build" ? BUILD_NAV : COMMERCE_NAV;
-  const accent = mode === "build" ? "from-amber-500 to-orange-600" : "from-purple-500 to-indigo-600";
+  const accent = mode === "build" ? "from-amber-500 to-orange-600" : "from-teal-500 to-amber-600";
 
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r bg-card lg:flex">
@@ -104,7 +104,7 @@ export function DashboardSidebar({
                 active
                   ? mode === "build"
                     ? "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                    : "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    : "bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
@@ -115,7 +115,7 @@ export function DashboardSidebar({
                   "rounded-full px-2 py-0.5 text-[10px] font-semibold",
                   mode === "build"
                     ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
-                    : "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300"
+                    : "bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300"
                 )}>{badge}</span>
               ) : null}
             </Link>
@@ -142,7 +142,7 @@ export function DashboardSidebar({
             </Link>
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-fuchsia-50 p-4 dark:from-purple-950/30 dark:to-fuchsia-950/30">
+          <div className="relative overflow-hidden rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-orange-50 p-4 dark:from-teal-950/30 dark:to-orange-950/30">
             <div className="flex items-start gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white">
                 <Gift className="h-4 w-4" />
@@ -150,10 +150,10 @@ export function DashboardSidebar({
               <h4 className="text-sm font-semibold">Invite &amp; Earn</h4>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">Invite friends and earn</p>
-            <p className="text-sm font-bold text-purple-700 dark:text-purple-300">100 Smart Coins</p>
+            <p className="text-sm font-bold text-teal-700 dark:text-teal-300">100 Smart Coins</p>
             <Link
               href="/dashboard/customer/invite"
-              className="mt-3 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-md"
+              className="mt-3 inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-teal-600 to-amber-600 px-3 py-1.5 text-xs font-medium text-white shadow-md"
             >
               Invite Now
             </Link>

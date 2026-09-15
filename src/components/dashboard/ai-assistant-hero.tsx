@@ -13,8 +13,8 @@ export function AIAssistantHero({ firstName }: { firstName?: string }) {
   }
 
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 px-8 py-7 text-white shadow-lg shadow-purple-600/20">
-      <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-fuchsia-400/30 blur-3xl" />
+    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 via-amber-600 to-blue-700 px-8 py-7 text-white shadow-lg shadow-teal-600/20">
+      <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-orange-400/30 blur-3xl" />
       <div className="absolute -bottom-10 right-20 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
 
       <div className="relative grid items-center gap-6 md:grid-cols-[1fr,auto]">
@@ -35,7 +35,7 @@ export function AIAssistantHero({ firstName }: { firstName?: string }) {
               if (q) ask(q);
             }}
           >
-            <span className="flex h-9 w-9 items-center justify-center text-purple-600">
+            <span className="flex h-9 w-9 items-center justify-center text-teal-600">
               <Sparkles className="h-5 w-5" />
             </span>
             <input
@@ -45,7 +45,7 @@ export function AIAssistantHero({ firstName }: { firstName?: string }) {
             />
             <button
               type="submit"
-              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-teal-600 to-amber-600 px-4 py-2 text-sm font-medium text-white hover:opacity-90"
             >
               Ask AI <Send className="h-3.5 w-3.5" />
             </button>

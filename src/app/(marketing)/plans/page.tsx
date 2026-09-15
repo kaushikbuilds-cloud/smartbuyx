@@ -72,9 +72,9 @@ export default async function PlansPage({
           const isCurrent = currentSubscriptionPlanId === plan.id;
           const isFree = plan.price_inr === 0;
           return (
-            <Card key={plan.id} className={plan.highlight ? "relative border-purple-400 shadow-lg shadow-purple-500/10" : "relative"}>
+            <Card key={plan.id} className={plan.highlight ? "relative border-teal-400 shadow-lg shadow-teal-500/10" : "relative"}>
               {plan.highlight ? (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-teal-600 to-amber-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
                   {plan.tagline ?? "Most Popular"}
                 </div>
               ) : null}
@@ -109,7 +109,7 @@ export default async function PlansPage({
                 {session ? (
                   <SubscribeButton planId={plan.id} isFree={isFree} isCurrent={isCurrent} />
                 ) : (
-                  <a href="/login" className="block w-full rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-center text-sm font-medium text-white">
+                  <a href="/login" className="block w-full rounded-md bg-gradient-to-r from-teal-600 to-amber-600 px-4 py-2 text-center text-sm font-medium text-white">
                     Log in to subscribe
                   </a>
                 )}

@@ -4,10 +4,10 @@ import type { ReviewSummary } from "@/features/ai/review-summary";
 
 export function ReviewSummaryCard({ summary }: { summary: ReviewSummary }) {
   return (
-    <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 dark:border-purple-900/40 dark:from-purple-950/20 dark:to-indigo-950/20">
+    <Card className="border-teal-200 bg-gradient-to-br from-teal-50 to-amber-50 dark:border-teal-900/40 dark:from-teal-950/20 dark:to-amber-950/20">
       <CardContent className="space-y-3 p-5">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-teal-600 to-amber-600 text-white">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
           <p className="text-sm font-semibold">AI review summary</p>

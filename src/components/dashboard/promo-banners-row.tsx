@@ -5,7 +5,7 @@ export function PromoBannersRow() {
   return (
     <section className="grid gap-4 lg:grid-cols-2">
       {/* AI Compare Products */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-500 p-6 text-white shadow-lg shadow-purple-600/20">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 via-orange-600 to-pink-500 p-6 text-white shadow-lg shadow-teal-600/20">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
         <div className="relative">
           <h3 className="text-xl font-bold">AI Compare Products</h3>
@@ -17,7 +17,7 @@ export function PromoBannersRow() {
           </ul>
           <Link
             href="/dashboard/customer/compare"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-purple-700 shadow-md transition-transform hover:scale-[1.02]"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-md transition-transform hover:scale-[1.02]"
           >
             Compare Now <ArrowRight className="h-3.5 w-3.5" />
           </Link>

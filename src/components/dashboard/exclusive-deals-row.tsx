@@ -7,7 +7,7 @@ export function ExclusiveDealsRow({ smartCoins }: { smartCoins: number }) {
   return (
     <section className="grid gap-4 lg:grid-cols-[2fr,1fr]">
       {/* Exclusive deals */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 p-5 text-white shadow-md shadow-purple-600/20">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 to-orange-600 p-5 text-white shadow-md shadow-teal-600/20">
         <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-start justify-between gap-4">
           <div>
@@ -15,7 +15,7 @@ export function ExclusiveDealsRow({ smartCoins }: { smartCoins: number }) {
               Exclusive Deals for You <PartyPopper className="h-5 w-5 text-amber-300" />
             </h3>
             <p className="mt-1 text-sm text-white/80">Grab the best offers handpicked just for you!</p>
-            <Button asChild variant="secondary" className="mt-3 bg-white text-purple-700 hover:bg-white/90">
+            <Button asChild variant="secondary" className="mt-3 bg-white text-teal-700 hover:bg-white/90">
               <Link href="/products?sort=rating">Explore Deals</Link>
             </Button>
           </div>

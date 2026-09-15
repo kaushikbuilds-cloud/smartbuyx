@@ -46,9 +46,9 @@ export default async function RfqDetailPage({ params }: { params: Promise<{ id: 
       </Card>
 
       {verdict ? (
-        <Card className="mb-4 border-purple-200 bg-purple-50/60 dark:border-purple-900 dark:bg-purple-950/30">
+        <Card className="mb-4 border-teal-200 bg-teal-50/60 dark:border-teal-900 dark:bg-teal-950/30">
           <CardContent className="flex gap-3 p-4">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-600 to-amber-600 text-white">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>
@@ -72,14 +72,14 @@ export default async function RfqDetailPage({ params }: { params: Promise<{ id: 
           {quotes.map((q) => {
             const recommended = verdict?.recommendedQuoteId === q.id;
             return (
-              <Card key={q.id} className={recommended ? "border-purple-400 ring-1 ring-purple-400" : ""}>
+              <Card key={q.id} className={recommended ? "border-teal-400 ring-1 ring-teal-400" : ""}>
                 <CardContent className="space-y-2 p-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="flex items-center gap-2 font-medium">
                         {q.supplier_name ?? "Supplier"}
                         {recommended ? (
-                          <Badge className="gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-[10px]">
+                          <Badge className="gap-1 bg-gradient-to-r from-teal-600 to-amber-600 text-[10px]">
                             <Sparkles className="h-2.5 w-2.5" /> Recommended
                           </Badge>
                         ) : null}

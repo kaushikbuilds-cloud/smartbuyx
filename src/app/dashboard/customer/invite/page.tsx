@@ -17,7 +17,7 @@ export default async function InvitePage() {
       <Card>
         <CardContent className="space-y-6 p-8">
           <div className="flex flex-col items-center gap-4 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-600/30">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-orange-600 text-white shadow-lg shadow-teal-600/30">
               <Gift className="h-8 w-8" />
             </span>
             <div>

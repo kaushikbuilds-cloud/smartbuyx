@@ -29,7 +29,7 @@ export function ModeSwitcher({ mode }: { mode: AppMode }) {
         className={cn(
           "flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 transition-colors",
           mode === "commerce"
-            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
+            ? "bg-gradient-to-r from-teal-600 to-amber-600 text-white shadow-sm"
             : "text-muted-foreground hover:bg-muted"
         )}
       >

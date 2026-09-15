@@ -43,9 +43,9 @@ export function AiAssistPanel() {
   }
 
   return (
-    <div className="mb-6 max-w-2xl rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-4 dark:border-purple-900/40 dark:from-purple-950/30 dark:to-indigo-950/30">
+    <div className="mb-6 max-w-2xl rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-amber-50 p-4 dark:border-teal-900/40 dark:from-teal-950/30 dark:to-amber-950/30">
       <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-amber-600 text-white">
           <Sparkles className="h-4 w-4" />
         </span>
         <p className="text-sm font-semibold">Generate with AI</p>

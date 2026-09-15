@@ -22,7 +22,7 @@ export function NativeAppBridge() {
       void SplashScreen.hide();
 
       const { StatusBar, Style } = await import("@capacitor/status-bar");
-      void StatusBar.setBackgroundColor({ color: "#9333EA" }).catch(() => {});
+      void StatusBar.setBackgroundColor({ color: "#0f766e" }).catch(() => {});
       void StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
 
       const { App } = await import("@capacitor/app");

@@ -11,12 +11,12 @@ export default async function AdminOverviewPage() {
 
   const stats = [
     { icon: IndianRupee, label: "GMV", value: formatINR(s.gmv), color: "from-emerald-500 to-teal-500" },
-    { icon: ShoppingBag, label: "Orders", value: s.orders.toLocaleString("en-IN"), color: "from-blue-500 to-indigo-500" },
-    { icon: TrendingUp, label: "Paid orders", value: s.paidOrders.toLocaleString("en-IN"), color: "from-purple-500 to-fuchsia-500" },
+    { icon: ShoppingBag, label: "Orders", value: s.orders.toLocaleString("en-IN"), color: "from-blue-500 to-amber-500" },
+    { icon: TrendingUp, label: "Paid orders", value: s.paidOrders.toLocaleString("en-IN"), color: "from-teal-500 to-orange-500" },
     { icon: Users, label: "Users", value: s.users.toLocaleString("en-IN"), color: "from-cyan-500 to-blue-500" },
     { icon: Store, label: "Sellers", value: s.sellers.toLocaleString("en-IN"), color: "from-amber-500 to-orange-500" },
     { icon: Package, label: "Products", value: s.products.toLocaleString("en-IN"), color: "from-rose-500 to-pink-500" },
-    { icon: FileClock, label: "Pending applications", value: s.pendingApplications, color: "from-violet-500 to-purple-500" },
+    { icon: FileClock, label: "Pending applications", value: s.pendingApplications, color: "from-cyan-500 to-teal-500" },
     { icon: RotateCcw, label: "Open returns", value: s.openReturns, color: "from-red-500 to-rose-500" },
   ];
 

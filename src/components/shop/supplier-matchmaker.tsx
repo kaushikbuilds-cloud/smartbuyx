@@ -39,10 +39,10 @@ export function SupplierMatchmaker({ defaultPincode }: { defaultPincode?: string
   }
 
   return (
-    <Card className="border-purple-200 bg-purple-50/40 dark:border-purple-900 dark:bg-purple-950/20">
+    <Card className="border-teal-200 bg-teal-50/40 dark:border-teal-900 dark:bg-teal-950/20">
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-amber-600 text-white">
             <Sparkles className="h-4 w-4" />
           </span>
           <div>

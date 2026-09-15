@@ -62,7 +62,7 @@ export function AssistantChat({ initialQuery }: { initialQuery?: string }) {
       <div className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
         {turns.length === 0 && !pending ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-amber-600 text-white shadow-lg shadow-teal-600/30">
               <Sparkles className="h-7 w-7" />
             </span>
             <div>
@@ -92,7 +92,7 @@ export function AssistantChat({ initialQuery }: { initialQuery?: string }) {
                 className={cn(
                   "whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm",
                   t.role === "user"
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                    ? "bg-gradient-to-r from-teal-600 to-amber-600 text-white"
                     : "border bg-card"
                 )}
               >
@@ -127,7 +127,7 @@ export function AssistantChat({ initialQuery }: { initialQuery?: string }) {
           send(input);
         }}
       >
-        <span className="flex h-9 w-9 items-center justify-center text-purple-600">
+        <span className="flex h-9 w-9 items-center justify-center text-teal-600">
           <Sparkles className="h-5 w-5" />
         </span>
         <input
@@ -140,7 +140,7 @@ export function AssistantChat({ initialQuery }: { initialQuery?: string }) {
         <button
           type="submit"
           disabled={pending || !input.trim()}
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-amber-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           Send <Send className="h-3.5 w-3.5" />
         </button>

@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const CATEGORIES = [
   { label: "Mobiles", href: "/products?q=mobile", icon: Smartphone, color: "from-rose-400 to-pink-500" },
-  { label: "Laptops", href: "/products?q=laptop", icon: Laptop, color: "from-blue-400 to-indigo-500" },
-  { label: "Fashion", href: "/products?q=fashion", icon: Shirt, color: "from-fuchsia-400 to-purple-500" },
+  { label: "Laptops", href: "/products?q=laptop", icon: Laptop, color: "from-blue-400 to-amber-500" },
+  { label: "Fashion", href: "/products?q=fashion", icon: Shirt, color: "from-orange-400 to-teal-500" },
   { label: "Home & Kitchen", href: "/products?q=kitchen", icon: UtensilsCrossed, color: "from-amber-400 to-orange-500" },
   { label: "Electronics", href: "/products?q=electronics", icon: Cpu, color: "from-cyan-400 to-teal-500" },
   { label: "Furniture", href: "/products?q=furniture", icon: Armchair, color: "from-emerald-400 to-green-500" },

@@ -28,7 +28,7 @@ export default async function PaymentsPage() {
               <ul className="space-y-2">
                 {methods.map((m) => (
                   <li key={m.id} className="flex items-center gap-3 rounded-lg border p-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-amber-600 text-white">
                       <CreditCard className="h-4 w-4" />
                     </span>
                     <div className="min-w-0 flex-1">

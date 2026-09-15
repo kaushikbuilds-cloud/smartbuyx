@@ -26,12 +26,12 @@ export default async function AiSettingsPage() {
       </SettingsCard>
 
       <SettingsCard title="Try your AI assistant">
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 p-4 text-white">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-gradient-to-r from-teal-600 to-amber-600 p-4 text-white">
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5" />
             <p className="text-sm">Ready to test? Ask for product picks tuned to your preferences.</p>
           </div>
-          <Button variant="secondary" className="bg-white text-purple-700 hover:bg-white/90" asChild>
+          <Button variant="secondary" className="bg-white text-teal-700 hover:bg-white/90" asChild>
             <Link href="/assistant">Open assistant <ArrowRight className="h-4 w-4" /></Link>
           </Button>
         </div>

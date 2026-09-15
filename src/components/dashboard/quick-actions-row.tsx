@@ -6,9 +6,9 @@ const ACTIONS = [
   { icon: Scale, label: "Compare Products", href: "/dashboard/customer/compare", color: "from-blue-500 to-cyan-500" },
   { icon: Bell, label: "Track Prices", href: "/dashboard/customer/alerts", color: "from-rose-500 to-pink-500" },
   { icon: Tag, label: "Browse Deals", href: "/products?sort=rating", color: "from-amber-500 to-orange-500" },
-  { icon: Sparkles, label: "Ask AI", href: "/assistant", color: "from-purple-600 to-indigo-600" },
+  { icon: Sparkles, label: "Ask AI", href: "/assistant", color: "from-teal-600 to-amber-600" },
   { icon: HardHat, label: "Build Cost Estimator", href: "/cost-calculator", color: "from-emerald-500 to-teal-500" },
-  { icon: Gift, label: "Refer & Earn", href: "/dashboard/customer/invite", color: "from-fuchsia-500 to-purple-600" },
+  { icon: Gift, label: "Refer & Earn", href: "/dashboard/customer/invite", color: "from-orange-500 to-teal-600" },
 ];
 
 export function QuickActionsRow() {

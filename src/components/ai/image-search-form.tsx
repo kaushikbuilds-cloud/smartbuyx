@@ -63,7 +63,7 @@ export function ImageSearchForm() {
             </div>
           ) : (
             <label className="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-10 text-center hover:bg-muted">
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
                 <Camera className="h-6 w-6" />
               </span>
               <div>
@@ -87,7 +87,7 @@ export function ImageSearchForm() {
       {result ? (
         <Card>
           <CardContent className="space-y-4 p-6">
-            <div className="flex items-center gap-2 text-sm font-semibold text-purple-600">
+            <div className="flex items-center gap-2 text-sm font-semibold text-teal-600">
               <Sparkles className="h-4 w-4" /> We think this is: {result.detected}
             </div>
             {result.products.length > 0 ? (

@@ -54,7 +54,7 @@ export default async function AdminKycPage() {
                   <td className="p-3 font-medium">{d.owner_name ?? "—"}</td>
                   <td className="p-3">
                     {d.signed_url ? (
-                      <a href={d.signed_url} target="_blank" rel="noopener noreferrer" className="text-purple-600 underline">
+                      <a href={d.signed_url} target="_blank" rel="noopener noreferrer" className="text-teal-600 underline">
                         {DOC_LABEL[d.doc_type] ?? d.doc_type}
                       </a>
                     ) : (

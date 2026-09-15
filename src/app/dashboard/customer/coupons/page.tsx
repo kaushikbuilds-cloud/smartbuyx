@@ -31,7 +31,7 @@ export default async function CouponsPage() {
           {(coupons ?? []).map((c) => (
             <Card key={c.id} className="overflow-hidden">
               <CardContent className="flex items-center gap-4 p-5">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-orange-600 text-white">
                   <Tag className="h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">

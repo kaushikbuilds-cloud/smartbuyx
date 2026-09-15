@@ -58,7 +58,7 @@ export function NotificationBell({
                         onClick={() => startTransition(async () => { await markNotificationRead(n.id); })}
                         className={cn(
                           "w-full rounded-lg px-2 py-2 text-left text-xs hover:bg-muted",
-                          !n.read_at && "bg-purple-50 dark:bg-purple-900/20"
+                          !n.read_at && "bg-teal-50 dark:bg-teal-900/20"
                         )}
                       >
                         <p className={cn("capitalize", !n.read_at && "font-medium")}>{describeNotification(n)}</p>

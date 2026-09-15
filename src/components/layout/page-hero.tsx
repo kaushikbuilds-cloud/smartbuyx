@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils/cn";
 type Variant = "purple" | "build" | "dark";
 
 const GRADIENT: Record<Variant, string> = {
-  purple: "from-purple-600 via-indigo-600 to-blue-700 shadow-purple-600/20",
+  purple: "from-teal-600 via-amber-600 to-blue-700 shadow-teal-600/20",
   build: "from-amber-500 via-orange-600 to-rose-600 shadow-orange-500/20",
-  dark: "from-[#1a0d3b] via-[#2d1465] to-[#1a0d3b] shadow-purple-900/30",
+  dark: "from-[#1a0d3b] via-[#2d1465] to-[#1a0d3b] shadow-teal-900/30",
 };
 
 export function PageHero({
