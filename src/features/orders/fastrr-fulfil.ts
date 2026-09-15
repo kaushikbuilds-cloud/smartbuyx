@@ -86,7 +86,7 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
     });
   }
 
-  const { data: newAddress } = await admin
+  const { data: newAddress, error: addressErr } = await admin
     .from("addresses")
     .insert({
       user_id: profile.id,
@@ -100,12 +100,27 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
     })
     .select("id")
     .single();
+  // Not fatal -- the order can still be created with a null shipping
+  // address and fixed up manually -- but a silent failure here previously
+  // meant a "paid" order with no shipping address and no record of why.
+  if (addressErr) console.error("[fastrr-fulfil] address insert failed", { message: addressErr.message, cartId: payload.cart_id });
 
   const subtotal = resolvedItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0);
   const discount = Number(payload.total_discount ?? 0);
   const shipping = Number(payload.shipping_price ?? 0);
   const tax = Number(payload.tax ?? 0);
   const total = Number(payload.total_price);
+
+  // This webhook has no signature/HMAC (see file header) -- its total_price
+  // is otherwise-unauthenticated attacker input, and would otherwise flow
+  // straight into orders.total and per-seller escrow amounts below. Reject
+  // anything that doesn't match what our own catalog prices compute to
+  // (small tolerance for rounding), rather than trusting a claimed total we
+  // can't verify against Fastrr's own records.
+  const expectedTotal = subtotal - discount + shipping + tax;
+  if (Math.abs(expectedTotal - total) > 1) {
+    return { ok: false, reason: `total_price ${total} doesn't match computed total ${expectedTotal} (subtotal ${subtotal}, discount ${discount}, shipping ${shipping}, tax ${tax})` };
+  }
 
   const { data: newOrder, error: orderErr } = await admin
     .from("orders")
@@ -130,7 +145,11 @@ export async function fulfillFastrrOrder(payload: FastrrWebhookPayload): Promise
     quantity: l.quantity,
     total: l.unit_price * l.quantity,
   }));
-  await admin.from("order_items").insert(items);
+  // A failure here would otherwise leave a "paid" order with $0 of line
+  // items and no record of why -- the same silent-empty-result bug class
+  // this codebase has hit before (see PayU/Fastrr-catalog history).
+  const { error: itemsErr } = await admin.from("order_items").insert(items);
+  if (itemsErr) return { ok: false, reason: `order_items insert failed: ${itemsErr.message}` };
   await admin.from("order_status_history").insert({ order_id: newOrder.id, status: "paid", note: "Payment captured via Fastrr" });
 
   for (const l of resolvedItems) {
