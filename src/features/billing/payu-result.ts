@@ -39,14 +39,20 @@ export async function handlePayuPlanResult(form: FormData): Promise<PayuPlanResu
     return { userId: planPayment?.user_id ?? null, status: "invalid" };
   }
 
-  // Idempotent: only act the first time this payment is seen as captured, in
-  // case both the redirect callback and the webhook arrive.
+  // Idempotent: the redirect callback and the webhook can both arrive for the
+  // same payment, so this must claim atomically rather than check-then-act --
+  // a plain "if status !== captured, then update" (as this used to be) lets
+  // both requests read the pre-update status concurrently and both proceed,
+  // double-activating the subscription. Same fix as fulfilPaidOrder's
+  // pending->paid claim for order payments.
   if (status === "success") {
-    if (planPayment.status !== "captured") {
-      await admin
-        .from("plan_payments")
-        .update({ payu_mihpayid: mihpayid || null, payu_mode: mode || null, status: "captured", raw: Object.fromEntries(form) })
-        .eq("payu_txnid", txnid);
+    const { data: claimed } = await admin
+      .from("plan_payments")
+      .update({ payu_mihpayid: mihpayid || null, payu_mode: mode || null, status: "captured", raw: Object.fromEntries(form) })
+      .eq("payu_txnid", txnid)
+      .neq("status", "captured")
+      .select("id");
+    if (claimed && claimed.length > 0) {
       await activateSubscription(planPayment.user_id, planPayment.plan_id, txnid);
     }
     return { userId: planPayment.user_id, status: "captured" };
