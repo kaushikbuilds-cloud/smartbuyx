@@ -36,13 +36,16 @@ async function signedFetch(path: string, body: unknown): Promise<Response> {
 
 export type CartItem = { variant_id: string; quantity: number };
 
-export type AccessTokenResult = { token: string; raw: unknown };
+export type AccessTokenResult = { token: string; orderId: string | null; raw: unknown };
 
 // Called at checkout time -- the returned token drives Fastrr's checkout
-// iframe (see HeadlessCheckout.addToCart in the button script). redirectUrl
-// should carry a correlation reference (query param) since Fastrr's order
-// webhook has no field identifying which of our users placed the order --
-// Fastrr owns the cart, we only find out who via this round-trip.
+// iframe (see HeadlessCheckout.addToCart in the button script). The response
+// also carries Fastrr's own order_id (result.data.order_id), which matches
+// the cart_id their order-placed webhook later sends -- capturing it here
+// and storing it on our checkout session (see startFastrrCheckout) gives a
+// reliable link back to which of our users placed the order, instead of the
+// webhook having to guess by matching phone numbers (unreliable: our
+// profiles.phone is optional and often unset).
 export async function generateAccessToken(items: CartItem[], redirectUrl: string): Promise<AccessTokenResult> {
   const res = await signedFetch("/api/v1/access-token/checkout", {
     cart_data: { items },
@@ -53,7 +56,8 @@ export async function generateAccessToken(items: CartItem[], redirectUrl: string
   const raw = await res.json();
   const token = raw?.result?.token;
   if (!token) throw new Error(`Fastrr access-token response missing token: ${JSON.stringify(raw)}`);
-  return { token, raw };
+  const orderId = raw?.result?.data?.order_id ?? null;
+  return { token, orderId, raw };
 }
 
 export type FastrrOrderDetails = {
