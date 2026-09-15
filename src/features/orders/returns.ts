@@ -57,6 +57,19 @@ export async function initiateReturn(_prev: ReturnActionState, formData: FormDat
   const days = (Date.now() - deliveredAt.getTime()) / (1000 * 60 * 60 * 24);
   if (days > RETURN_WINDOW_DAYS) return { error: `Return window of ${RETURN_WINDOW_DAYS} days has passed.` };
 
+  // Nothing stops the same order_item_id from having multiple return_requests
+  // rows -- the refund trigger only guards against double-crediting the same
+  // row, not against a second, independent request for an item already
+  // returned/refunded. Without this check a buyer could resubmit the form
+  // repeatedly on a returnless-eligible item and get credited every time.
+  const { data: existingReturn } = await supabase
+    .from("return_requests")
+    .select("id")
+    .eq("order_item_id", parsed.data.orderItemId)
+    .not("status", "eq", "cancelled")
+    .maybeSingle();
+  if (existingReturn) return { error: "A return has already been requested for this item." };
+
   // Decide returnless-refund eligibility: low value + trusted buyer + not the
   // reasons where we'd want the item back to inspect (damaged/wrong item can be
   // returnless too since they're low value, but keep quality issues reviewable).
@@ -84,7 +97,7 @@ export async function initiateReturn(_prev: ReturnActionState, formData: FormDat
     })
     .select("id")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: error.code === "23505" ? "A return has already been requested for this item." : error.message };
 
   if (returnless && created) {
     // Instant refund to wallet, no pickup. The status trigger credits the wallet.
