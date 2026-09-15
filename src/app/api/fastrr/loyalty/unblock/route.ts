@@ -7,6 +7,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // expire-orders/route.ts also sweeps stale blocks after a timeout, per the
 // guide's own caveat that merchants are responsible for that fallback.
 export async function POST(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get("token");
+  if (!process.env.FASTRR_LOYALTY_WEBHOOK_TOKEN || token !== process.env.FASTRR_LOYALTY_WEBHOOK_TOKEN) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   const orderId = String(body?.order_id ?? "");
   if (!orderId) return NextResponse.json({ error: "order_id is required" }, { status: 400 });

@@ -4,6 +4,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // "Fetch Available Points" -- 1 point = ₹1, matching how wallets.balance is
 // already treated as a plain INR amount throughout the app.
 export async function POST(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get("token");
+  if (!process.env.FASTRR_LOYALTY_WEBHOOK_TOKEN || token !== process.env.FASTRR_LOYALTY_WEBHOOK_TOKEN) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   const phone = body?.mobile_number;
   const cartValue = Number(body?.cart_value ?? 0);
