@@ -381,3 +381,50 @@ export async function listFraudFlags(): Promise<FraudFlag[]> {
     createdAt: r.created_at,
   }));
 }
+
+export type PendingReturn = {
+  id: string;
+  buyerName: string | null;
+  itemTitle: string;
+  reason: string;
+  notes: string | null;
+  videoUrl: string | null;
+  isExchange: boolean;
+  disputed: boolean;
+  sellerNotes: string | null;
+  amount: number;
+  createdAt: string;
+};
+
+// Returns awaiting manual resolution -- the returnless-refund and
+// instant-exchange paths in initiateReturn() auto-approve themselves, but
+// anything that falls outside those (higher-value items, a buyer who
+// doesn't clear the trust bar) stays "requested" until an admin acts here.
+export async function listPendingReturns(): Promise<PendingReturn[]> {
+  if (!isSupabaseConfigured()) return [];
+  const db = createAdminClient();
+  const { data, error } = await db
+    .from("return_requests")
+    .select("id, reason, notes, video_url, is_exchange, disputed, seller_notes, amount, created_at, profiles!return_requests_user_id_fkey(full_name), order_items(title)")
+    .eq("status", "requested")
+    .order("created_at", { ascending: true })
+    .limit(100);
+  logIfError("listPendingReturns", error);
+  return (data ?? []).map((r) => {
+    const buyer = r.profiles as unknown as { full_name: string | null } | null;
+    const item = r.order_items as unknown as { title: string } | null;
+    return {
+      id: r.id,
+      buyerName: buyer?.full_name ?? null,
+      itemTitle: item?.title ?? "Item",
+      reason: r.reason,
+      notes: r.notes,
+      videoUrl: r.video_url,
+      isExchange: r.is_exchange,
+      disputed: r.disputed,
+      sellerNotes: r.seller_notes,
+      amount: Number(r.amount),
+      createdAt: r.created_at,
+    };
+  });
+}

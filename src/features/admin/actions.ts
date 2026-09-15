@@ -256,3 +256,32 @@ export async function setUserSuspended(
   revalidatePath("/dashboard/admin/users");
   return {};
 }
+
+// Resolves a return_requests row stuck in "requested" -- everything that
+// doesn't qualify for the returnless-refund/instant-exchange auto-approval
+// in initiateReturn() lands here with no other way to move forward.
+// "Approve" refunds to the buyer's wallet immediately (same mechanism as a
+// returnless refund, via the status trigger) since there's no reverse-pickup
+// logistics integration wired up for returns; "Reject" just closes it out.
+export async function resolveReturnRequest(
+  returnId: string,
+  decision: "approve" | "reject",
+  adminNotes?: string
+): Promise<{ error?: string }> {
+  const { user } = await requireRole(...ADMIN);
+  const db = createAdminClient();
+  const status = decision === "approve" ? "refunded" : "rejected";
+  const { error } = await db
+    .from("return_requests")
+    .update({ status, resolved_at: new Date().toISOString() })
+    .eq("id", returnId)
+    .eq("status", "requested"); // only resolve returns still awaiting review
+  logIfError("resolveReturnRequest", error);
+  if (error) return { error: "Failed to resolve return. Check server logs." };
+  await logAdminAction(user.id, decision === "approve" ? "approve_return" : "reject_return", "return_request", returnId, {
+    notes: adminNotes?.trim() || undefined,
+  });
+  revalidatePath("/dashboard/admin/returns");
+  revalidatePath("/dashboard/customer/returns");
+  return {};
+}
