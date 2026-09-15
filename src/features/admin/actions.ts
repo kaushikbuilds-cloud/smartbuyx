@@ -66,6 +66,7 @@ export async function setProductStatus(productId: string, status: "active" | "ar
   const db = createAdminClient();
   const { error } = await db.from("products").update({ status }).eq("id", productId);
   logIfError("setProductStatus", error);
+  if (error) return;
   await logAdminAction(user.id, "set_product_status", "product", productId, { status });
   revalidatePath("/dashboard/admin/products");
 }
@@ -75,6 +76,7 @@ export async function setProductFeatured(productId: string, featured: boolean): 
   const db = createAdminClient();
   const { error } = await db.from("products").update({ is_featured: featured }).eq("id", productId);
   logIfError("setProductFeatured", error);
+  if (error) return;
   await logAdminAction(user.id, "set_product_featured", "product", productId, { featured });
   revalidatePath("/dashboard/admin/products");
 }
@@ -98,6 +100,7 @@ export async function reviewProApplication(
     .update({ status: approve ? "approved" : "rejected", reviewed_at: new Date().toISOString() })
     .eq("id", applicationId);
   logIfError("reviewProApplication.application", appError);
+  if (appError) return;
 
   if (approve) {
     // Promote the user to their requested pro role.
@@ -145,6 +148,7 @@ export async function setApplicationStatus(
     .update({ status, review_note: note?.trim() || null })
     .eq("id", applicationId);
   logIfError("setApplicationStatus", error);
+  if (error) return;
   await logAdminAction(
     user.id,
     status === "under_review" ? "application_under_review" : "application_info_requested",
@@ -167,6 +171,7 @@ export async function verifySupplierGst(userId: string, verified: boolean): Prom
     })
     .eq("user_id", userId);
   logIfError("verifySupplierGst", error);
+  if (error) return;
   // Recompute trust score after verification.
   await db.rpc("recompute_trust_score", { p_supplier: userId }).then(() => {}, () => {});
   await logAdminAction(user.id, "verify_supplier_gst", "supplier_profile", userId, { verified });
@@ -190,6 +195,7 @@ export async function reviewRefurbishedQc(
     })
     .eq("product_id", productId);
   logIfError("reviewRefurbishedQc", error);
+  if (error) return;
   await logAdminAction(user.id, status === "passed" ? "refurbished_qc_passed" : "refurbished_qc_failed", "product", productId, {
     notes: notes?.trim() || undefined,
   });
@@ -210,6 +216,7 @@ export async function setKycStatus(
     .single();
   const { error } = await db.from("seller_kyc_documents").update({ status }).eq("id", documentId);
   logIfError("setKycStatus", error);
+  if (error) return;
   await logAdminAction(user.id, "set_kyc_status", "kyc_document", documentId, {
     status,
     doc_type: doc?.doc_type,
