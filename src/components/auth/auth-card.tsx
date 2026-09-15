@@ -17,7 +17,7 @@ export function AuthCard({
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <Link href="/" className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+          <Link href="/" className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-2 text-white shadow-brand">
             <Building2 className="h-6 w-6" />
           </Link>
           <CardTitle className="text-2xl">{title}</CardTitle>
