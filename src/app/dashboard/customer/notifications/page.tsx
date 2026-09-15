@@ -32,8 +32,8 @@ export default async function NotificationsPage() {
               const payload = n.payload as Record<string, unknown>;
               const title = (payload?.title as string) ?? n.kind.replace(/[._]/g, " ");
               return (
-                <div key={n.id} className={`flex items-start gap-3 p-4 ${n.read_at ? "" : "bg-purple-50/40 dark:bg-purple-950/10"}`}>
-                  <span className="mt-1 flex h-2 w-2 rounded-full bg-purple-500" />
+                <div key={n.id} className={`flex items-start gap-3 p-4 ${n.read_at ? "" : "bg-teal-50/40 dark:bg-teal-950/10"}`}>
+                  <span className="mt-1 flex h-2 w-2 rounded-full bg-teal-500" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium capitalize">{title}</p>
                     <p className="text-xs text-muted-foreground">

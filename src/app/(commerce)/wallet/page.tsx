@@ -30,7 +30,7 @@ export default async function WalletPage() {
     <PageShell title="Smart Coins" description="Your in-app wallet and reward balance.">
       {/* Hero balance card */}
       <Card className="relative overflow-hidden bg-gradient-to-br from-[#1a0d3b] via-[#2d1465] to-[#1a0d3b] text-white">
-        <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-fuchsia-500/30 blur-3xl" />
+        <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-orange-500/30 blur-3xl" />
         <CardContent className="relative grid items-center gap-4 p-6 md:grid-cols-[1fr,auto]">
           <div>
             <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export default async function WalletPage() {
             <p className="mt-3 text-4xl font-bold">{Math.round(balance).toLocaleString("en-IN")}</p>
             <p className="text-sm text-white/60">≈ {formatINR(balance)} · 1 Coin = ₹1</p>
             <div className="mt-4 flex gap-2">
-              <Button variant="secondary" className="bg-white text-purple-700 hover:bg-white/90" asChild>
+              <Button variant="secondary" className="bg-white text-teal-700 hover:bg-white/90" asChild>
                 <Link href="/products">Shop with coins</Link>
               </Button>
               <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" asChild>
@@ -50,7 +50,7 @@ export default async function WalletPage() {
               </Button>
             </div>
           </div>
-          <Wallet className="hidden h-24 w-24 text-fuchsia-300/80 md:block" />
+          <Wallet className="hidden h-24 w-24 text-orange-300/80 md:block" />
         </CardContent>
       </Card>
 

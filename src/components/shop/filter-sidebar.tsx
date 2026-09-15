@@ -77,7 +77,7 @@ export function FilterSidebar({
                 onClick={() => update("category", "")}
                 className={cn(
                   "w-full rounded px-2 py-1 text-left text-xs hover:bg-muted",
-                  !activeCategory && "bg-purple-50 font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                  !activeCategory && "bg-teal-50 font-medium text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                 )}
               >
                 All
@@ -89,7 +89,7 @@ export function FilterSidebar({
                   onClick={() => update("category", c.id)}
                   className={cn(
                     "w-full rounded px-2 py-1 text-left text-xs hover:bg-muted",
-                    activeCategory === c.id && "bg-purple-50 font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    activeCategory === c.id && "bg-teal-50 font-medium text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                   )}
                 >
                   {c.name}
@@ -121,7 +121,7 @@ export function FilterSidebar({
         </div>
         <button
           onClick={applyPrice}
-          className="mt-2 w-full rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1.5 text-xs font-medium text-white"
+          className="mt-2 w-full rounded-md bg-gradient-to-r from-teal-600 to-amber-600 px-3 py-1.5 text-xs font-medium text-white"
         >
           Apply
         </button>
@@ -137,7 +137,7 @@ export function FilterSidebar({
                   onClick={() => update("rating", activeRating === r ? "" : String(r))}
                   className={cn(
                     "flex w-full items-center gap-1 rounded px-2 py-1 text-left text-xs hover:bg-muted",
-                    activeRating === r && "bg-purple-50 font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    activeRating === r && "bg-teal-50 font-medium text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                   )}
                 >
                   <span className="flex">
@@ -169,7 +169,7 @@ export function FilterSidebar({
                   onClick={() => update("discount", activeDiscount === d ? "" : String(d))}
                   className={cn(
                     "w-full rounded px-2 py-1 text-left text-xs hover:bg-muted",
-                    activeDiscount === d && "bg-purple-50 font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                    activeDiscount === d && "bg-teal-50 font-medium text-teal-700 dark:bg-teal-900/30 dark:text-teal-300"
                   )}
                 >
                   {d}% or more

@@ -21,7 +21,7 @@ export default async function CompetitorAnalysisPage() {
   return (
     <main className="container mx-auto space-y-4 px-4 py-8">
       <div className="flex items-center gap-2">
-        <Scale className="h-6 w-6 text-purple-600" />
+        <Scale className="h-6 w-6 text-teal-600" />
         <h1 className="text-2xl font-bold">Competitor Analysis</h1>
       </div>
       <p className="text-sm text-muted-foreground">

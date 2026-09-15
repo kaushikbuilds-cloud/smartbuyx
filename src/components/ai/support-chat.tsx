@@ -44,7 +44,7 @@ export function SupportChat() {
     <Card>
       <CardContent className="space-y-4 p-5">
         <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-600 to-amber-600 text-white">
             <LifeBuoy className="h-4 w-4" />
           </span>
           <div>
@@ -74,7 +74,7 @@ export function SupportChat() {
                 className={cn(
                   "max-w-[85%] whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm",
                   t.role === "user"
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                    ? "bg-gradient-to-r from-teal-600 to-amber-600 text-white"
                     : "border bg-muted/40"
                 )}
               >
@@ -108,7 +108,7 @@ export function SupportChat() {
           <button
             type="submit"
             disabled={pending || !input.trim()}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white disabled:opacity-50"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-teal-600 to-amber-600 text-white disabled:opacity-50"
             aria-label="Send"
           >
             <Send className="h-3.5 w-3.5" />

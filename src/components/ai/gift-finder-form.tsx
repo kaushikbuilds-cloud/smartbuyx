@@ -51,7 +51,7 @@ export function GiftFinderForm() {
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, occasion: o }))}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                    form.occasion === o ? "border-purple-600 bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300" : "hover:bg-muted"
+                    form.occasion === o ? "border-teal-600 bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" : "hover:bg-muted"
                   }`}
                 >
                   {o}
@@ -98,7 +98,7 @@ export function GiftFinderForm() {
       {result ? (
         <Card>
           <CardContent className="space-y-4 p-6">
-            <div className="flex items-center gap-2 text-sm font-semibold text-purple-600">
+            <div className="flex items-center gap-2 text-sm font-semibold text-teal-600">
               <Sparkles className="h-4 w-4" /> Ideas for you
             </div>
             <p className="whitespace-pre-line text-sm">{result.answer}</p>

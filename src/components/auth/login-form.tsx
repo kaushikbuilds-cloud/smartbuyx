@@ -60,18 +60,18 @@ export function LoginForm({ next }: { next?: string }) {
             type="checkbox"
             name="remember"
             defaultChecked
-            className="h-4 w-4 rounded border-input accent-purple-600"
+            className="h-4 w-4 rounded border-input accent-teal-600"
           />
           <span>Remember me</span>
         </label>
-        <Link href="/forgot-password" className="text-sm font-medium text-purple-600 hover:underline">
+        <Link href="/forgot-password" className="text-sm font-medium text-teal-600 hover:underline">
           Forgot Password?
         </Link>
       </div>
 
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
-      <SubmitButton variant="gradient" className="h-11 w-full bg-gradient-to-r from-purple-600 to-indigo-600">
+      <SubmitButton variant="gradient" className="h-11 w-full bg-gradient-to-r from-teal-600 to-amber-600">
         Login <ArrowRight className="h-4 w-4" />
       </SubmitButton>
     </form>

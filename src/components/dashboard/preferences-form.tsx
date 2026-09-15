@@ -36,7 +36,7 @@ export function PreferencesForm({ initial }: { initial: Preferences["ui"] }) {
               onClick={() => setTheme(t.value)}
               className={cn(
                 "flex flex-col items-center gap-2 rounded-xl border p-4 transition-colors",
-                theme === t.value ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" : "hover:bg-muted"
+                theme === t.value ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20" : "hover:bg-muted"
               )}
             >
               <t.icon className="h-5 w-5" />

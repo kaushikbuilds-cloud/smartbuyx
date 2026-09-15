@@ -31,7 +31,7 @@ export function AudienceTabs({ active }: { active: string }) {
           className={cn(
             "flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
             active === a.value
-              ? "border-transparent bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md"
+              ? "border-transparent bg-gradient-to-r from-teal-600 to-amber-600 text-white shadow-md"
               : "bg-card hover:bg-muted"
           )}
         >

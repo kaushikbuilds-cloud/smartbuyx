@@ -40,7 +40,7 @@ export function DashboardMobileNav({ mode, isAdminTier }: { mode: AppMode; isAdm
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const items = mode === "build" ? BUILD_NAV : COMMERCE_NAV;
-  const accent = mode === "build" ? "from-amber-500 to-orange-600" : "from-purple-600 to-indigo-600";
+  const accent = mode === "build" ? "from-amber-500 to-orange-600" : "from-teal-600 to-amber-600";
 
   return (
     <>
@@ -67,7 +67,7 @@ export function DashboardMobileNav({ mode, isAdminTier }: { mode: AppMode; isAdm
           </div>
         ) : null}
         <nav className="mt-3 flex-1 overflow-y-auto px-3 pb-2">
-          {items.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href); return <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={cn("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium", active ? mode === "build" ? "bg-amber-50 text-amber-700" : "bg-purple-50 text-purple-700" : "text-muted-foreground hover:bg-muted hover:text-foreground")}><item.icon className="h-4 w-4" />{item.label}</Link>; })}
+          {items.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href); return <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={cn("flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium", active ? mode === "build" ? "bg-amber-50 text-amber-700" : "bg-teal-50 text-teal-700" : "text-muted-foreground hover:bg-muted hover:text-foreground")}><item.icon className="h-4 w-4" />{item.label}</Link>; })}
         </nav>
         <form action={signOut} className="border-t px-3 py-3">
           <button type="submit" className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-muted">

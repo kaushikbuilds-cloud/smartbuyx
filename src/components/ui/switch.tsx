@@ -16,7 +16,7 @@ export function Switch({ className, label, description, defaultChecked, ...props
         {label ? <p className="text-sm font-medium">{label}</p> : null}
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </div>
-      <span className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full bg-muted transition-colors has-[:checked]:bg-gradient-to-r has-[:checked]:from-purple-600 has-[:checked]:to-indigo-600">
+      <span className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full bg-muted transition-colors has-[:checked]:bg-gradient-to-r has-[:checked]:from-teal-600 has-[:checked]:to-amber-600">
         <input
           type="checkbox"
           className="peer sr-only"

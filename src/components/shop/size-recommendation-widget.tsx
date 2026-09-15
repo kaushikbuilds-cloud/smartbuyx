@@ -36,7 +36,7 @@ export function SizeRecommendationWidget({ productId }: { productId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:underline"
+        className="flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:underline"
       >
         <Ruler className="h-4 w-4" /> Find my size
       </button>
@@ -46,7 +46,7 @@ export function SizeRecommendationWidget({ productId }: { productId: string }) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold">
-        <Ruler className="h-4 w-4 text-purple-600" /> Find my size
+        <Ruler className="h-4 w-4 text-teal-600" /> Find my size
       </p>
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-1">
@@ -71,8 +71,8 @@ export function SizeRecommendationWidget({ productId }: { productId: string }) {
       </Button>
 
       {result ? (
-        <div className="mt-3 rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
-          <p className="text-sm font-semibold text-purple-700 dark:text-purple-300">Recommended size: {result.size}</p>
+        <div className="mt-3 rounded-lg bg-teal-50 p-3 dark:bg-teal-900/20">
+          <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">Recommended size: {result.size}</p>
           {result.reasoning ? <p className="mt-1 text-xs text-muted-foreground">{result.reasoning}</p> : null}
         </div>
       ) : null}

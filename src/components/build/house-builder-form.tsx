@@ -79,14 +79,14 @@ export function HouseBuilderForm() {
 
       {output ? (
         <div className="space-y-4">
-          <Card className="border-purple-200 bg-purple-50/40 dark:border-purple-900 dark:bg-purple-950/20">
+          <Card className="border-teal-200 bg-teal-50/40 dark:border-teal-900 dark:bg-teal-950/20">
             <CardContent className="p-4 text-sm">{output.summary}</CardContent>
           </Card>
 
           {output.floorPlans.map((fp) => (
             <Card key={fp.floor}>
               <CardContent className="p-5">
-                <h3 className="mb-3 flex items-center gap-2 font-semibold"><Home className="h-4 w-4 text-purple-600" /> {fp.floor}</h3>
+                <h3 className="mb-3 flex items-center gap-2 font-semibold"><Home className="h-4 w-4 text-teal-600" /> {fp.floor}</h3>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {fp.rooms.map((r, i) => (
                     <div key={i} className="rounded-lg border p-3">

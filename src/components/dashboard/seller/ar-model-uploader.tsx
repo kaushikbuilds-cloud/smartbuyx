@@ -39,7 +39,7 @@ export function ArModelUploader({ userId, initialGlbUrl, initialUsdzUrl }: Props
   return (
     <div className="space-y-3 rounded-lg border p-4">
       <div className="flex items-center gap-2 text-sm font-semibold">
-        <Boxes className="h-4 w-4 text-purple-600" /> AR "View in My Room" (optional)
+        <Boxes className="h-4 w-4 text-teal-600" /> AR "View in My Room" (optional)
       </div>
       <p className="text-xs text-muted-foreground">
         Upload a 3D model so customers can preview this item in their own space via their phone camera.

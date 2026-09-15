@@ -84,7 +84,7 @@ export function ShoppingPlannerForm() {
       {categories ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="flex items-center gap-2 text-sm font-semibold text-purple-600">
+            <p className="flex items-center gap-2 text-sm font-semibold text-teal-600">
               <Sparkles className="h-4 w-4" /> Your plan
             </p>
             <p className="text-sm text-muted-foreground">

@@ -57,7 +57,7 @@ function ServiceCard({ service, loggedIn }: { service: EnterpriseService; logged
             {requested ? "Request sent" : "Request this service"}
           </Button>
         ) : (
-          <a href="/login" className="block w-full rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-center text-sm font-medium text-white">
+          <a href="/login" className="block w-full rounded-md bg-gradient-to-r from-teal-600 to-amber-600 px-4 py-2 text-center text-sm font-medium text-white">
             Log in to request
           </a>
         )}

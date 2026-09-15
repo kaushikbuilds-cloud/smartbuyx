@@ -35,7 +35,7 @@ export default async function MySubscriptionPage() {
         <ComingSoonCard message="You don't have an active pro subscription. Browse plans to unlock priority listing, unlimited leads and more." />
       ) : (
         <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+          <div className="bg-gradient-to-r from-teal-600 to-amber-600 p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 text-sm text-white/80">

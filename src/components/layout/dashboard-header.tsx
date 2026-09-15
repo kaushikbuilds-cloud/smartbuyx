@@ -58,7 +58,7 @@ export async function DashboardHeader({ mode = "commerce" }: { mode?: AppMode })
       <Link href="/cart" aria-label="Cart" className="relative flex h-10 w-10 items-center justify-center rounded-xl border bg-card hover:bg-muted">
         <ShoppingCart className="h-5 w-5" />
         {cartCount > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-purple-600 px-1 text-[10px] font-bold text-white">{cartCount}</span>
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-teal-600 px-1 text-[10px] font-bold text-white">{cartCount}</span>
         ) : null}
       </Link>
 

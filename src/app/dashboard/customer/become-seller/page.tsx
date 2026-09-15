@@ -44,7 +44,7 @@ export default async function BecomeSellerPage() {
   return (
     <main className="container mx-auto max-w-lg px-4 py-8">
       <div className="mb-6 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-amber-600 text-white">
           <Store className="h-5 w-5" />
         </span>
         <div>

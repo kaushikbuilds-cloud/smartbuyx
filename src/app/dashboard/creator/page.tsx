@@ -23,7 +23,7 @@ export default async function CreatorDashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <Card><CardContent className="flex items-center gap-3 p-5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300"><Video className="h-5 w-5" /></span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300"><Video className="h-5 w-5" /></span>
           <div><p className="text-xl font-bold">{reels.length}</p><p className="text-xs text-muted-foreground">Reels</p></div>
         </CardContent></Card>
         <Card><CardContent className="flex items-center gap-3 p-5">

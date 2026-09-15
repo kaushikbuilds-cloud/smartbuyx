@@ -8,7 +8,7 @@ const TOOLS = [
     desc: "Sketch → Floor plan + 3D + BOQ",
     href: "/house-builder",
     icon: Sparkles,
-    gradient: "from-purple-600 to-indigo-600",
+    gradient: "from-teal-600 to-amber-600",
   },
   {
     title: "Material Estimator",

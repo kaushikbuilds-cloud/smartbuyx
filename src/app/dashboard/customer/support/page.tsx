@@ -22,21 +22,21 @@ export default async function SupportPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="space-y-2 p-5">
-            <Mail className="h-5 w-5 text-purple-600" />
+            <Mail className="h-5 w-5 text-teal-600" />
             <p className="font-semibold">Email</p>
             <a href="mailto:hello@smartbuyx.in" className="text-sm text-primary hover:underline">hello@smartbuyx.in</a>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="space-y-2 p-5">
-            <Phone className="h-5 w-5 text-purple-600" />
+            <Phone className="h-5 w-5 text-teal-600" />
             <p className="font-semibold">Phone</p>
             <p className="text-sm text-muted-foreground">Mon–Sat · 9 AM to 9 PM IST</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="space-y-2 p-5">
-            <MessageCircle className="h-5 w-5 text-purple-600" />
+            <MessageCircle className="h-5 w-5 text-teal-600" />
             <p className="font-semibold">Live chat</p>
             <p className="text-sm text-muted-foreground">Available in your bottom-right</p>
           </CardContent>

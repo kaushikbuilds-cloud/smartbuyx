@@ -60,7 +60,7 @@ export function VoiceSearchBar() {
     <form
       ref={formRef}
       action="/products"
-      className="flex flex-1 items-stretch overflow-hidden rounded-xl border bg-muted/30 focus-within:ring-2 focus-within:ring-purple-500/30"
+      className="flex flex-1 items-stretch overflow-hidden rounded-xl border bg-muted/30 focus-within:ring-2 focus-within:ring-teal-500/30"
     >
       <div className="flex items-center pl-4 text-muted-foreground"><Search className="h-4 w-4" /></div>
       <input
@@ -97,7 +97,7 @@ export function VoiceSearchBar() {
       <div className="hidden items-center gap-1 border-l border-border/60 px-3 text-xs text-muted-foreground sm:flex">
         All Categories <ChevronDown className="h-3 w-3" />
       </div>
-      <button type="submit" className="flex items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 px-5 text-white hover:opacity-90">
+      <button type="submit" className="flex items-center justify-center bg-gradient-to-r from-teal-600 to-amber-600 px-5 text-white hover:opacity-90">
         <Search className="h-4 w-4" />
       </button>
     </form>

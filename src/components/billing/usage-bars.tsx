@@ -25,7 +25,7 @@ export function UsageBars({ usage }: { usage: UsageSummary[] }) {
             {u.limit !== null ? (
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className={`h-full rounded-full ${pct >= 100 ? "bg-destructive" : "bg-gradient-to-r from-purple-600 to-indigo-600"}`}
+                  className={`h-full rounded-full ${pct >= 100 ? "bg-destructive" : "bg-gradient-to-r from-teal-600 to-amber-600"}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>

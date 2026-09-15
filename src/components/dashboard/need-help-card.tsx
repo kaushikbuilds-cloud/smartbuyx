@@ -21,7 +21,7 @@ export function NeedHelpCard() {
               href={it.href}
               className="rounded-lg border bg-muted/20 p-3 transition-colors hover:bg-muted/40"
             >
-              <it.icon className="h-4 w-4 text-purple-600" />
+              <it.icon className="h-4 w-4 text-teal-600" />
               <p className="mt-1.5 text-xs font-semibold">{it.label}</p>
               <p className="text-[10px] text-muted-foreground">{it.sub}</p>
             </Link>

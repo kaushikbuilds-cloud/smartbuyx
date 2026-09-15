@@ -41,7 +41,7 @@ export function ReturnTimeline({ status }: { status: string }) {
                 skipped
                   ? "bg-muted text-muted-foreground line-through"
                   : done
-                    ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white"
+                    ? "bg-gradient-to-br from-teal-600 to-amber-600 text-white"
                     : "bg-muted text-muted-foreground"
               )}
             >

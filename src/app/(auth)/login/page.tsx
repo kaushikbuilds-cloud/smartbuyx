@@ -16,15 +16,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-950/40 dark:via-background dark:to-indigo-950/40">
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-teal-50 via-white to-amber-50 dark:from-teal-950/40 dark:via-background dark:to-amber-950/40">
       <div className="container mx-auto flex flex-1 flex-col px-4 py-6 lg:px-8">
         {/* Brand */}
         <Link href="/" className="mb-8 flex items-center gap-2 self-start">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-amber-600 text-white shadow-md shadow-teal-500/30">
             <ShoppingBag className="h-5 w-5" />
           </span>
           <span className="text-2xl font-bold tracking-tight">
-            Smart<span className="text-purple-600">BuyX</span>
+            Smart<span className="text-teal-600">BuyX</span>
           </span>
         </Link>
 
@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <p className="text-base font-medium text-muted-foreground">Welcome back! 👋</p>
             <h1 className="mt-1 text-5xl font-bold tracking-tight">
               Smart shopping<br />
-              starts <span className="text-purple-600">here</span>
+              starts <span className="text-teal-600">here</span>
             </h1>
             <p className="mt-4 max-w-md text-muted-foreground">
               Login to your account and discover, compare and save more with SmartBuyX.
@@ -43,7 +43,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <ul className="mt-8 space-y-4">
               {FEATURES.map((f) => (
                 <li key={f.title} className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
                     <f.icon className="h-5 w-5" />
                   </span>
                   <div>
@@ -60,14 +60,14 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                 {[1, 2, 3, 4].map((i) => (
                   <span
                     key={i}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-card bg-gradient-to-br from-purple-200 to-indigo-200 text-xs font-bold text-purple-800"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-card bg-gradient-to-br from-teal-200 to-amber-200 text-xs font-bold text-teal-800"
                   >
                     {String.fromCharCode(64 + i)}
                   </span>
                 ))}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-purple-600">Trusted by 100K+</p>
+                <p className="text-sm font-semibold text-teal-600">Trusted by 100K+</p>
                 <p className="text-xs text-muted-foreground">shoppers across India</p>
               </div>
               <div className="flex items-center gap-1 border-l pl-4">
@@ -90,7 +90,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               <div className="mb-6 flex items-center justify-end">
                 <p className="text-sm text-muted-foreground">
                   New here?{" "}
-                  <Link href="/register" className="font-medium text-purple-600 hover:underline">Sign up</Link>
+                  <Link href="/register" className="font-medium text-teal-600 hover:underline">Sign up</Link>
                 </p>
               </div>
 
@@ -103,18 +103,18 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
               <div className="my-5"><SocialButtons /></div>
 
-              <div className="flex items-start gap-3 rounded-xl bg-purple-50 p-4 text-sm dark:bg-purple-900/20">
-                <Shield className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
+              <div className="flex items-start gap-3 rounded-xl bg-teal-50 p-4 text-sm dark:bg-teal-900/20">
+                <Shield className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
                 <div>
-                  <p className="font-semibold text-purple-700 dark:text-purple-300">Your security, our priority</p>
+                  <p className="font-semibold text-teal-700 dark:text-teal-300">Your security, our priority</p>
                   <p className="text-xs text-muted-foreground">Your data is protected with industry-leading encryption and security.</p>
                 </div>
               </div>
 
               <p className="mt-5 text-center text-xs text-muted-foreground">
                 By continuing, you agree to our{" "}
-                <Link href="/terms" className="text-purple-600 hover:underline">Terms of Service</Link>{" "}and{" "}
-                <Link href="/privacy" className="text-purple-600 hover:underline">Privacy Policy</Link>
+                <Link href="/terms" className="text-teal-600 hover:underline">Terms of Service</Link>{" "}and{" "}
+                <Link href="/privacy" className="text-teal-600 hover:underline">Privacy Policy</Link>
               </p>
             </div>
           </section>
@@ -131,7 +131,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             { icon: Truck, title: "Pan India Delivery", sub: "Delivery across 29,000+ pin codes" },
           ].map((b) => (
             <div key={b.title} className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-purple-600">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-teal-600">
                 <b.icon className="h-4 w-4" />
               </span>
               <div>

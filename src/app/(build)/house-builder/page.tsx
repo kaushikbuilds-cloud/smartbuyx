@@ -21,7 +21,7 @@ export default async function HouseBuilderPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="space-y-2 p-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
               <Sparkles className="h-5 w-5" />
             </span>
             <h3 className="font-semibold">Floor plan layout</h3>

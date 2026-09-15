@@ -12,12 +12,12 @@ import { ProductGrid } from "@/components/shop/product-grid";
 const QUICK = [
   { icon: ShoppingBag, label: "Shopping", href: "/products", color: "from-rose-500 to-pink-500" },
   { icon: Boxes, label: "Construction", href: "/materials", color: "from-amber-500 to-orange-500" },
-  { icon: Building2, label: "Architects", href: "/architects", color: "from-blue-500 to-indigo-500" },
+  { icon: Building2, label: "Architects", href: "/architects", color: "from-blue-500 to-amber-500" },
   { icon: HardHat, label: "Contractors", href: "/contractors", color: "from-emerald-500 to-teal-500" },
   { icon: Ruler, label: "Estimator", href: "/estimator", color: "from-cyan-500 to-blue-500" },
-  { icon: ScanLine, label: "AR Try Room", href: "/ar-try", color: "from-fuchsia-500 to-purple-500" },
-  { icon: Video, label: "Creator Hub", href: "/reels", color: "from-violet-500 to-purple-500" },
-  { icon: Sparkles, label: "AI Assistant", href: "/assistant", color: "from-purple-600 to-indigo-600" },
+  { icon: ScanLine, label: "AR Try Room", href: "/ar-try", color: "from-orange-500 to-teal-500" },
+  { icon: Video, label: "Creator Hub", href: "/reels", color: "from-cyan-500 to-teal-500" },
+  { icon: Sparkles, label: "AI Assistant", href: "/assistant", color: "from-teal-600 to-amber-600" },
   { icon: Gift, label: "Gift Finder", href: "/gift-finder", color: "from-rose-500 to-pink-600" },
   { icon: RefreshCw, label: "Refurbished", href: "/refurbished", color: "from-teal-500 to-emerald-600" },
 ];
@@ -36,7 +36,7 @@ const PILLARS = [
     desc: "D2C brands, construction materials, and verified suppliers — one cart, one checkout, fast delivery.",
     href: "/products",
     cta: "Start shopping",
-    gradient: "from-purple-600 via-fuchsia-600 to-pink-500",
+    gradient: "from-teal-600 via-orange-600 to-pink-500",
     icon: ShoppingBag,
   },
   {
@@ -64,17 +64,17 @@ export async function MarketingLanding() {
     <main>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-purple-950/40 dark:via-background dark:to-indigo-950/40" />
-        <div className="absolute -top-20 right-0 -z-10 h-72 w-72 rounded-full bg-purple-300/30 blur-3xl dark:bg-purple-700/20" />
-        <div className="absolute bottom-0 left-0 -z-10 h-64 w-64 rounded-full bg-indigo-300/30 blur-3xl dark:bg-indigo-700/20" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-teal-50 via-white to-amber-50 dark:from-teal-950/40 dark:via-background dark:to-amber-950/40" />
+        <div className="absolute -top-20 right-0 -z-10 h-72 w-72 rounded-full bg-teal-300/30 blur-3xl dark:bg-teal-700/20" />
+        <div className="absolute bottom-0 left-0 -z-10 h-64 w-64 rounded-full bg-amber-300/30 blur-3xl dark:bg-amber-700/20" />
 
         <div className="container mx-auto px-4 py-20 text-center md:py-28">
-          <Badge variant="secondary" className="mb-4 gap-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+          <Badge variant="secondary" className="mb-4 gap-1 bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300">
             <Sparkles className="h-3 w-3" /> India&apos;s AI Commerce + Construction super-app
           </Badge>
           <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             Shop. Build. Create.{" "}
-            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-600 via-orange-600 to-amber-600 bg-clip-text text-transparent">
               All in one place.
             </span>
           </h1>
@@ -82,7 +82,7 @@ export async function MarketingLanding() {
             From black shoes under ₹2000 to estimating materials for a 1500 sq.ft house — SmartBuyX does it with AI.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button size="lg" variant="gradient" className="bg-gradient-to-r from-purple-600 to-indigo-600" asChild>
+            <Button size="lg" variant="gradient" className="bg-gradient-to-r from-teal-600 to-amber-600" asChild>
               <Link href="/register">Get started <ArrowRight className="h-4 w-4" /></Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
@@ -94,13 +94,13 @@ export async function MarketingLanding() {
           <div className="mx-auto mt-10 inline-flex items-center gap-4 rounded-2xl border bg-card/80 p-3 shadow-sm backdrop-blur">
             <div className="flex -space-x-2">
               {["A", "B", "C", "D"].map((c) => (
-                <span key={c} className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-card bg-gradient-to-br from-purple-200 to-indigo-200 text-xs font-bold text-purple-800">
+                <span key={c} className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-card bg-gradient-to-br from-teal-200 to-amber-200 text-xs font-bold text-teal-800">
                   {c}
                 </span>
               ))}
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-purple-600">Trusted by 100K+ shoppers</p>
+              <p className="text-sm font-semibold text-teal-600">Trusted by 100K+ shoppers</p>
               <p className="text-xs text-muted-foreground">across India</p>
             </div>
             <div className="hidden items-center gap-1 border-l pl-4 sm:flex">
@@ -147,7 +147,7 @@ export async function MarketingLanding() {
           {FEATURES.map((f) => (
             <Card key={f.title} className="h-full">
               <CardContent className="space-y-3 p-6">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
                   <f.icon className="h-6 w-6" />
                 </span>
                 <h3 className="text-lg font-semibold">{f.title}</h3>
@@ -173,7 +173,7 @@ export async function MarketingLanding() {
                 <p.icon className="h-10 w-10 text-white/80" />
                 <h3 className="mt-4 text-2xl font-bold">{p.title}</h3>
                 <p className="mt-2 text-sm text-white/85">{p.desc}</p>
-                <Button className="mt-6 bg-white text-purple-700 hover:bg-white/90" asChild>
+                <Button className="mt-6 bg-white text-teal-700 hover:bg-white/90" asChild>
                   <Link href={p.href}>{p.cta} <ArrowRight className="h-4 w-4" /></Link>
                 </Button>
               </div>
@@ -197,12 +197,12 @@ export async function MarketingLanding() {
 
       {/* CTA banner */}
       <section className="container mx-auto px-4 py-12">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-700 p-8 text-center text-white shadow-xl">
-          <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-fuchsia-400/30 blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 via-amber-600 to-blue-700 p-8 text-center text-white shadow-xl">
+          <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-orange-400/30 blur-3xl" />
           <div className="relative">
             <h2 className="text-3xl font-bold">Ready to start saving?</h2>
             <p className="mt-2 text-white/85">Join 100,000+ Indians shopping smarter every day.</p>
-            <Button size="lg" className="mt-6 bg-white text-purple-700 hover:bg-white/90" asChild>
+            <Button size="lg" className="mt-6 bg-white text-teal-700 hover:bg-white/90" asChild>
               <Link href="/register">Create your free account <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
@@ -214,7 +214,7 @@ export async function MarketingLanding() {
         <div className="container mx-auto grid grid-cols-2 gap-4 px-4 py-6 md:grid-cols-4">
           {TRUST.map((t) => (
             <div key={t.title} className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-teal-600 dark:bg-teal-900/40 dark:text-teal-300">
                 <t.icon className="h-4 w-4" />
               </span>
               <div className="min-w-0">
