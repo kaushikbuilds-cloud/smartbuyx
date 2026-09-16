@@ -101,18 +101,18 @@ export function CheckoutClient({
       </div>
 
       {discount > 0 ? (
-        <div className="flex justify-between text-sm text-emerald-600">
-          <span>Coupon {appliedCode}</span>
-          <span>− {formatINR(discount)}</span>
+        <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+          <span>Coupon {appliedCode} applied</span>
+          <span className="font-medium">− {formatINR(discount)}</span>
         </div>
       ) : null}
 
-      <div className="flex justify-between border-t pt-3 font-semibold">
-        <span>Total</span>
-        <span>{formatINR(total)}</span>
+      <div className="flex items-baseline justify-between border-t pt-3">
+        <span className="font-semibold">Total</span>
+        <span className="text-lg font-bold text-primary">{formatINR(total)}</span>
       </div>
 
-      <Button variant="gradient" className="w-full" onClick={pay} disabled={loading}>
+      <Button variant="gradient" size="lg" className="w-full" onClick={pay} disabled={loading}>
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         Pay {formatINR(total)}
       </Button>
