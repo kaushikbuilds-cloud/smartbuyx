@@ -12,7 +12,6 @@ import { AIAssistantHero } from "@/components/dashboard/ai-assistant-hero";
 import { QuickActionsRow } from "@/components/dashboard/quick-actions-row";
 import { PromoBannersRow } from "@/components/dashboard/promo-banners-row";
 import { PopularCategoriesRow } from "@/components/dashboard/popular-categories-row";
-import { TopBrandsRow } from "@/components/dashboard/top-brands-row";
 
 export const metadata = { title: "Shop" };
 const PAGE_SIZE = 24;
@@ -63,7 +62,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <QuickActionsRow />
           <PopularCategoriesRow />
           <PromoBannersRow />
-          <TopBrandsRow />
         </>
       ) : null}
 
