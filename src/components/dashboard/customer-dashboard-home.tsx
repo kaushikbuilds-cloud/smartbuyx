@@ -10,7 +10,6 @@ import { MyOrdersRow } from "@/components/dashboard/my-orders-row";
 import { PromoBannersRow } from "@/components/dashboard/promo-banners-row";
 import { RecommendedRow } from "@/components/dashboard/recommended-row";
 import { PopularCategoriesRow } from "@/components/dashboard/popular-categories-row";
-import { TopBrandsRow } from "@/components/dashboard/top-brands-row";
 import { HelpBar } from "@/components/dashboard/help-bar";
 
 import { AccountOverviewCard } from "@/components/dashboard/account-overview-card";
@@ -59,7 +58,6 @@ export async function CustomerDashboardHome({ userId, firstName }: { userId: str
           wishlistedIds={Array.from(wishlistedIds)}
         />
         <PopularCategoriesRow />
-        <TopBrandsRow />
         <HelpBar />
       </div>
 
