@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, requireUser } from "@/lib/auth/guards";
 import { uniqueSlug } from "@/lib/utils/format";
 import { productSchema, reviewSchema, parseSizeChart } from "./schemas";
-import { syncProductToFastrr } from "@/lib/fastrr/sync";
+import { buyerPriceFromSellerPrice } from "@/lib/config/commission";
 
 export type ActionState = { error?: string; success?: string } | null;
 
@@ -33,6 +33,12 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   const supabase = await createClient();
   const slug = uniqueSlug(p.title);
 
+  // p.basePrice is what the seller wants to receive -- the price buyers
+  // actually see/pay has our commission added automatically (see
+  // src/lib/config/commission.ts). seller_price is kept so escrow pays out
+  // only the seller's share, not the commission-inclusive total.
+  const buyerPrice = buyerPriceFromSellerPrice(p.basePrice);
+
   const { data: product, error } = await supabase
     .from("products")
     .insert({
@@ -43,7 +49,8 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
       description: p.description || null,
       brand: p.brand || null,
       unit: p.unit || null,
-      base_price: p.basePrice,
+      seller_price: p.basePrice,
+      base_price: buyerPrice,
       compare_at_price: p.compareAtPrice ?? null,
       category_id: p.categoryId || null,
       images: p.images.map((url) => ({ url })),
@@ -59,7 +66,7 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   // Every product needs at least one purchasable variant (default SKU).
   const { data: variant, error: vErr } = await supabase
     .from("product_variants")
-    .insert({ product_id: product.id, sku: `${slug}-default`, options: {}, price: p.basePrice })
+    .insert({ product_id: product.id, sku: `${slug}-default`, options: {}, price: buyerPrice })
     .select("id")
     .single();
   if (vErr) return { error: vErr.message };
@@ -68,8 +75,6 @@ export async function createProduct(_prev: ActionState, formData: FormData): Pro
   if (variant && p.stock > 0) {
     await supabase.from("inventory").update({ quantity: p.stock }).eq("variant_id", variant.id);
   }
-
-  await syncProductToFastrr(product.id).catch(() => null); // best-effort, never blocks listing
 
   revalidatePath("/dashboard/supplier/products");
   redirect("/dashboard/supplier/products");
@@ -91,6 +96,8 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
   if (sizeChart) attributes.size_chart = sizeChart;
   else delete attributes.size_chart;
 
+  const buyerPrice = buyerPriceFromSellerPrice(p.basePrice);
+
   const { error } = await supabase
     .from("products")
     .update({
@@ -98,7 +105,8 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
       description: p.description || null,
       brand: p.brand || null,
       unit: p.unit || null,
-      base_price: p.basePrice,
+      seller_price: p.basePrice,
+      base_price: buyerPrice,
       compare_at_price: p.compareAtPrice ?? null,
       category_id: p.categoryId || null,
       images: p.images.map((url) => ({ url })),
@@ -112,7 +120,12 @@ export async function updateProduct(id: string, _prev: ActionState, formData: Fo
     .eq("supplier_id", user.id);
   if (error) return { error: error.message };
 
-  await syncProductToFastrr(id).catch(() => null); // best-effort, never blocks the save
+  // Bug fix: price edits previously never reached product_variants, so
+  // cart/checkout (which reads variant price, not products.base_price) kept
+  // charging the old price after a seller updated it. Every listing created
+  // by createProduct has exactly one variant today, so update all of this
+  // product's variants to match.
+  await supabase.from("product_variants").update({ price: buyerPrice }).eq("product_id", id);
 
   revalidatePath("/dashboard/supplier/products");
   return { success: "Product updated." };

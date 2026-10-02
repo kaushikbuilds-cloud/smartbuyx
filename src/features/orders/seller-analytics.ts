@@ -14,7 +14,7 @@ export async function getSellerStats(sellerId: string): Promise<SellerStats> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("order_items")
-    .select("title, quantity, total, order_id, orders!inner(status)")
+    .select("title, quantity, seller_amount, order_id, orders!inner(status)")
     .eq("supplier_id", sellerId);
 
   const rows = (data ?? []).filter((r) => {
@@ -28,12 +28,14 @@ export async function getSellerStats(sellerId: string): Promise<SellerStats> {
   const byProduct = new Map<string, { units: number; revenue: number }>();
 
   for (const r of rows) {
+    // revenue is what the seller is actually paid (seller_amount), not the
+    // buyer-paid total, which includes our commission.
     orders.add(r.order_id);
-    revenue += Number(r.total);
+    revenue += Number(r.seller_amount);
     unitsSold += r.quantity;
     const cur = byProduct.get(r.title) ?? { units: 0, revenue: 0 };
     cur.units += r.quantity;
-    cur.revenue += Number(r.total);
+    cur.revenue += Number(r.seller_amount);
     byProduct.set(r.title, cur);
   }
 

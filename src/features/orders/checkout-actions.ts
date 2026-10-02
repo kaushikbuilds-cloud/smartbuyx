@@ -86,6 +86,10 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
     unit_price: l.unitPrice,
     quantity: l.quantity,
     total: l.unitPrice * l.quantity,
+    // Frozen at purchase time -- a later commission-rate change must never
+    // reprice an order already placed. This is what escrow actually pays
+    // the seller; the gap vs. `total` is our commission.
+    seller_amount: l.sellerUnitPrice * l.quantity,
   }));
   const { error: itemsErr } = await supabase.from("order_items").insert(items);
   if (itemsErr) return { ok: false, error: itemsErr.message };

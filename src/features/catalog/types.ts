@@ -13,6 +13,7 @@ export type Product = {
   brand: string | null;
   unit: string | null;
   base_price: number;
+  seller_price: number;
   compare_at_price: number | null;
   currency: string;
   images: ProductImage[];

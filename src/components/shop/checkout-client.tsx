@@ -1,22 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Script from "next/script";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatINR } from "@/lib/utils/format";
-import { validateCoupon } from "@/features/orders/checkout-actions";
-import { startFastrrCheckout } from "@/features/orders/fastrr-checkout-actions";
-
-declare global {
-  interface Window {
-    HeadlessCheckout: {
-      addToCart: (event: Event, token: string, opts: { fallbackUrl: string }) => void;
-    };
-  }
-}
+import { validateCoupon, createCheckoutOrder } from "@/features/orders/checkout-actions";
 
 export function CheckoutClient({
   addressId,
@@ -25,18 +16,12 @@ export function CheckoutClient({
   addressId: string | null;
   subtotal: number;
 }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
-  // Shiprocket's shopify.js scans/mutates the DOM (e.g. the #sellerDomain
-  // input) as soon as it loads, which can race React's hydration of this
-  // subtree and trip "Hydration failed" (#418) on /checkout. Mounting these
-  // elements only after hydration completes keeps them out of the
-  // server/client diff entirely.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const total = Math.max(0, subtotal - discount);
 
@@ -55,36 +40,27 @@ export function CheckoutClient({
     toast.success(`Coupon applied — you save ${formatINR(res.discount)}`);
   }
 
-  async function pay(e: React.MouseEvent) {
+  async function pay() {
     if (!addressId) {
       toast.error("Please add a delivery address.");
       return;
     }
     setLoading(true);
-    const res = await startFastrrCheckout(addressId, appliedCode ?? undefined);
-    setLoading(false);
+    const res = await createCheckoutOrder(addressId, appliedCode ?? undefined);
     if (!res.ok) {
+      setLoading(false);
       toast.error(res.error);
       return;
     }
-    // Opens Fastrr's checkout iframe overlay directly on this page -- see
-    // the "SR Checkout Integration Guide" embedding pattern. fallbackUrl is
-    // used if the iframe itself can't load for some reason.
-    window.HeadlessCheckout.addToCart(e.nativeEvent, res.token, {
-      fallbackUrl: `${window.location.origin}/checkout/failure`,
-    });
+    // PayU is a hosted, redirect-based checkout -- this navigates to a
+    // server-rendered bridge page that auto-submits a real <form> to PayU
+    // (see /checkout/pay/[orderId]). PayU posts the result back to
+    // /api/payu/callback, which redirects to /checkout/success|failure.
+    router.push(`/checkout/pay/${res.orderId}`);
   }
 
   return (
     <>
-      {mounted ? (
-        <>
-          <Script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" strategy="afterInteractive" />
-          <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css" />
-          <input type="hidden" id="sellerDomain" value="smartbuyx.in" readOnly />
-        </>
-      ) : null}
-
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

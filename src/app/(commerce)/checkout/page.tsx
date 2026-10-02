@@ -102,7 +102,7 @@ export default async function CheckoutPage() {
             />
             <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-xs text-muted-foreground">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>Secured by Shiprocket Checkout · UPI, cards, net banking, COD</span>
+              <span>Secured by PayU · UPI, cards, net banking, COD</span>
             </div>
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ export type CartLine = {
   quantity: number;
   sku: string;
   unitPrice: number;
+  sellerUnitPrice: number;
   productId: string;
   title: string;
   slug: string;
@@ -38,7 +39,7 @@ export async function getCart(userId: string): Promise<Cart> {
     .select(
       `id, quantity, variant_id,
        product_variants!inner ( id, sku, price,
-         products!inner ( id, title, slug, images, supplier_id ) )`
+         products!inner ( id, title, slug, images, supplier_id, seller_price ) )`
     )
     .eq("cart_id", cart.id);
 
@@ -46,7 +47,7 @@ export async function getCart(userId: string): Promise<Cart> {
     // Supabase returns nested relations as objects (single) here.
     const variant = row.product_variants as unknown as {
       id: string; sku: string; price: number;
-      products: { id: string; title: string; slug: string; images: { url: string }[]; supplier_id: string };
+      products: { id: string; title: string; slug: string; images: { url: string }[]; supplier_id: string; seller_price: number };
     };
     const product = variant.products;
     return {
@@ -55,6 +56,7 @@ export async function getCart(userId: string): Promise<Cart> {
       quantity: row.quantity,
       sku: variant.sku,
       unitPrice: Number(variant.price),
+      sellerUnitPrice: Number(product.seller_price),
       productId: product.id,
       title: product.title,
       slug: product.slug,

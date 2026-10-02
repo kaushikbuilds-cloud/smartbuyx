@@ -18,7 +18,7 @@ export async function getSellerOrders(sellerId: string): Promise<SellerOrderLine
   const supabase = await createClient();
   const { data } = await supabase
     .from("order_items")
-    .select("order_id, shipment_id, title, quantity, total, orders!inner(created_at, buyer_id), shipments(status, awb, courier_name, label_url, raw)")
+    .select("order_id, shipment_id, title, quantity, total, seller_amount, orders!inner(created_at, buyer_id), shipments(status, awb, courier_name, label_url, raw)")
     .eq("supplier_id", sellerId)
     .order("order_id", { ascending: false });
 
@@ -43,8 +43,10 @@ export async function getSellerOrders(sellerId: string): Promise<SellerOrderLine
       });
     }
     const line = byShipment.get(key)!;
+    // amount is what the seller is actually paid (seller_amount), not the
+    // buyer-paid total, which includes our commission.
     line.items.push({ title: row.title, quantity: row.quantity, total: Number(row.total) });
-    line.amount += Number(row.total);
+    line.amount += Number(row.seller_amount);
   }
 
   return [...byShipment.values()].sort((a, b) => b.placedAt.localeCompare(a.placedAt));

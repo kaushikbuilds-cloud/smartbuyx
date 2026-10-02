@@ -19,6 +19,9 @@ export type RefurbishedListing = {
   slug: string;
   brand: string | null;
   base_price: number;
+  // Only present on seller-facing queries (SELLER_COLS) -- public listings
+  // (PUBLIC_COLS) never select it and don't need it.
+  seller_price: number | null;
   compare_at_price: number | null;
   images: { url: string }[];
   status: string;

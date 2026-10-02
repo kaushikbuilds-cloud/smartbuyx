@@ -318,6 +318,29 @@ export async function listAllOrders(): Promise<AdminOrder[]> {
   return (data ?? []).map((o) => ({ ...o, total: Number(o.total) })) as AdminOrder[];
 }
 
+// Platform commission earned on paid+ orders among the last 100 (same window
+// as listAllOrders' GMV figure) -- the gap between what buyers paid
+// (order_items.total) and what sellers are owed (order_items.seller_amount).
+export async function getPlatformRevenue(): Promise<number> {
+  if (!isSupabaseConfigured()) return 0;
+  const db = createAdminClient();
+  const { data: orders } = await db
+    .from("orders")
+    .select("id")
+    .in("status", ["paid", "processing", "shipped", "delivered"])
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const orderIds = (orders ?? []).map((o) => o.id);
+  if (orderIds.length === 0) return 0;
+
+  const { data: items, error } = await db
+    .from("order_items")
+    .select("total, seller_amount")
+    .in("order_id", orderIds);
+  logIfError("getPlatformRevenue", error);
+  return (items ?? []).reduce((sum, i) => sum + (Number(i.total) - Number(i.seller_amount)), 0);
+}
+
 export type AdminSubscription = {
   id: string;
   userId: string;

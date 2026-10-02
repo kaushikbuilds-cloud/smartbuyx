@@ -1,4 +1,4 @@
-import { listAllOrders } from "@/features/admin/queries";
+import { listAllOrders, getPlatformRevenue } from "@/features/admin/queries";
 import { formatINR } from "@/lib/utils/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/shop/order-status-badge";
@@ -7,16 +7,19 @@ export const metadata = { title: "Orders · Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
-  const orders = await listAllOrders();
+  const [orders, platformRevenue] = await Promise.all([listAllOrders(), getPlatformRevenue()]);
   const gmv = orders
     .filter((o) => ["paid", "processing", "shipped", "delivered"].includes(o.status))
     .reduce((s, o) => s + o.total, 0);
 
   return (
     <main className="space-y-4">
-      <div className="flex items-baseline justify-between">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <p className="text-sm text-muted-foreground">GMV (last 100): <span className="font-semibold text-foreground">{formatINR(gmv)}</span></p>
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+          <p>GMV (last 100): <span className="font-semibold text-foreground">{formatINR(gmv)}</span></p>
+          <p>Our commission (last 100): <span className="font-semibold text-foreground">{formatINR(platformRevenue)}</span></p>
+        </div>
       </div>
 
       <Card>
