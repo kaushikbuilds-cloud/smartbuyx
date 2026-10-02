@@ -49,9 +49,12 @@ export function ProductForm({ action, product, submitLabel = "Save product", use
 
       <div className="grid grid-cols-3 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="basePrice">Price (₹)</Label>
+          <Label htmlFor="basePrice">Your price (₹)</Label>
           <Input id="basePrice" name="basePrice" type="number" step="0.01" min="0"
-            defaultValue={product?.base_price} required />
+            defaultValue={product?.seller_price} required />
+          <p className="text-xs text-muted-foreground">
+            The amount you receive. Our commission is added automatically to set the price buyers see.
+          </p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="compareAtPrice">MRP (₹)</Label>

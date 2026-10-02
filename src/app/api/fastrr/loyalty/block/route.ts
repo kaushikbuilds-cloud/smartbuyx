@@ -2,8 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // "Block Points" -- holds points against a Fastrr order_id without debiting
-// them yet (see unblock/route.ts and fastrr-fulfil.ts for when they're
-// actually released or converted to a permanent debit).
+// them yet (see unblock/route.ts for when they're released). Order checkout
+// no longer runs through Fastrr, so nothing converts a block into a
+// permanent debit anymore; blocks are only ever released (here, via
+// unblock, or swept as stale by the expire-orders cron).
 //
 // Was completely unauthenticated -- anyone who knew a customer's phone
 // number could block (and, chained with a forged order-webhook using the

@@ -55,8 +55,11 @@ export function RefurbishedForm({ action, product, submitLabel = "Save listing" 
 
       <div className="grid grid-cols-3 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="basePrice">Price (₹)</Label>
-          <Input id="basePrice" name="basePrice" type="number" step="0.01" min="0" defaultValue={product?.base_price} required />
+          <Label htmlFor="basePrice">Your price (₹)</Label>
+          <Input id="basePrice" name="basePrice" type="number" step="0.01" min="0" defaultValue={product?.seller_price ?? undefined} required />
+          <p className="text-xs text-muted-foreground">
+            The amount you receive. Our commission is added automatically to set the price buyers see.
+          </p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="compareAtPrice">Original MRP (₹)</Label>

@@ -62,7 +62,7 @@ export async function fulfilPaidOrder(orderId: string): Promise<void> {
   // Create one shipment per distinct seller (delivery partner assigned later).
   const { data: items } = await admin
     .from("order_items")
-    .select("id, supplier_id, total")
+    .select("id, supplier_id, seller_amount")
     .eq("order_id", orderId);
 
   const sellers = [...new Set((items ?? []).map((i) => i.supplier_id))];
@@ -79,10 +79,12 @@ export async function fulfilPaidOrder(orderId: string): Promise<void> {
       await createShiprocketShipment(shipment.id);
     }
 
-    // ESCROW: hold this seller's portion of the payment until buyer confirms delivery.
+    // ESCROW: hold this seller's portion of the payment until buyer confirms
+    // delivery -- seller_amount, not the buyer-paid total, so our commission
+    // is never escrowed to (or payable out to) the seller.
     const sellerAmount = (items ?? [])
       .filter((i) => i.supplier_id === sellerId)
-      .reduce((sum, i) => sum + Number(i.total), 0);
+      .reduce((sum, i) => sum + Number(i.seller_amount), 0);
     await admin.from("escrow_holds").insert({
       order_id: orderId,
       seller_id: sellerId,

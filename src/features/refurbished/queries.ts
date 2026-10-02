@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { RefurbishedListing } from "./types";
 
 const SELLER_COLS =
-  "id, title, slug, brand, base_price, compare_at_price, images, status, refurbished_details(condition_grade, battery_health, warranty_months, accessories_included, qc_status, qc_notes)";
+  "id, title, slug, brand, base_price, seller_price, compare_at_price, images, status, refurbished_details(condition_grade, battery_health, warranty_months, accessories_included, qc_status, qc_notes)";
 
 type Row = Omit<RefurbishedListing, "condition_grade" | "battery_health" | "warranty_months" | "accessories_included" | "qc_status" | "qc_notes"> & {
   refurbished_details: {
@@ -24,6 +24,7 @@ function flatten(row: Row): RefurbishedListing {
     slug: row.slug,
     brand: row.brand,
     base_price: Number(row.base_price),
+    seller_price: row.seller_price != null ? Number(row.seller_price) : null,
     compare_at_price: row.compare_at_price ? Number(row.compare_at_price) : null,
     images: row.images ?? [],
     status: row.status,

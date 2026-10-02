@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/guards";
 import { uniqueSlug } from "@/lib/utils/format";
 import { refurbishedSchema } from "./schemas";
+import { buyerPriceFromSellerPrice } from "@/lib/config/commission";
 
 export type ActionState = { error?: string; success?: string } | null;
 
@@ -24,6 +25,7 @@ export async function createRefurbishedProduct(_prev: ActionState, formData: For
 
   const supabase = await createClient();
   const slug = uniqueSlug(p.title);
+  const buyerPrice = buyerPriceFromSellerPrice(p.basePrice);
 
   const { data: product, error } = await supabase
     .from("products")
@@ -35,7 +37,8 @@ export async function createRefurbishedProduct(_prev: ActionState, formData: For
       slug,
       description: p.description || null,
       brand: p.brand || null,
-      base_price: p.basePrice,
+      seller_price: p.basePrice,
+      base_price: buyerPrice,
       compare_at_price: p.compareAtPrice ?? null,
       images: p.images.map((url) => ({ url })),
       status: "active",
@@ -46,7 +49,7 @@ export async function createRefurbishedProduct(_prev: ActionState, formData: For
 
   const { data: variant, error: vErr } = await supabase
     .from("product_variants")
-    .insert({ product_id: product.id, sku: `${slug}-default`, options: {}, price: p.basePrice })
+    .insert({ product_id: product.id, sku: `${slug}-default`, options: {}, price: buyerPrice })
     .select("id")
     .single();
   if (vErr) return { error: vErr.message };
@@ -81,6 +84,7 @@ export async function updateRefurbishedProduct(id: string, _prev: ActionState, f
   const p = parsed.data;
 
   const supabase = await createClient();
+  const buyerPrice = buyerPriceFromSellerPrice(p.basePrice);
 
   const { error } = await supabase
     .from("products")
@@ -88,7 +92,8 @@ export async function updateRefurbishedProduct(id: string, _prev: ActionState, f
       title: p.title,
       description: p.description || null,
       brand: p.brand || null,
-      base_price: p.basePrice,
+      seller_price: p.basePrice,
+      base_price: buyerPrice,
       compare_at_price: p.compareAtPrice ?? null,
       images: p.images.map((url) => ({ url })),
       updated_at: new Date().toISOString(),
@@ -96,6 +101,10 @@ export async function updateRefurbishedProduct(id: string, _prev: ActionState, f
     .eq("id", id)
     .eq("supplier_id", user.id);
   if (error) return { error: error.message };
+
+  // Same price-edit bug as catalog/actions.ts updateProduct: product_variants
+  // is what cart/checkout actually reads, so it must be kept in sync.
+  await supabase.from("product_variants").update({ price: buyerPrice }).eq("product_id", id);
 
   // Editing the condition report resets QC -- the item must be re-inspected
   // before it's visible to shoppers again, since what's being sold changed.
