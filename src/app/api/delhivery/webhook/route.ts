@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncOrderStatus } from "@/features/orders/seller-order-actions";
 
-// Delhivery has no self-serve webhook dashboard (unlike Shiprocket) -- you
+// Delhivery has no self-serve webhook dashboard -- you
 // email them this URL + a shared-secret token to include as a query param,
 // and their team wires up the push (their docs say allow 5-6 business days).
 // Register: https://www.smartbuyx.in/api/delhivery/webhook?token=<DELHIVERY_WEBHOOK_TOKEN>

@@ -1,4 +1,4 @@
-// Delhivery Express API. Unlike Shiprocket, Delhivery isn't self-serve --
+// Delhivery Express API. Delhivery isn't self-serve --
 // getting an API token requires emailing Delhivery (Vendordesk@delhivery.com
 // or a BD/CS contact); a sandbox token comes first, a production token after
 // UAT. Endpoints below are sourced from Delhivery's official docs

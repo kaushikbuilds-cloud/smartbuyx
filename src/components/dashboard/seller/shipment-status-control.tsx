@@ -3,11 +3,11 @@
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { updateShipmentStatus, retryShiprocketBooking } from "@/features/orders/seller-order-actions";
+import { updateShipmentStatus, retryCourierBooking } from "@/features/orders/seller-order-actions";
 
-// "ready_to_ship" is now normally reached automatically once Shiprocket
-// assigns a courier + AWB (see createShiprocketShipment) -- the manual
-// transition stays as a fallback for shipments booked outside Shiprocket.
+// "ready_to_ship" is now normally reached automatically once Delhivery
+// assigns a courier + AWB (see createDelhiveryShipment) -- the manual
+// transition stays as a fallback for shipments booked outside Delhivery.
 const NEXT_LABEL: Record<string, { status: string; label: string }> = {
   pending: { status: "ready_to_ship", label: "Mark ready to ship" },
   ready_to_ship: { status: "picked_up", label: "Mark picked up" },
@@ -46,7 +46,7 @@ export function ShipmentStatusControl({
           disabled={pending}
           onClick={() =>
             startTransition(async () => {
-              const res = await retryShiprocketBooking(shipmentId);
+              const res = await retryCourierBooking(shipmentId);
               if (!res.ok) toast.error(res.error ?? "Could not book courier.");
               else toast.success("Booking retried — refresh in a moment.");
             })
