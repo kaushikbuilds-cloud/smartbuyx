@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 // without per-request nonce middleware (not set up here) — this CSP is a
 // pragmatic baseline (blocks framing, restricts connect/img/frame to known
 // hosts) rather than a maximally strict one. Tighten with nonces later if needed.
+// YouPI PG is self-hosted, so its origin comes from env.
+const YOUPI = process.env.NEXT_PUBLIC_YOUPI_BASE_URL ?? "";
+
 const CSP = [
   "default-src 'self'",
   // Order checkout uses Fastrr (Shiprocket Checkout)'s client-side script +
@@ -16,7 +19,7 @@ const CSP = [
   // Wildcarding *.shiprocket.com, *.pickrr.com, and *.fastrr.com covers
   // whichever specific subdomain they use without needing to chase each one
   // individually as their product evolves.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com https://otpless.com",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com https://otpless.com ${YOUPI}`,
   "style-src 'self' 'unsafe-inline' https://*.shiprocket.com https://*.pickrr.com https://fonts.googleapis.com",
   "img-src 'self' https: data: blob:",
   "font-src 'self' data: https://fonts.gstatic.com",
@@ -26,8 +29,8 @@ const CSP = [
   // (tez.google.com). Added those plus the other major Indian UPI/payment
   // providers proactively, rather than discovering each one via another
   // failed checkout attempt.
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com https://*.payu.in https://cred.club https://tez.google.com https://*.phonepe.com https://*.paytm.com https://*.npci.org.in https://*.amazonpay.in",
-  "frame-src https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com",
+  `connect-src 'self' ${YOUPI} https://*.supabase.co wss://*.supabase.co https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com https://*.payu.in https://cred.club https://tez.google.com https://*.phonepe.com https://*.paytm.com https://*.npci.org.in https://*.amazonpay.in`,
+  `frame-src ${YOUPI} https://*.shiprocket.com https://*.pickrr.com https://*.fastrr.com`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   // Plan/subscription billing still uses PayU's hosted checkout (order

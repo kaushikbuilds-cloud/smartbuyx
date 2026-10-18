@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/guards";
 import { getCart } from "./cart-queries";
-import { generatePayuRequestHash, payuBaseUrl, txnidForOrder, isPayuConfigured } from "@/lib/payu/client";
+import { txnidForOrder, isYoupiConfigured } from "@/lib/youpi/client";
 import { safeErrorMessage } from "@/lib/utils/safe-error";
 
 export type CreateOrderResult =
@@ -26,15 +26,13 @@ export async function validateCoupon(code: string): Promise<{ ok: boolean; disco
   return { ok: true, discount: Number(row.discount), reason: "ok" };
 }
 
-// Build a DB order from the cart, compute the PayU hosted-checkout fields,
-// and store them on the payment row. The client navigates (plain top-level
-// navigation, not a form-action) to /checkout/pay/[orderId], a server-
-// rendered page that renders the actual auto-submitting <form> as real HTML
-// -- not built via client-side DOM manipulation. PayU posts the result back
-// to /api/payu/callback (see that route for hash verification + fulfilment).
+// Build a DB order from the cart and a "created" payment row. The client then
+// navigates to /checkout/pay/[orderId], which opens the YouPI PG UPI checkout.
+// YouPI confirms payment via a signed webhook (/api/youpi/webhook), which
+// verifies the signature + amount and runs fulfilPaidOrder.
 export async function createCheckoutOrder(addressId: string, couponCode?: string): Promise<CreateOrderResult> {
   const { user } = await requireUser();
-  if (!isPayuConfigured()) return { ok: false, error: "Payments are not configured yet." };
+  if (!isYoupiConfigured()) return { ok: false, error: "Payments are not configured yet." };
   const supabase = await createClient();
   const cart = await getCart(user.id);
 
@@ -95,27 +93,13 @@ export async function createCheckoutOrder(addressId: string, couponCode?: string
   if (itemsErr) return { ok: false, error: itemsErr.message };
 
   try {
-    const key = process.env.PAYU_MERCHANT_KEY!;
-    const txnid = txnidForOrder(order.id);
-    const amount = total.toFixed(2); // must be byte-identical everywhere it's used (hash + form + response)
-    const productinfo = "SmartBuyX Order";
-    const firstname = (profile.full_name ?? user.email ?? "Customer").split(" ")[0];
-    const email = user.email ?? "";
-    const phone = profile.phone;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
-    const surl = `${appUrl}/api/payu/callback`;
-    const furl = `${appUrl}/api/payu/callback`; // same route -- it reads `status` from the posted body
-
-    const hash = generatePayuRequestHash({ key, txnid, amount, productinfo, firstname, email });
-    const payuFields = { payuUrl: payuBaseUrl(), key, txnid, amount, productinfo, firstname, email, phone, surl, furl, hash };
-
     const { error: paymentErr } = await supabase.from("payments").insert({
       order_id: order.id,
-      payu_txnid: txnid,
+      payu_txnid: txnidForOrder(order.id), // reuses the existing unique txn-id column
       amount: total,
       currency: "INR",
       status: "created",
-      raw: { payu_request_fields: payuFields },
+      raw: { provider: "youpi" },
     });
     if (paymentErr) return { ok: false, error: paymentErr.message };
 

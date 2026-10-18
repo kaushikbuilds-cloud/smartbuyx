@@ -52,10 +52,8 @@ export function CheckoutClient({
       toast.error(res.error);
       return;
     }
-    // PayU is a hosted, redirect-based checkout -- this navigates to a
-    // server-rendered bridge page that auto-submits a real <form> to PayU
-    // (see /checkout/pay/[orderId]). PayU posts the result back to
-    // /api/payu/callback, which redirects to /checkout/success|failure.
+    // Opens the YouPI PG UPI checkout (see /checkout/pay/[orderId]); the
+    // signed webhook at /api/youpi/webhook is what confirms payment.
     router.push(`/checkout/pay/${res.orderId}`);
   }
 
